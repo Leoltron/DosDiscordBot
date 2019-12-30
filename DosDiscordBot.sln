@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DosDiscordBot", "DosDiscordBot\DosDiscordBot.csproj", "{539699EF-108F-43DB-BC2B-77807A65872E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DosGame", "DosGame\DosGame.csproj", "{7B2B86A9-06B2-4864-9235-A50FA458889B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DosGame.Tests", "DosGame.Tests\DosGame.Tests.csproj", "{6F091B42-F135-47DA-B6B9-61B79DD8634F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{539699EF-108F-43DB-BC2B-77807A65872E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{539699EF-108F-43DB-BC2B-77807A65872E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{539699EF-108F-43DB-BC2B-77807A65872E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{539699EF-108F-43DB-BC2B-77807A65872E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7B2B86A9-06B2-4864-9235-A50FA458889B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7B2B86A9-06B2-4864-9235-A50FA458889B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7B2B86A9-06B2-4864-9235-A50FA458889B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7B2B86A9-06B2-4864-9235-A50FA458889B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F091B42-F135-47DA-B6B9-61B79DD8634F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F091B42-F135-47DA-B6B9-61B79DD8634F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F091B42-F135-47DA-B6B9-61B79DD8634F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F091B42-F135-47DA-B6B9-61B79DD8634F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
