@@ -1,11 +1,11 @@
 using System;
+using DosGame.Extensions;
 
-namespace DosGame
+namespace DosGame.Model
 {
     public struct Card : IEquatable<Card>
     {
-        public static readonly Card WildDos = CardValue.Two.Of(CardColor.Wild);
-        public static readonly Card WildSharp = CardValue.Sharp.Of(CardColor.Wild);
+        public static readonly Card WildDos = 2.Of(CardColor.Wild);
         
         public CardColor Color { get; }
         public CardValue Value { get; }

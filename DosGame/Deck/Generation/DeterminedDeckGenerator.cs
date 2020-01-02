@@ -1,6 +1,7 @@
 using System;
+using DosGame.Model;
 
-namespace DosGame
+namespace DosGame.Deck.Generation
 {
     public class DeterminedDeckGenerator : IDeckGenerator
     {

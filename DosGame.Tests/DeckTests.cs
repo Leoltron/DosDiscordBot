@@ -1,5 +1,8 @@
 using System;
 using System.Linq;
+using DosGame.Deck;
+using DosGame.Deck.Generation;
+using DosGame.Model;
 using FluentAssertions;
 using NUnit.Framework;
 

@@ -1,3 +1,4 @@
+using DosGame.Model;
 using FluentAssertions;
 using NUnit.Framework;
 

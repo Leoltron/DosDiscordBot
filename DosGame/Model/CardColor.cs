@@ -1,6 +1,6 @@
 using System;
 
-namespace DosGame
+namespace DosGame.Model
 {
     [Flags]
     public enum CardColor : byte

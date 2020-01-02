@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using DosGame.Match;
+using DosGame.Model;
 
-namespace DosGame
+namespace DosGame.Extensions
 {
     public static class CardExtensions
     {
@@ -29,9 +31,9 @@ namespace DosGame
 
         public static IEnumerable<Card> OfAllColors(this IEnumerable<CardValue> values) =>
             values.SelectMany(v => v.OfAllColors());
-        
+
         public static IEnumerable<Card> OfAllColors(this IEnumerable<int> values) =>
-            values.SelectMany(v => ((CardValue)v).OfAllColors());
+            values.SelectMany(v => ((CardValue) v).OfAllColors());
 
         public static MatchType MatchWith(this Card target, Card[] matchers)
         {
@@ -66,6 +68,24 @@ namespace DosGame
             }
 
             return MatchType.NoMatch;
+        }
+
+        public static bool Contains<T>(this IEnumerable<T> source, IEnumerable<T> sublist) where T : IEquatable<T>
+        {
+            var elementsCount = source
+                               .GroupBy(e => e)
+                               .ToDictionary(g => g.Key, g => g.Count());
+            foreach (var element in sublist)
+            {
+                if (!elementsCount.TryGetValue(element, out var c) || c <= 0)
+                {
+                    return false;
+                }
+
+                elementsCount[element] = --c;
+            }
+
+            return true;
         }
     }
 }

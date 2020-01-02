@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 
-namespace DosGame
+namespace DosGame.Extensions
 {
     public static class EnumerableExtensions
     {
@@ -49,5 +49,7 @@ namespace DosGame
                 list[n] = value;
             }
         }
+
+        public static bool IsEmpty<T>(this IEnumerable<T> enumerable) => !enumerable.Any();
     }
 }

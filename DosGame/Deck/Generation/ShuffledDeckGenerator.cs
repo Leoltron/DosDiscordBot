@@ -1,6 +1,8 @@
 using System;
+using DosGame.Extensions;
+using DosGame.Model;
 
-namespace DosGame
+namespace DosGame.Deck.Generation
 {
     public class ShuffledDeckGenerator : IDeckGenerator
     {

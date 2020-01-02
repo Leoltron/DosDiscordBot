@@ -1,4 +1,4 @@
-namespace DosGame
+namespace DosGame.Model
 {
     public enum CardValue : byte
     {
