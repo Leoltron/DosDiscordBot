@@ -1,7 +1,7 @@
 using Dos.Game.Model;
 using Dos.Game.Util;
 
-namespace Dos.Game.State
+namespace Dos.Game
 {
     public interface IGame
     {

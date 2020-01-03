@@ -11,9 +11,4 @@ namespace Dos.Game.Model
         Yellow = 0b1000,
         Wild = 0b1111
     }
-
-    public static class ColorExtensions
-    {
-        public static bool Matches(this CardColor one, CardColor other) => (one & other) != 0;
-    }
 }

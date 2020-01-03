@@ -1,3 +1,4 @@
+using Dos.Game.Extensions;
 using Dos.Game.Util;
 
 namespace Dos.Game.State

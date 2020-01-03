@@ -14,27 +14,4 @@ namespace Dos.Game.Model
         Nine = 9,
         Ten = 10
     }
-
-    public static class CardValueExtensions
-    {
-        private static int MinValue(this CardValue value) => value == CardValue.Sharp ? 1 : (int) value;
-
-        public static bool Matches(this CardValue target, CardValue other) =>
-            target == CardValue.Sharp || other == CardValue.Sharp || target == other;
-
-        public static bool Matches(this CardValue target, CardValue first, CardValue second)
-        {
-            if (target == CardValue.Sharp) return first.MinValue() + second.MinValue() <= 10;
-
-            var targetValue = (int) target;
-
-            if (first == CardValue.Sharp) return second.MinValue() < targetValue;
-
-            if (second == CardValue.Sharp) return first.MinValue() < targetValue;
-
-            return (int) first + (int) second < targetValue;
-        }
-
-        public static string Name(this CardValue value) => value == CardValue.Sharp ? "#" : ((byte) value).ToString();
-    }
 }
