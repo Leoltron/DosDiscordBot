@@ -1,7 +1,7 @@
 using System.Collections.Generic;
+using Dos.Game.Extensions;
 using Dos.Game.Model;
 using Dos.Game.Util;
-using Dos.Game.Extensions;
 
 namespace Dos.Game.State
 {
@@ -10,10 +10,8 @@ namespace Dos.Game.State
         private static readonly Result<string> MatchingFail = "You are already finished matching cards".ToFail();
         private readonly int cardsToAdd;
 
-        public AddingToCenterRowState(GameState gameState, int cardsToAdd) : base(gameState)
-        {
+        public AddingToCenterRowState(GameState gameState, int cardsToAdd) : base(gameState) =>
             this.cardsToAdd = cardsToAdd;
-        }
 
         protected override Result<string> CurrentPlayerMatchCenterRowCard(Card target, Card[] cardsToPlay) =>
             MatchingFail;
@@ -36,7 +34,7 @@ namespace Dos.Game.State
                 Game.CurrentState = new FinishedGameState(this);
                 return $"{CurrentPlayerName} won!".ToSuccess();
             }
-            
+
             Game.CheckCurrentPlayerForDos();
 
             if (cardsToAdd != 0)

@@ -33,16 +33,12 @@ namespace Dos.Game.State
         public override Result<string> CallDos(int caller)
         {
             if (caller != CurrentPlayer)
-            {
                 return "You do not need to call DOS if you got 2 cards outside of your turn or you already finished it."
                    .ToFail();
-            }
 
             var cardsCount = Game.playerHands[caller].Count;
             if (cardsCount != 2 && !Game.CurrentPlayerDidNotCallDos)
-            {
                 return $"You do not have to call DOS since you have {cardsCount} cards, not 2".ToFail();
-            }
 
             Game.CurrentPlayerDidNotCallDos = false;
             return $"**DOS! {Game.GetPlayerName(caller)} has only 2 cards!**".ToSuccess();

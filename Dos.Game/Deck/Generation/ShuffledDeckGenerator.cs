@@ -1,6 +1,6 @@
 using System;
-using Dos.Game.Model;
 using Dos.Game.Extensions;
+using Dos.Game.Model;
 
 namespace Dos.Game.Deck.Generation
 {
@@ -8,10 +8,7 @@ namespace Dos.Game.Deck.Generation
     {
         private readonly Card[] deck;
 
-        public ShuffledDeckGenerator(Card[] deck)
-        {
-            this.deck = deck;
-        }
+        public ShuffledDeckGenerator(Card[] deck) => this.deck = deck;
 
         public Card[] Generate()
         {

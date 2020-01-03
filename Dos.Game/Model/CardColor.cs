@@ -14,9 +14,6 @@ namespace Dos.Game.Model
 
     public static class ColorExtensions
     {
-        public static bool Matches(this CardColor one, CardColor other)
-        {
-            return (one & other) != 0;
-        }
+        public static bool Matches(this CardColor one, CardColor other) => (one & other) != 0;
     }
 }

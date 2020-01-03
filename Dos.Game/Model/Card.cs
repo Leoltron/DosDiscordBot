@@ -6,7 +6,7 @@ namespace Dos.Game.Model
     public struct Card : IEquatable<Card>
     {
         public static readonly Card WildDos = 2.Of(CardColor.Wild);
-        
+
         public CardColor Color { get; }
         public CardValue Value { get; }
 
@@ -22,30 +22,15 @@ namespace Dos.Game.Model
                 ? 20
                 : (int) Value;
 
-        public bool Equals(Card other)
-        {
-            return Color == other.Color && Value == other.Value;
-        }
+        public bool Equals(Card other) => Color == other.Color && Value == other.Value;
 
-        public override bool Equals(object obj)
-        {
-            return obj is Card other && Equals(other);
-        }
+        public override bool Equals(object obj) => obj is Card other && Equals(other);
 
-        public override int GetHashCode()
-        {
-            return HashCode.Combine((int) Color, (int) Value);
-        }
+        public override int GetHashCode() => HashCode.Combine((int) Color, (int) Value);
 
-        public static bool operator ==(Card left, Card right)
-        {
-            return left.Equals(right);
-        }
+        public static bool operator ==(Card left, Card right) => left.Equals(right);
 
-        public static bool operator !=(Card left, Card right)
-        {
-            return !left.Equals(right);
-        }
+        public static bool operator !=(Card left, Card right) => !left.Equals(right);
 
         public override string ToString() => this == WildDos ? "Wild Dos" : $"{Color} {Value.Name()}";
     }

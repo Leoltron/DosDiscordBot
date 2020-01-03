@@ -25,15 +25,23 @@ namespace Dos.Game.Extensions
 
 
         public static Card Of(this CardValue value, CardColor color) => new Card(color, value);
+
         public static Card Of(this int value, CardColor color) => new Card(color, (CardValue) value);
 
-        public static IEnumerable<Card> OfAllColors(this CardValue value) => AllColors.Select(c => value.Of(c));
+        public static IEnumerable<Card> OfAllColors(this CardValue value)
+        {
+            return AllColors.Select(c => value.Of(c));
+        }
 
-        public static IEnumerable<Card> OfAllColors(this IEnumerable<CardValue> values) =>
-            values.SelectMany(v => v.OfAllColors());
+        public static IEnumerable<Card> OfAllColors(this IEnumerable<CardValue> values)
+        {
+            return values.SelectMany(v => v.OfAllColors());
+        }
 
-        public static IEnumerable<Card> OfAllColors(this IEnumerable<int> values) =>
-            values.SelectMany(v => ((CardValue) v).OfAllColors());
+        public static IEnumerable<Card> OfAllColors(this IEnumerable<int> values)
+        {
+            return values.SelectMany(v => ((CardValue) v).OfAllColors());
+        }
 
         public static MatchType MatchWith(this Card target, Card[] matchers)
         {
@@ -51,9 +59,7 @@ namespace Dos.Game.Extensions
         public static MatchType MatchWith(this Card target, Card matcher)
         {
             if (target.Value.Matches(matcher.Value))
-            {
                 return target.Color.Matches(matcher.Color) ? MatchType.SingleColorMatch : MatchType.SingleMatch;
-            }
 
             return MatchType.NoMatch;
         }
@@ -61,11 +67,9 @@ namespace Dos.Game.Extensions
         public static MatchType MatchWith(this Card target, Card first, Card second)
         {
             if (target.Value.Matches(first.Value, second.Value))
-            {
                 return target.Color.Matches(first.Color) && target.Color.Matches(second.Color)
                     ? MatchType.DoubleColorMatch
                     : MatchType.DoubleMatch;
-            }
 
             return MatchType.NoMatch;
         }
@@ -77,10 +81,7 @@ namespace Dos.Game.Extensions
                                .ToDictionary(g => g.Key, g => g.Count());
             foreach (var element in sublist)
             {
-                if (!elementsCount.TryGetValue(element, out var c) || c <= 0)
-                {
-                    return false;
-                }
+                if (!elementsCount.TryGetValue(element, out var c) || c <= 0) return false;
 
                 elementsCount[element] = --c;
             }

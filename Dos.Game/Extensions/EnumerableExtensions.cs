@@ -7,6 +7,8 @@ namespace Dos.Game.Extensions
 {
     public static class EnumerableExtensions
     {
+        private static readonly Random Rng = new Random();
+
         public static IEnumerable<T> Repeat<T>(this T element, int repeatAmount)
         {
             for (var i = 0; i < repeatAmount; i++)
@@ -17,8 +19,6 @@ namespace Dos.Game.Extensions
         {
             return source.SelectMany(e => e.Repeat(repeatAmount));
         }
-
-        private static readonly Random Rng = new Random();
 
         public static void ShuffleFast<T>(this IList<T> list)
         {
@@ -40,8 +40,11 @@ namespace Dos.Game.Extensions
             while (n > 1)
             {
                 var box = new byte[1];
-                do provider.GetBytes(box);
-                while (!(box[0] < n * (byte.MaxValue / n)));
+                do
+                {
+                    provider.GetBytes(box);
+                } while (!(box[0] < n * (byte.MaxValue / n)));
+
                 var k = box[0] % n;
                 n--;
                 var value = list[k];

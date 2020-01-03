@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using Dos.Game.Deck;
 using Dos.Game.Deck.Generation;
+using Dos.Game.Extensions;
 using Dos.Game.Model;
 using Dos.Game.State;
 using Dos.Game.Util;
-using Dos.Game.Extensions;
 
 namespace Dos.Game
 {
@@ -14,8 +14,8 @@ namespace Dos.Game
     {
         public List<Card> centerRow = new List<Card>(8);
         public List<List<Card>> centerRowAdditional = new List<List<Card>>(8);
-        public bool CurrentPlayerDidNotCallDos = false;
-        public int CurrentPlayerPenalty = 0;
+        public bool CurrentPlayerDidNotCallDos;
+        public int CurrentPlayerPenalty;
 
         public Stack<Card> deck;
         public Stack<Card> discardPile;
@@ -64,6 +64,20 @@ namespace Dos.Game
                       .Select(i => (GetPlayerName(i), playerHands[i].Count))
                       .ToList();
 
+        public Result<string> MatchCenterRowCard(int player, Card target, params Card[] cardsToPlay) =>
+            CurrentState.MatchCenterRowCard(player, target, cardsToPlay);
+
+        public Result<string> FinishMatching(int player) => CurrentState.FinishMatching(player);
+
+        public Result<string> Draw(int player) => CurrentState.Draw(player);
+
+        public Result<string> AddCardToCenterRow(int player, Card card) =>
+            CurrentState.AddCardToCenterRow(player, card);
+
+        public Result<string> Callout(int caller) => CurrentState.Callout(caller);
+
+        public Result<string> CallDos(int caller) => CurrentState.CallDos(caller);
+
         public string GetPlayerName(int id) => PlayerNames.TryGetValue(id, out var name) ? name : "Player " + id;
 
         public void DealCards(int player, int amount)
@@ -75,10 +89,7 @@ namespace Dos.Game
         {
             playerHands[player].Add(DrawCard());
 
-            if (player == CurrentPlayer)
-            {
-                CheckCurrentPlayerForDos();
-            }
+            if (player == CurrentPlayer) CheckCurrentPlayerForDos();
         }
 
         public void CheckCurrentPlayerForDos()
@@ -103,15 +114,9 @@ namespace Dos.Game
 
         public void EnsureCenterRowIsValid()
         {
-            while (centerRow.Count < 2)
-            {
-                centerRow.Add(DrawCard());
-            }
+            while (centerRow.Count < 2) centerRow.Add(DrawCard());
 
-            while (centerRowAdditional.Count < centerRow.Count)
-            {
-                centerRowAdditional.Add(new List<Card>());
-            }
+            while (centerRowAdditional.Count < centerRow.Count) centerRowAdditional.Add(new List<Card>());
         }
 
         public void MoveTurnToNextPlayer()
@@ -121,17 +126,5 @@ namespace Dos.Game
             CurrentPlayerDidNotCallDos = false;
             CurrentPlayer = (CurrentPlayer + 1) % PlayersCount;
         }
-
-        public Result<string> MatchCenterRowCard(int player, Card target, params Card[] cardsToPlay) =>
-            CurrentState.MatchCenterRowCard(player, target, cardsToPlay);
-
-        public Result<string> FinishMatching(int player) => CurrentState.FinishMatching(player);
-        public Result<string> Draw(int player) => CurrentState.Draw(player);
-
-        public Result<string> AddCardToCenterRow(int player, Card card) =>
-            CurrentState.AddCardToCenterRow(player, card);
-
-        public Result<string> Callout(int caller) => CurrentState.Callout(caller);
-        public Result<string> CallDos(int caller) => CurrentState.CallDos(caller);
     }
 }

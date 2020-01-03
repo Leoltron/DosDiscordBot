@@ -2,14 +2,14 @@ namespace Dos.Game.Match
 {
     public class MatchResult
     {
-        public MatchType Type { get; }
-        public string Message { get; }
-
         public MatchResult(MatchType type, string message = null)
         {
             Type = type;
             Message = message;
         }
+
+        public MatchType Type { get; }
+        public string Message { get; }
 
         public MatchResult AddText(string text)
         {

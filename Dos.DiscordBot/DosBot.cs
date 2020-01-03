@@ -8,8 +8,12 @@ namespace Dos.DiscordBot
 {
     public class DosBot
     {
+        private static readonly Regex unoRegex =
+            new Regex("(?:\\s|^)uno(?:\\s|$)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        private readonly Random rand = new Random();
+
         private DiscordSocketClient client;
-        private Random rand = new Random();
 
         public async Task StartAsync()
         {
@@ -36,15 +40,11 @@ namespace Dos.DiscordBot
             Console.WriteLine(msg.ToString());
             return Task.CompletedTask;
         }
-        
-        private static readonly Regex unoRegex = new Regex("(?:\\s|^)uno(?:\\s|$)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         private async Task MessageReceived(SocketMessage message)
         {
             if (message.Author.Id != client.CurrentUser.Id && unoRegex.IsMatch(message.Content) && rand.Next(100) < 5)
-            {
                 await message.Channel.SendMessageAsync("UNO is good, but did you try playing DOS?");
-            }
         }
     }
 }

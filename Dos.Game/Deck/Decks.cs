@@ -1,6 +1,6 @@
 using System.Linq;
-using Dos.Game.Model;
 using Dos.Game.Extensions;
+using Dos.Game.Model;
 
 namespace Dos.Game.Deck
 {

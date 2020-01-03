@@ -8,10 +8,7 @@ namespace Dos.Game.State
     {
         protected readonly Game Game;
 
-        protected GameState(Game game)
-        {
-            Game = game;
-        }
+        protected GameState(Game game) => Game = game;
 
         protected GameState(GameState gameState) : this(gameState.Game)
         {
@@ -24,7 +21,7 @@ namespace Dos.Game.State
         public abstract Result<string> MatchCenterRowCard(int player, Card target, params Card[] cardsToPlay);
         public abstract Result<string> FinishMatching(int player);
         public abstract Result<string> Draw(int player);
-        
+
         public abstract Result<string> AddCardToCenterRow(int player, Card card);
 
         public abstract Result<string> Callout(int caller);

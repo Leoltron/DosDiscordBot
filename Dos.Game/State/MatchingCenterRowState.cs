@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
+using Dos.Game.Extensions;
 using Dos.Game.Match;
 using Dos.Game.Model;
 using Dos.Game.Util;
-using Dos.Game.Extensions;
 
 namespace Dos.Game.State
 {
@@ -20,37 +20,23 @@ namespace Dos.Game.State
         protected override Result<string> CurrentPlayerMatchCenterRowCard(Card target, Card[] cardsToPlay)
         {
             if (!(cardsToPlay.Length == 1 || cardsToPlay.Length == 2))
-            {
                 return $"Expected 1 or 2 cards to match, got {cardsToPlay.Length}".ToFail();
-            }
 
             var match = target.MatchWith(cardsToPlay);
 
             if (match != MatchType.NoMatch)
             {
-                if (!Game.centerRow.Contains(target))
-                {
-                    return $"{target} is not present at the Central Row".ToFail();
-                }
+                if (!Game.centerRow.Contains(target)) return $"{target} is not present at the Central Row".ToFail();
 
                 var additional = Game.centerRowAdditional
                                      .Where((e, i) => Game.centerRow[i] == target && e.IsEmpty())
                                      .FirstOrDefault();
 
-                if (additional == null)
-                {
-                    return $"{target} was already matched".ToFail();
-                }
+                if (additional == null) return $"{target} was already matched".ToFail();
 
-                if (!CurrentPlayerHand.Contains(cardsToPlay))
-                {
-                    return "You don't have specified cards".ToFail();
-                }
+                if (!CurrentPlayerHand.Contains(cardsToPlay)) return "You don't have specified cards".ToFail();
 
-                foreach (var card in cardsToPlay)
-                {
-                    CurrentPlayerHand.Remove(card);
-                }
+                foreach (var card in cardsToPlay) CurrentPlayerHand.Remove(card);
 
                 additional.AddRange(cardsToPlay);
 
@@ -65,7 +51,7 @@ namespace Dos.Game.State
 
             return $"{target} cannot be matched with {string.Join(" and ", cardsToPlay)}".ToFail();
         }
-        
+
         protected override Result<string> CurrentPlayerDraw()
         {
             Game.DealCard(CurrentPlayer);
@@ -75,11 +61,8 @@ namespace Dos.Game.State
 
         protected override Result<string> CurrentPlayerFinishMatching()
         {
-            if (Game.centerRowAdditional.SelectMany(c => c).IsEmpty())
-            {
-                return CurrentPlayerDraw();
-            }
-            
+            if (Game.centerRowAdditional.SelectMany(c => c).IsEmpty()) return CurrentPlayerDraw();
+
             var discardCount = CountBonusFromMatches(out var drawCount);
             var message = new List<string>();
             if (drawCount != 0)
@@ -128,12 +111,13 @@ namespace Dos.Game.State
         private int CountBonusFromMatches(out int drawCount)
         {
             int discardCount;
-            (discardCount, drawCount) = Game.centerRow.Select((c, i) => c.MatchWith(Game.centerRowAdditional[i].ToArray()))
-                                            .Select(m => m.ToColorMatchBonus())
-                                            .Aggregate((discardCount: 0, drawCount: 0),
-                                                       (prev, bonus) => (
-                                                           prev.discardCount + bonus.discardCount,
-                                                           prev.drawCount + bonus.drawCount));
+            (discardCount, drawCount) = Game
+                                       .centerRow.Select((c, i) => c.MatchWith(Game.centerRowAdditional[i].ToArray()))
+                                       .Select(m => m.ToColorMatchBonus())
+                                       .Aggregate((discardCount: 0, drawCount: 0),
+                                                  (prev, bonus) => (
+                                                      prev.discardCount + bonus.discardCount,
+                                                      prev.drawCount + bonus.drawCount));
             return discardCount;
         }
 

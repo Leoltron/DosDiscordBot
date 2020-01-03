@@ -1,5 +1,4 @@
-﻿
-namespace Dos.DiscordBot
+﻿namespace Dos.DiscordBot
 {
     internal class Program
     {
