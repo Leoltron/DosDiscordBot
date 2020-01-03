@@ -1,10 +1,10 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DosDiscordBot", "DosDiscordBot\DosDiscordBot.csproj", "{539699EF-108F-43DB-BC2B-77807A65872E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dos.DiscordBot", "Dos.DiscordBot\Dos.DiscordBot.csproj", "{539699EF-108F-43DB-BC2B-77807A65872E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DosGame", "DosGame\DosGame.csproj", "{7B2B86A9-06B2-4864-9235-A50FA458889B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dos.Game", "Dos.Game\Dos.Game.csproj", "{7B2B86A9-06B2-4864-9235-A50FA458889B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DosGame.Tests", "DosGame.Tests\DosGame.Tests.csproj", "{6F091B42-F135-47DA-B6B9-61B79DD8634F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dos.Game.Tests", "Dos.Game.Tests\Dos.Game.Tests.csproj", "{6F091B42-F135-47DA-B6B9-61B79DD8634F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
