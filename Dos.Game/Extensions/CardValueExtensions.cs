@@ -19,7 +19,7 @@ namespace Dos.Game.Extensions
 
             if (second == CardValue.Sharp) return first.MinValue() < targetValue;
 
-            return (int) first + (int) second < targetValue;
+            return (int) first + (int) second == targetValue;
         }
 
         public static string Name(this CardValue value) => value == CardValue.Sharp ? "#" : ((byte) value).ToString();

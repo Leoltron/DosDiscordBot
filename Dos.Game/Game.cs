@@ -126,5 +126,21 @@ namespace Dos.Game
             CurrentPlayerDidNotCallDos = false;
             CurrentPlayer = (CurrentPlayer + 1) % PlayersCount;
         }
+
+        public IEnumerable<string> GameTableLines(int player)
+        {
+            yield return "**Center Row:**";
+            for (var i = 0; i < centerRow.Count; i++)
+            {
+                yield return centerRow[i] +
+                             (centerRowAdditional[i]
+                                .Any()
+                                 ? $" with {string.Join(" and ", centerRowAdditional[i])} on top"
+                                 : string.Empty);
+            }
+
+            yield return "**Your hand:**";
+            yield return string.Join(" | ", playerHands[player]);
+        }
     }
 }

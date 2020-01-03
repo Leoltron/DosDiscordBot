@@ -8,7 +8,7 @@ namespace Dos.Game.State
     public class AddingToCenterRowState : CurrentPlayerOnlyState
     {
         private static readonly Result<string> MatchingFail = "You are already finished matching cards".ToFail();
-        private readonly int cardsToAdd;
+        private int cardsToAdd;
 
         public AddingToCenterRowState(GameState gameState, int cardsToAdd) : base(gameState) =>
             this.cardsToAdd = cardsToAdd;
@@ -37,6 +37,7 @@ namespace Dos.Game.State
 
             Game.CheckCurrentPlayerForDos();
 
+            cardsToAdd--;
             if (cardsToAdd != 0)
                 return $"{cardsToAdd} more".ToSuccess();
 

@@ -12,13 +12,13 @@ namespace Dos.Game.Extensions
                 case MatchType.NoMatch:
                     return MatchResult.NoMatch("No matching card found");
                 case MatchType.SingleMatch:
-                    return MatchResult.NoMatch("Single match!");
+                    return MatchResult.NoMatch("Single match");
                 case MatchType.DoubleMatch:
                     return MatchResult.NoMatch("Double match!");
                 case MatchType.SingleColorMatch:
-                    return MatchResult.NoMatch("Single Color Match! Discard one card");
+                    return MatchResult.NoMatch("Single Color Match!");
                 case MatchType.DoubleColorMatch:
-                    return MatchResult.NoMatch("Double Color Match! Discard one card, everyone has to pick a card");
+                    return MatchResult.NoMatch("Double Color Match!!");
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }

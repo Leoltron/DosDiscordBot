@@ -34,7 +34,11 @@ namespace Dos.Game.State
 
                 if (additional == null) return $"{target} was already matched".ToFail();
 
-                if (!CurrentPlayerHand.Contains(cardsToPlay)) return "You don't have specified cards".ToFail();
+                var missingCards = cardsToPlay.Where(c => !CurrentPlayerHand.Contains(c)).ToList();
+                if (missingCards.Any())
+                {
+                    return $"You don't have {string.Join(" and ", missingCards)}".ToFail();
+                }
 
                 foreach (var card in cardsToPlay) CurrentPlayerHand.Remove(card);
 
@@ -46,7 +50,9 @@ namespace Dos.Game.State
                     return match.DefaultResult().AddText($"{CurrentPlayerName} won!").Message.ToSuccess();
                 }
 
-                return match.DefaultResult().Message.ToSuccess();
+                return Game.centerRowAdditional.All(c => c.Any()) 
+                    ? match.DefaultResult().AddText(CurrentPlayerFinishMatching().Value).Message.ToSuccess() 
+                    : match.DefaultResult().Message.ToSuccess();
             }
 
             return $"{target} cannot be matched with {string.Join(" and ", cardsToPlay)}".ToFail();

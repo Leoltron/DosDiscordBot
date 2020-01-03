@@ -19,5 +19,7 @@ namespace Dos.Game.Util
 
         public Result<TNext> Then<TNext>(Func<T, Result<TNext>> successAction, Func<T, Result<TNext>> failActon) =>
             IsSuccess ? successAction(Value) : failActon(Value);
+
+        public override string ToString() => $"({(IsSuccess ? "Success" : "Fail")}) {Value}";
     }
 }

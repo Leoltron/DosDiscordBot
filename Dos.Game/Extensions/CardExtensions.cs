@@ -52,7 +52,7 @@ namespace Dos.Game.Extensions
                 case 2:
                     return target.MatchWith(matchers[0], matchers[1]);
                 default:
-                    throw new InvalidOperationException("Card can be matched only with 1 or 2, got " + matchers.Length);
+                    return MatchType.NoMatch;
             }
         }
 
