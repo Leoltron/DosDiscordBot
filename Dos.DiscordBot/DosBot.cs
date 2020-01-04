@@ -1,50 +1,46 @@
 using System;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Discord;
+using Discord.Commands;
 using Discord.WebSocket;
+using Serilog;
+using Serilog.Events;
 
 namespace Dos.DiscordBot
 {
     public class DosBot
     {
-        private static readonly Regex unoRegex =
-            new Regex("(?:\\s|^)uno(?:\\s|$)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
-        private readonly Random rand = new Random();
-
         private DiscordSocketClient client;
+        private CommandHandler commandHandler;
+
+        private readonly ILogger logger = new LoggerConfiguration()
+                                         .WriteTo.Console(LogEventLevel.Information)
+                                         .WriteTo.File("logs/bot-.log", rollingInterval: RollingInterval.Day)
+                                         .CreateLogger();
 
         public async Task StartAsync()
         {
-            client = new DiscordSocketClient();
+            client = new DiscordSocketClient(new DiscordSocketConfig
+            {
+                LogLevel = LogSeverity.Verbose,
+                MessageCacheSize = 1000
+            });
 
             client.Log += Log;
-            client.MessageReceived += MessageReceived;
+            var commandService = new CommandService(new CommandServiceConfig {LogLevel = LogSeverity.Verbose});
+            commandHandler = new CommandHandler(client, commandService, ServiceProviderBuilder.BuildProvider());
 
-            // Remember to keep token private or to read it from an 
-            // external source! In this case, we are reading the token 
-            // from an environment variable. If you do not know how to set-up
-            // environment variables, you may find more information on the 
-            // Internet or by using other methods such as reading from 
-            // a configuration.
+            await commandHandler.InstallCommandsAsync();
             await client.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("DiscordToken"));
             await client.StartAsync();
 
-            // Block this task until the program is closed.
             await Task.Delay(-1);
         }
 
         private Task Log(LogMessage msg)
         {
-            Console.WriteLine(msg.ToString());
+            logger.Write(msg.Severity.ToLogLevel(), msg.Exception, $"[{msg.Source}] {msg.Message}");
             return Task.CompletedTask;
-        }
-
-        private async Task MessageReceived(SocketMessage message)
-        {
-            if (message.Author.Id != client.CurrentUser.Id && unoRegex.IsMatch(message.Content) && rand.Next(100) < 5)
-                await message.Channel.SendMessageAsync("UNO is good, but did you try playing DOS?");
         }
     }
 }

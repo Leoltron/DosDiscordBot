@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Dos.Game.Deck;
 using Dos.Game.Deck.Generation;
 using Dos.Game.Extensions;
 using Dos.Game.Model;
@@ -22,9 +21,17 @@ namespace Dos.Game
 
         public List<Card>[] playerHands;
 
-        public Game() : this(new ShuffledDeckGenerator(Decks.Classic), 2, 7)
-        {
-        }
+        public GameState CurrentState { get; set; }
+
+        public int CalloutPenalty { get; set; }
+        public int FalseCalloutPenalty { get; set; }
+
+        public int CurrentPlayer { get; set; }
+        public Dictionary<int, string> PlayerNames { get; set; } = new Dictionary<int, string>();
+        public int PlayersCount => playerHands.Length;
+
+        public List<Card> CurrentPlayerHand => playerHands[CurrentPlayer];
+        public string CurrentPlayerName => GetPlayerName(CurrentPlayer);
 
         public Game(IDeckGenerator deckGenerator, int playersCount, int initialHandSize)
         {
@@ -42,17 +49,6 @@ namespace Dos.Game
             CurrentPlayer = new Random().Next(playersCount);
             CurrentState = new MatchingCenterRowState(this);
         }
-
-        public GameState CurrentState { get; set; }
-
-        public int CalloutPenalty { get; set; }
-        public int FalseCalloutPenalty { get; set; }
-
-        public int CurrentPlayer { get; set; }
-        public Dictionary<int, string> PlayerNames { get; set; } = new Dictionary<int, string>();
-        public int PlayersCount => playerHands.Length;
-
-        public List<Card> CurrentPlayerHand => playerHands[CurrentPlayer];
 
         public List<(string name, int score)> ScoreTable =>
             Enumerable.Range(0, PlayersCount)
