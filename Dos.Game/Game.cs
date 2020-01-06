@@ -5,7 +5,7 @@ using Dos.Game.Deck.Generation;
 using Dos.Game.Extensions;
 using Dos.Game.Model;
 using Dos.Game.State;
-using Dos.Game.Util;
+using Dos.Utils;
 
 namespace Dos.Game
 {
@@ -16,7 +16,7 @@ namespace Dos.Game
         public bool CurrentPlayerDidNotCallDos;
         public int CurrentPlayerPenalty;
 
-        public Stack<Card> deck;
+        public Stack<Card> Deck;
         public Stack<Card> discardPile;
 
         public List<Card>[] playerHands;
@@ -33,9 +33,12 @@ namespace Dos.Game
         public List<Card> CurrentPlayerHand => playerHands[CurrentPlayer];
         public string CurrentPlayerName => GetPlayerName(CurrentPlayer);
 
+        public event Action<int> PlayerSwitch;
+        public event Action<int, Card[]> PlayerReceivedCards;
+
         public Game(IDeckGenerator deckGenerator, int playersCount, int initialHandSize)
         {
-            deck = new Stack<Card>(deckGenerator.Generate());
+            Deck = new Stack<Card>(deckGenerator.Generate());
             discardPile = new Stack<Card>();
 
             playerHands = new List<Card>[playersCount];
@@ -60,32 +63,46 @@ namespace Dos.Game
                       .Select(i => (GetPlayerName(i), playerHands[i].Count))
                       .ToList();
 
-        public Result<string> MatchCenterRowCard(int player, Card target, params Card[] cardsToPlay) =>
+        public Result MatchCenterRowCard(int player, Card target, params Card[] cardsToPlay) =>
             CurrentState.MatchCenterRowCard(player, target, cardsToPlay);
 
-        public Result<string> FinishMatching(int player) => CurrentState.FinishMatching(player);
+        public Result FinishMatching(int player) => CurrentState.FinishMatching(player);
 
-        public Result<string> Draw(int player) => CurrentState.Draw(player);
+        public Result Draw(int player) => CurrentState.Draw(player);
 
-        public Result<string> AddCardToCenterRow(int player, Card card) =>
+        public Result AddCardToCenterRow(int player, Card card) =>
             CurrentState.AddCardToCenterRow(player, card);
 
-        public Result<string> Callout(int caller) => CurrentState.Callout(caller);
+        public Result Callout(int caller) => CurrentState.Callout(caller);
 
-        public Result<string> CallDos(int caller) => CurrentState.CallDos(caller);
+        public Result CallDos(int caller) => CurrentState.CallDos(caller);
 
         public string GetPlayerName(int id) => PlayerNames.TryGetValue(id, out var name) ? name : "Player " + id;
 
-        public void DealCards(int player, int amount)
-        {
-            for (var i = 0; i < amount; i++) DealCard(player);
-        }
 
         public void DealCard(int player)
         {
-            playerHands[player].Add(DrawCard());
+            DealCards(player, 1);
+        }
+
+        public void DealCards(int player, int amount)
+        {
+            if (amount <= 0) return;
+
+            var cardsDealt = new Card[amount];
+            for (var i = 0; i < amount; i++) cardsDealt[i] = DealCardInternal(player);
+
+            PlayerReceivedCards?.Invoke(player, cardsDealt);
+        }
+
+        private Card DealCardInternal(int player)
+        {
+            var card = DrawCard();
+            playerHands[player].Add(card);
 
             if (player == CurrentPlayer) CheckCurrentPlayerForDos();
+
+            return card;
         }
 
         public void CheckCurrentPlayerForDos()
@@ -96,15 +113,15 @@ namespace Dos.Game
         public Card DrawCard()
         {
             EnsureDeckHasCards();
-            return deck.Pop();
+            return Deck.Pop();
         }
 
         public void EnsureDeckHasCards()
         {
-            if (deck.Any()) return;
+            if (Deck.Any()) return;
             var newDeck = discardPile.ToList();
             newDeck.Shuffle();
-            deck = new Stack<Card>(newDeck);
+            Deck = new Stack<Card>(newDeck);
             discardPile.Clear();
         }
 
@@ -121,22 +138,35 @@ namespace Dos.Game
             CurrentPlayerPenalty = 0;
             CurrentPlayerDidNotCallDos = false;
             CurrentPlayer = (CurrentPlayer + 1) % PlayersCount;
+            PlayerSwitch?.Invoke(CurrentPlayer);
         }
 
-        public IEnumerable<string> GameTableLines(int player)
+        public IEnumerable<string> PersonalGameTableLines(int player)
+        {
+            foreach (var p in GameTableLines()) yield return p;
+
+            foreach (var p in GetPlayerHandLines(player)) yield return p;
+        }
+
+        public IEnumerable<string> GetPlayerHandLines(int player)
+        {
+            var hand = playerHands[player];
+            yield return $"Your current hand ({hand.Count} {(hand.Count == 1 ? "card" : "cards")}):";
+            yield return "\u200b";
+            yield return hand.ToDiscordString();
+        }
+
+        public IEnumerable<string> GameTableLines()
         {
             yield return "**Center Row:**";
             for (var i = 0; i < centerRow.Count; i++)
             {
-                yield return centerRow[i] +
+                yield return " - " + centerRow[i] +
                              (centerRowAdditional[i]
                                 .Any()
                                  ? $" with {string.Join(" and ", centerRowAdditional[i])} on top"
                                  : string.Empty);
             }
-
-            yield return "**Your hand:**";
-            yield return string.Join(" | ", playerHands[player]);
         }
     }
 }

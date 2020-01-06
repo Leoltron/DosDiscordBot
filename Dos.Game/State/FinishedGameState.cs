@@ -1,28 +1,30 @@
 using Dos.Game.Extensions;
 using Dos.Game.Model;
-using Dos.Game.Util;
+using Dos.Utils;
 
 namespace Dos.Game.State
 {
     public class FinishedGameState : GameState
     {
-        private static readonly Result<string> GameFinishedResult = "Game has finished".ToFail();
+        private static readonly Result GameFinishedResult = Result.Fail("Game has finished");
 
         public FinishedGameState(GameState gameState) : base(gameState)
         {
         }
 
-        public override Result<string> MatchCenterRowCard(int player, Card target, params Card[] cardsToPlay) =>
+        public override bool IsFinished => true;
+
+        public override Result MatchCenterRowCard(int player, Card target, params Card[] cardsToPlay) =>
             GameFinishedResult;
 
-        public override Result<string> FinishMatching(int player) => GameFinishedResult;
+        public override Result FinishMatching(int player) => GameFinishedResult;
 
-        public override Result<string> Draw(int player) => GameFinishedResult;
+        public override Result Draw(int player) => GameFinishedResult;
 
-        public override Result<string> AddCardToCenterRow(int player, Card card) => GameFinishedResult;
+        public override Result AddCardToCenterRow(int player, Card card) => GameFinishedResult;
 
-        public override Result<string> Callout(int caller) => GameFinishedResult;
+        public override Result Callout(int caller) => GameFinishedResult;
 
-        public override Result<string> CallDos(int caller) => GameFinishedResult;
+        public override Result CallDos(int caller) => GameFinishedResult;
     }
 }

@@ -3,7 +3,7 @@ using System.Linq;
 using Dos.Game.Extensions;
 using Dos.Game.Match;
 using Dos.Game.Model;
-using Dos.Game.Util;
+using Dos.Utils;
 
 namespace Dos.Game.State
 {
@@ -17,55 +17,52 @@ namespace Dos.Game.State
         {
         }
 
-        protected override Result<string> CurrentPlayerMatchCenterRowCard(Card target, Card[] cardsToPlay)
+        protected override Result CurrentPlayerMatchCenterRowCard(Card target, Card[] cardsToPlay)
         {
             if (!(cardsToPlay.Length == 1 || cardsToPlay.Length == 2))
-                return $"Expected 1 or 2 cards to match, got {cardsToPlay.Length}".ToFail();
+                return Result.Fail($"Expected 1 or 2 cards to match, got {cardsToPlay.Length}");
 
             var match = target.MatchWith(cardsToPlay);
 
-            if (match != MatchType.NoMatch)
+            if (match == MatchType.NoMatch)
+                return Result.Fail($"{target} cannot be matched with {string.Join(" and ", cardsToPlay)}");
+
+            if (!Game.centerRow.Contains(target)) return Result.Fail($"{target} is not present at the Central Row");
+
+            var additional = Game.centerRowAdditional
+                                 .Where((e, i) => Game.centerRow[i] == target && e.IsEmpty())
+                                 .FirstOrDefault();
+
+            if (additional == null) return Result.Fail($"{target} was already matched");
+
+            var missingCards = cardsToPlay.Where(c => !CurrentPlayerHand.Contains(c)).ToList();
+            if (missingCards.Any())
             {
-                if (!Game.centerRow.Contains(target)) return $"{target} is not present at the Central Row".ToFail();
-
-                var additional = Game.centerRowAdditional
-                                     .Where((e, i) => Game.centerRow[i] == target && e.IsEmpty())
-                                     .FirstOrDefault();
-
-                if (additional == null) return $"{target} was already matched".ToFail();
-
-                var missingCards = cardsToPlay.Where(c => !CurrentPlayerHand.Contains(c)).ToList();
-                if (missingCards.Any())
-                {
-                    return $"You don't have {string.Join(" and ", missingCards)}".ToFail();
-                }
-
-                foreach (var card in cardsToPlay) CurrentPlayerHand.Remove(card);
-
-                additional.AddRange(cardsToPlay);
-
-                if (CurrentPlayerHand.IsEmpty())
-                {
-                    Game.CurrentState = new FinishedGameState(this);
-                    return match.DefaultResult().AddText($"{CurrentPlayerName} won!").Message.ToSuccess();
-                }
-
-                return Game.centerRowAdditional.All(c => c.Any()) 
-                    ? match.DefaultResult().AddText(CurrentPlayerFinishMatching().Value).Message.ToSuccess() 
-                    : match.DefaultResult().Message.ToSuccess();
+                return Result.Fail($"You don't have {string.Join(" and ", missingCards)}");
             }
 
-            return $"{target} cannot be matched with {string.Join(" and ", cardsToPlay)}".ToFail();
+            foreach (var card in cardsToPlay) CurrentPlayerHand.Remove(card);
+
+            additional.AddRange(cardsToPlay);
+
+            if (!CurrentPlayerHand.IsEmpty())
+                return Game.centerRowAdditional.All(c => c.Any())
+                    ? Result.Success(match.DefaultResult().AddText(CurrentPlayerFinishMatching().Message).Message)
+                    : Result.Success(match.DefaultResult().Message);
+            
+            Game.CurrentState = new FinishedGameState(this);
+            return Result.Success(match.DefaultResult().AddText($"{CurrentPlayerName} won!").Message);
+
         }
 
-        protected override Result<string> CurrentPlayerDraw()
+        protected override Result CurrentPlayerDraw()
         {
             Game.DealCard(CurrentPlayer);
             Game.CurrentState = new AddingToCenterRowState(this, 1);
-            return "Matched nothing? Draw a card. Now select a card to put to the Center Row.".ToSuccess();
+            return Result.Success("Matched nothing? Draw a card. Now select a card to put to the Center Row.");
         }
 
-        protected override Result<string> CurrentPlayerFinishMatching()
+        protected override Result CurrentPlayerFinishMatching()
         {
             if (Game.centerRowAdditional.SelectMany(c => c).IsEmpty()) return CurrentPlayerDraw();
 
@@ -90,7 +87,6 @@ namespace Dos.Game.State
             if (discardCount <= 0)
             {
                 Game.MoveTurnToNextPlayer();
-                message.Add("Now it's your turn, " + Game.GetPlayerName(CurrentPlayer));
             }
             else
             {
@@ -98,7 +94,7 @@ namespace Dos.Game.State
                 Game.CurrentState = new AddingToCenterRowState(this, discardCount);
             }
 
-            return string.Join(" ", message).ToSuccess();
+            return Result.Success(string.Join(" ", message));
         }
 
         private void ClearMatchedCardsFromCenterRow()
@@ -127,7 +123,7 @@ namespace Dos.Game.State
             return discardCount;
         }
 
-        protected override Result<string> CurrentPlayerAddCardToCenterRow(Card card) =>
-            "Finish matching cards first".ToFail();
+        protected override Result CurrentPlayerAddCardToCenterRow(Card card) =>
+            Result.Fail("Finish matching cards first");
     }
 }

@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 
-namespace Dos.Game.Extensions
+namespace Dos.Utils
 {
     public static class EnumerableExtensions
     {
-        private static readonly Random Rng = new Random();
+        private static readonly Random Rand = new Random();
 
         public static IEnumerable<T> Repeat<T>(this T element, int repeatAmount)
         {
@@ -26,7 +26,7 @@ namespace Dos.Game.Extensions
             while (n > 1)
             {
                 n--;
-                var k = Rng.Next(n + 1);
+                var k = Rand.Next(n + 1);
                 var value = list[k];
                 list[k] = list[n];
                 list[n] = value;
@@ -54,5 +54,27 @@ namespace Dos.Game.Extensions
         }
 
         public static bool IsEmpty<T>(this IEnumerable<T> enumerable) => !enumerable.Any();
+
+
+        public static T RandomElement<T>(this IList<T> list) =>
+            list.Count == 0
+                ? throw new ArgumentException($"{nameof(list)} cannot be empty!")
+                : list[Rand.Next(list.Count)];
+
+
+        public static Dictionary<TKey, TValue> ToDictionary<TKey, TValue>(
+            this IEnumerable<Tuple<TKey, TValue>> enumerable) =>
+            enumerable.ToDictionary(t => t.Item1, t => t.Item2);
+
+        public static Dictionary<TKey, TValue> ToDictionary<TKey, TValue>(
+            this IEnumerable<ValueTuple<TKey, TValue>> enumerable) =>
+            enumerable.ToDictionary(t => t.Item1, t => t.Item2);
+
+        public static bool IsNullOrWhiteSpace(this string s) => string.IsNullOrWhiteSpace(s);
+        public static bool IsNullOrEmpty(this string s) => string.IsNullOrEmpty(s);
+
+        public static Dictionary<TKey, TValue> UnionWith<TKey, TValue>(this IDictionary<TKey, TValue> one,
+                                                                       IDictionary<TKey, TValue> other) =>
+            new Dictionary<TKey, TValue>(one.Concat(other));
     }
 }

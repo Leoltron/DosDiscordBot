@@ -1,19 +1,14 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using Discord;
+using Discord.Commands;
+using Dos.DiscordBot.Commands;
 using Serilog.Events;
 
-namespace Dos.DiscordBot
+namespace Dos.DiscordBot.Util
 {
     public static class Extensions
     {
-        private static readonly Random Rand = new Random();
-
-        public static T RandomElement<T>(this IList<T> list) =>
-            list.Count == 0
-                ? throw new ArgumentException($"{nameof(list)} cannot be empty!")
-                : list[Rand.Next(list.Count)];
+        public static DiscordDosGame GetGame(this ICommandContext context) => (context as DosCommandContext)?.DosGame;
 
         public static LogEventLevel ToLogLevel(this LogSeverity severity)
         {
@@ -35,13 +30,5 @@ namespace Dos.DiscordBot
                     throw new ArgumentOutOfRangeException(nameof(severity), severity, null);
             }
         }
-
-        public static Dictionary<TKey, TValue> ToDictionary<TKey, TValue>(
-            this IEnumerable<Tuple<TKey, TValue>> enumerable) =>
-            enumerable.ToDictionary(t => t.Item1, t => t.Item2);
-
-        public static Dictionary<TKey, TValue> ToDictionary<TKey, TValue>(
-            this IEnumerable<ValueTuple<TKey, TValue>> enumerable) =>
-            enumerable.ToDictionary(t => t.Item1, t => t.Item2);
     }
 }

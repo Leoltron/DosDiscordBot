@@ -3,20 +3,23 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Discord.Commands;
 using Discord.WebSocket;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace Dos.DiscordBot
+namespace Dos.DiscordBot.Commands
 {
     public class CommandHandler
     {
         private readonly DiscordSocketClient client;
         private readonly CommandService commands;
         private readonly IServiceProvider serviceProvider;
+        private readonly GameRouterService gameRouterService;
 
         public CommandHandler(DiscordSocketClient client, CommandService commands, IServiceProvider serviceProvider)
         {
             this.client = client;
             this.commands = commands;
             this.serviceProvider = serviceProvider;
+            gameRouterService = serviceProvider.GetService<GameRouterService>();
         }
 
         public async Task InstallCommandsAsync()
@@ -35,7 +38,10 @@ namespace Dos.DiscordBot
                 message.Author.IsBot)
                 return;
 
-            var context = new SocketCommandContext(client, message);
+            var context = new DosCommandContext(client, message)
+            {
+                DosGame = gameRouterService.TryFindGameByChannel(message.Channel)
+            };
 
             await commands.ExecuteAsync(context, 0, serviceProvider);
         }

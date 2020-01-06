@@ -1,5 +1,4 @@
-using Dos.Game.Extensions;
-using Dos.Game.Util;
+using Dos.Utils;
 
 namespace Dos.Game.State
 {
@@ -13,36 +12,35 @@ namespace Dos.Game.State
         {
         }
 
-        public override Result<string> Callout(int caller)
+        public override Result Callout(int caller)
         {
             if (!Game.CurrentPlayerDidNotCallDos)
                 return Game.FalseCalloutPenalty > 0
-                    ? $"False callout! {Game.GetPlayerName(caller)}, draw {Game.FalseCalloutPenalty}.".ToSuccess()
-                    : "False callout!".ToFail();
+                    ? Result.Success($"False callout! {Game.GetPlayerName(caller)}, draw {Game.FalseCalloutPenalty}.")
+                    : Result.Fail("False callout!");
 
 
             Game.CurrentPlayerDidNotCallDos = false;
 
             if (Game.CalloutPenalty <= 0)
-                return $"You are right, {CurrentPlayerName} did not call DOS but there is no penalty".ToSuccess();
+                return Result.Success($"You are right, {CurrentPlayerName} did not call DOS but there is no penalty");
 
             Game.CurrentPlayerPenalty += Game.CalloutPenalty;
-            return ($"{CurrentPlayerName}, you have been caught not calling DOS with two cards " +
-                    $"in hand! Draw {Game.CurrentPlayerPenalty} when your turn ends.").ToSuccess();
+            return Result.Success($"{CurrentPlayerName}, you have been caught not calling DOS with two cards " +
+                                   $"in hand! Draw {Game.CurrentPlayerPenalty} when your turn ends.");
         }
 
-        public override Result<string> CallDos(int caller)
+        public override Result CallDos(int caller)
         {
             if (caller != CurrentPlayer)
-                return "You do not need to call DOS if you got 2 cards outside of your turn or you already finished it."
-                   .ToFail();
+                return Result.Fail("You do not need to call DOS if you got 2 cards outside of your turn or you already finished it.");
 
             var cardsCount = Game.playerHands[caller].Count;
             if (cardsCount != 2 && !Game.CurrentPlayerDidNotCallDos)
-                return $"You do not have to call DOS since you have {cardsCount} cards, not 2".ToFail();
+                return Result.Fail($"You do not have to call DOS since you have {cardsCount} cards, not 2");
 
             Game.CurrentPlayerDidNotCallDos = false;
-            return $"**DOS! {Game.GetPlayerName(caller)} has only 2 cards!**".ToSuccess();
+            return Result.Success($"**DOS! {Game.GetPlayerName(caller)} has only 2 cards!**");
         }
     }
 }

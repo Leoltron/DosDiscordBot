@@ -13,7 +13,7 @@ namespace Dos.Game.Match
 
         public MatchResult AddText(string text)
         {
-            var newMessage = string.IsNullOrEmpty(Message) ? text : $"{Message} {text}";
+            var newMessage = string.IsNullOrEmpty(Message) ? text : $"{Message}\n{text}";
             return new MatchResult(Type, newMessage);
         }
 

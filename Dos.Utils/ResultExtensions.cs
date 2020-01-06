@@ -1,6 +1,4 @@
-using Dos.Game.Util;
-
-namespace Dos.Game.Extensions
+namespace Dos.Utils
 {
     public static class ResultExtensions
     {

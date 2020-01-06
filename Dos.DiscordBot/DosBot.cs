@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Dos.DiscordBot.Commands;
+using Dos.DiscordBot.Util;
 using Serilog;
 using Serilog.Events;
 
@@ -28,7 +30,7 @@ namespace Dos.DiscordBot
 
             client.Log += Log;
             var commandService = new CommandService(new CommandServiceConfig {LogLevel = LogSeverity.Verbose});
-            commandHandler = new CommandHandler(client, commandService, ServiceProviderBuilder.BuildProvider());
+            commandHandler = new CommandHandler(client, commandService, ServiceProviderBuilder.BuildProvider(logger));
 
             await commandHandler.InstallCommandsAsync();
             await client.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("DiscordToken"));

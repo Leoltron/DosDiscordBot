@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using Dos.Game.Model;
-using Dos.Game.Util;
+using Dos.Utils;
 
 namespace Dos.Game.State
 {
@@ -18,13 +18,15 @@ namespace Dos.Game.State
         protected List<Card> CurrentPlayerHand => Game.CurrentPlayerHand;
         protected string CurrentPlayerName => Game.GetPlayerName(CurrentPlayer);
 
-        public abstract Result<string> MatchCenterRowCard(int player, Card target, params Card[] cardsToPlay);
-        public abstract Result<string> FinishMatching(int player);
-        public abstract Result<string> Draw(int player);
+        public virtual bool IsFinished => false;
 
-        public abstract Result<string> AddCardToCenterRow(int player, Card card);
+        public abstract Result MatchCenterRowCard(int player, Card target, params Card[] cardsToPlay);
+        public abstract Result FinishMatching(int player);
+        public abstract Result Draw(int player);
 
-        public abstract Result<string> Callout(int caller);
-        public abstract Result<string> CallDos(int caller);
+        public abstract Result AddCardToCenterRow(int player, Card card);
+
+        public abstract Result Callout(int caller);
+        public abstract Result CallDos(int caller);
     }
 }

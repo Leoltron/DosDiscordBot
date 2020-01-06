@@ -3,6 +3,7 @@ using Dos.Game.Deck.Generation;
 using Dos.Game.Extensions;
 using Dos.Game.Model;
 using Dos.Game.State;
+using Dos.Utils;
 using FluentAssertions;
 using NUnit.Framework;
 

@@ -88,5 +88,8 @@ namespace Dos.Game.Extensions
 
             return true;
         }
+        
+        public static string ToDiscordString(this IEnumerable<Card> cards) => $"**{string.Join(" | ", cards.OrderBy(c => c.Color).ThenBy(c => c.Value))}**";
+        public static string Join(this IEnumerable<Card> cards) => $"{string.Join(",", cards.OrderBy(c => c.Color).ThenBy(c => c.Value))}";
     }
 }

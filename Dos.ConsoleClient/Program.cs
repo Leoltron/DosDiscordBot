@@ -5,6 +5,7 @@ using Dos.Game.Deck;
 using Dos.Game.Deck.Generation;
 using Dos.Game.Extensions;
 using Dos.Game.Model;
+using Dos.Utils;
 
 namespace Dos.ConsoleClient
 {
@@ -29,7 +30,7 @@ namespace Dos.ConsoleClient
 
                 if (line == "dos cards" || line == "dosc")
                 {
-                    Console.WriteLine(string.Join(Environment.NewLine, game.GameTableLines(0)));
+                    Console.WriteLine(string.Join(Environment.NewLine, game.PersonalGameTableLines(0)));
                     continue;
                 }
 
@@ -44,7 +45,7 @@ namespace Dos.ConsoleClient
                     var cardString = line.Substring(9).Trim();
                     Console.WriteLine(
                         CardParser.TryParse(cardString, out var card)
-                            ? game.AddCardToCenterRow(0, card).Value
+                            ? game.AddCardToCenterRow(0, card).Message
                             : $"Did not recognise the card \"{cardString}\", expected something like b9");
                     continue;
                 }
@@ -87,7 +88,7 @@ namespace Dos.ConsoleClient
                     }
                     else
                     {
-                        Console.WriteLine(game.MatchCenterRowCard(0, (Card) target, cards.ToArray()));
+                        Console.WriteLine(game.MatchCenterRowCard(0, target.Value, cards.ToArray()));
                     }
                 }
             }

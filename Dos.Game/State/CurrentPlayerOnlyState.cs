@@ -1,12 +1,12 @@
 using Dos.Game.Extensions;
 using Dos.Game.Model;
-using Dos.Game.Util;
+using Dos.Utils;
 
 namespace Dos.Game.State
 {
     public abstract class CurrentPlayerOnlyState : CalloutsAllowedState
     {
-        private static readonly Result<string> NonCurrentPlayerFail = "It's not your turn right now.".ToFail();
+        private static readonly Result NonCurrentPlayerFail = Result.Fail("It's not your turn right now.");
 
         protected CurrentPlayerOnlyState(Game game) : base(game)
         {
@@ -16,32 +16,32 @@ namespace Dos.Game.State
         {
         }
 
-        public override Result<string> MatchCenterRowCard(int player, Card target, params Card[] cardsToPlay) =>
+        public override Result MatchCenterRowCard(int player, Card target, params Card[] cardsToPlay) =>
             player == Game.CurrentPlayer
                 ? CurrentPlayerMatchCenterRowCard(target, cardsToPlay)
                 : NonCurrentPlayerFail;
 
-        protected abstract Result<string> CurrentPlayerMatchCenterRowCard(Card target, Card[] cardsToPlay);
+        protected abstract Result CurrentPlayerMatchCenterRowCard(Card target, Card[] cardsToPlay);
 
-        public override Result<string> Draw(int player) =>
+        public override Result Draw(int player) =>
             player == Game.CurrentPlayer
                 ? CurrentPlayerDraw()
                 : NonCurrentPlayerFail;
 
-        protected abstract Result<string> CurrentPlayerDraw();
+        protected abstract Result CurrentPlayerDraw();
 
-        public override Result<string> FinishMatching(int player) =>
+        public override Result FinishMatching(int player) =>
             player == Game.CurrentPlayer
                 ? CurrentPlayerFinishMatching()
                 : NonCurrentPlayerFail;
 
-        protected abstract Result<string> CurrentPlayerFinishMatching();
+        protected abstract Result CurrentPlayerFinishMatching();
 
-        public override Result<string> AddCardToCenterRow(int player, Card card) =>
+        public override Result AddCardToCenterRow(int player, Card card) =>
             player == Game.CurrentPlayer
                 ? CurrentPlayerAddCardToCenterRow(card)
                 : NonCurrentPlayerFail;
 
-        protected abstract Result<string> CurrentPlayerAddCardToCenterRow(Card card);
+        protected abstract Result CurrentPlayerAddCardToCenterRow(Card card);
     }
 }
