@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord;
@@ -33,6 +34,8 @@ namespace Dos.DiscordBot
         private readonly ILogger logger;
 
         public bool IsFinished => IsGameStarted && Game.CurrentState.IsFinished;
+
+        public GameConfig Config { get; } = new GameConfig();
 
         public DiscordDosGame(ISocketMessageChannel channel, IUser owner, ILogger logger, string serverName)
         {
@@ -96,10 +99,10 @@ namespace Dos.DiscordBot
                     PlayerNames = PlayerIds.Select((id, i) => (i, Players[id].Username)).ToDictionary()
                 };
                 await Task.WhenAll(Enumerable.Range(0, Players.Count).Select(SendHandTo));
-                await SendShortTable();
+                await SendTableToChannel(false);
                 Game.PlayerSwitch += OnPlayerSwitch;
-                Game.PlayerReceivedCards += (id, cards) =>
-                    Players[PlayerIds[id]].SendMessageAsync("You were dealt " + cards.ToDiscordString());
+                Game.PlayerReceivedCards +=
+                    (id, cards) => Players[PlayerIds[id]].SendCards(cards, Config.UseImages, true);
 
                 Info($"Game started, center row: {string.Join(", ", Game.centerRow)}");
                 for (int i = 0; i < Players.Count; i++)
@@ -119,13 +122,51 @@ namespace Dos.DiscordBot
         {
             selectedCenterRowCard = null;
             SendHandTo(nextPlayer);
-            Channel.SendMessageAsync(
-                $"{GetTable(false).Message}\n\u200b\nNow it's your turn, **{Game.CurrentPlayerName}**");
+            NotifyChannelAboutPlayerSwitch();
         }
 
-        public Task<RestUserMessage> SendFullTable() => Channel.SendMessageAsync(GetTable(true).Message);
+        private async Task NotifyChannelAboutPlayerSwitch()
+        {
+            await SendTableToChannel(false);
+            await Channel.SendMessageAsync(
+                $"Now it's your turn, **{Game.CurrentPlayerName}**");
+        }
 
-        public Task<RestUserMessage> SendShortTable() => Channel.SendMessageAsync(GetTable(false).Message);
+        public Task SendTableToChannel(bool addPlayersStats) => SendTableToChannel(addPlayersStats, Config.UseImages);
+
+        private async Task SendTableToChannel(bool addPlayersStats, bool useImages)
+        {
+            if (!IsGameStarted)
+            {
+                await Channel.SendMessageAsync("Game has not started yet");
+            }
+            else
+            {
+                if (addPlayersStats)
+                {
+                    var messageBuilder = new StringBuilder();
+                    for (var i = 0; i < PlayerIds.Count; i++)
+                    {
+                        var handSize = Game.playerHands[i].Count;
+                        messageBuilder.Append(
+                            $"{Game.GetPlayerName(i)} - {handSize} {(handSize == 1 ? "card" : "cards")}\n");
+                    }
+
+                    await Channel.SendMessageAsync(messageBuilder.ToString());
+                }
+
+                await Channel.SendMessageAsync("**Center Row:**");
+                if (useImages)
+                {
+                    await Channel.SendCards(Game.centerRow);
+                }
+                else
+                {
+                    await Channel.SendMessageAsync(string.Join("\n", Game.GameTableLines()));
+                }
+            }
+        }
+
 
         public Result GetTable(bool addPlayersStats)
         {
@@ -151,7 +192,7 @@ namespace Dos.DiscordBot
         private Task<IUserMessage> SendHandTo(int playerIndex)
         {
             var id = PlayerIds[playerIndex];
-            return Players[id].SendMessageAsync(string.Join("\n", Game.GetPlayerHandLines(playerIndex)));
+            return Players[id].SendCards(Game.playerHands[playerIndex], Config.UseImages, false);
         }
 
         private async Task<Result> MatchAsync(IUser player, string args)
@@ -273,8 +314,7 @@ namespace Dos.DiscordBot
             await semaphoreSlim.WaitAsync();
             try
             {
-                await player.SendMessageAsync(
-                    string.Join("\n", Game.GetPlayerHandLines(PlayerIds.IndexOf(player.Id))));
+                await SendHandTo(PlayerIds.IndexOf(player.Id));
                 return Result.Success(reportToChannel ? "DM'd you your hand" : null);
             }
             finally

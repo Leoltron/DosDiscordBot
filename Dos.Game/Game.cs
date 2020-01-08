@@ -158,7 +158,6 @@ namespace Dos.Game
 
         public IEnumerable<string> GameTableLines()
         {
-            yield return "**Center Row:**";
             for (var i = 0; i < centerRow.Count; i++)
             {
                 yield return " - " + centerRow[i] +

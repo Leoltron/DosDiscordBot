@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 
 namespace Dos.DiscordBot.Commands
 {
@@ -13,6 +14,7 @@ namespace Dos.DiscordBot.Commands
         private readonly CommandService commands;
         private readonly IServiceProvider serviceProvider;
         private readonly GameRouterService gameRouterService;
+        private readonly ILogger logger;
 
         public CommandHandler(DiscordSocketClient client, CommandService commands, IServiceProvider serviceProvider)
         {
@@ -20,6 +22,7 @@ namespace Dos.DiscordBot.Commands
             this.commands = commands;
             this.serviceProvider = serviceProvider;
             gameRouterService = serviceProvider.GetService<GameRouterService>();
+            logger = serviceProvider.GetService<ILogger>();
         }
 
         public async Task InstallCommandsAsync()
@@ -43,7 +46,15 @@ namespace Dos.DiscordBot.Commands
                 DosGame = gameRouterService.TryFindGameByChannel(message.Channel)
             };
 
-            await commands.ExecuteAsync(context, 0, serviceProvider);
+            try
+            {
+                await commands.ExecuteAsync(context, 0, serviceProvider);
+            }
+            catch (Exception e)
+            {
+                logger.Error(e, "An error occured during execution of a command:");
+                throw;
+            }
         }
     }
 }

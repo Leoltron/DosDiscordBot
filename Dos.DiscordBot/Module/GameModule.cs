@@ -61,6 +61,6 @@ namespace Dos.DiscordBot.Module
 
         [RunningGameRequired]
         [Command("dos table", true), Alias("dost", "dostable")]
-        public Task Table() => ReplyIfHasMessageAsync(Game.GetTable(true));
+        public Task Table() => Game.SendTableToChannel(true);
     }
 }

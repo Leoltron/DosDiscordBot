@@ -33,5 +33,7 @@ namespace Dos.Game.Model
         public static bool operator !=(Card left, Card right) => !left.Equals(right);
 
         public override string ToString() => this == WildDos ? "Wild Dos" : $"{Color} {Value.Name()}";
+
+        public string ToShortString() => Color.ShortName() + Value.Name();
     }
 }
