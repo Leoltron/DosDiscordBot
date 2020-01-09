@@ -1,8 +1,10 @@
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
+using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Dos.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
@@ -28,6 +30,7 @@ namespace Dos.DiscordBot.Commands
         public async Task InstallCommandsAsync()
         {
             client.MessageReceived += HandleCommandAsync;
+            commands.CommandExecuted += OnCommandExecutedAsync;
             client.ChannelDestroyed += c =>
             {
                 if (c is ISocketMessageChannel smc)
@@ -61,6 +64,17 @@ namespace Dos.DiscordBot.Commands
                 logger.Error(e, "An error occured during execution of a command:");
                 throw;
             }
+        }
+
+        public async Task OnCommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context, IResult result)
+        {
+            if (!(result?.ErrorReason).IsNullOrEmpty())
+            {
+                await context.Channel.SendMessageAsync(result.ErrorReason);
+            }
+
+            var commandName = command.IsSpecified ? command.Value.Name : "A command";
+            logger.Information($"[{context.Guild.Name} #{context.Channel.Name}] {commandName} was executed at {DateTime.UtcNow}.");
         }
     }
 }

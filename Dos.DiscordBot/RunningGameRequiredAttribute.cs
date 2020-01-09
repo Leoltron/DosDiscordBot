@@ -12,14 +12,8 @@ namespace Dos.DiscordBot
 
         private static readonly PreconditionResult GameNotFoundResult = PreconditionResult.FromError(GameNotFoundMessage);
 
-        public override async Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo command,
-                                                                       IServiceProvider services)
-        {
-            if(context.GetGame() != null)
-                return PreconditionResult.FromSuccess();
-
-            await context.Channel.SendMessageAsync(GameNotFoundMessage);
-            return GameNotFoundResult;
-        }
+        public override Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo command,
+                                                                       IServiceProvider services) =>
+            Task.FromResult(context.GetGame() != null ? PreconditionResult.FromSuccess() : GameNotFoundResult);
     }
 }
