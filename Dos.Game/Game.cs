@@ -156,16 +156,11 @@ namespace Dos.Game
             yield return hand.ToDiscordString();
         }
 
-        public IEnumerable<string> GameTableLines()
-        {
-            for (var i = 0; i < centerRow.Count; i++)
-            {
-                yield return " - " + centerRow[i] +
-                             (centerRowAdditional[i]
-                                .Any()
-                                 ? $" with {string.Join(" and ", centerRowAdditional[i])} on top"
-                                 : string.Empty);
-            }
-        }
+        public IEnumerable<string> GameTableLines() =>
+            centerRow.Select((t, i) => " - " + t +
+                                       (centerRowAdditional[i]
+                                          .Any()
+                                           ? $" with {string.Join(" and ", centerRowAdditional[i])} on top"
+                                           : string.Empty));
     }
 }

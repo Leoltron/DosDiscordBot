@@ -3,9 +3,9 @@ using System.Threading.Tasks;
 using Discord.Commands;
 using Dos.DiscordBot.Util;
 
-namespace Dos.DiscordBot
+namespace Dos.DiscordBot.Attributes
 {
-    public class RunningGameRequiredAttribute : PreconditionAttribute
+    public class CreatedGameRequiredAttribute : PreconditionAttribute
     {
         private const string GameNotFoundMessage = "Sorry, but there's no game in this channel. " +
                                                    "If you want to create one, use `dos join`";

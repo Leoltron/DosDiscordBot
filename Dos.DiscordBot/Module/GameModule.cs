@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using Discord.Commands;
+using Dos.DiscordBot.Attributes;
 using Dos.DiscordBot.Util;
 
 namespace Dos.DiscordBot.Module
@@ -24,13 +25,14 @@ namespace Dos.DiscordBot.Module
             await ReplyIfHasMessageAsync(await gameRouterService.JoinGameAsync(Context.Guild, Context.Channel, Context.User));
         }
 
+        [NotStartedGameRequired]
         [Command("dos start", true), Alias("dosstart", "doss")]
         public async Task StartGame()
         {
             await ReplyIfHasMessageAsync(await Game.StartAsync(Context.User));
         }
 
-        [RunningGameRequired]
+        [StartedGameRequired]
         [Command("dos draw", true)]
         [Alias("dosdraw", "dosd", "dos take", "dos pick", "dos done", "dostake", "dospick", "dosdone")]
         public async Task FinishMatching()
@@ -38,28 +40,28 @@ namespace Dos.DiscordBot.Module
             await ReplyIfHasMessageAsync(await Game.FinishMatchingAsync(Context.User));
         }
 
-        [RunningGameRequired]
+        [StartedGameRequired]
         [Command("dos select"), Alias("dosselect", "dos choose", "doschoose")]
         public async Task Select([Remainder] string args)
         {
             await ReplyIfHasMessageAsync(await Game.SelectAsync(Context.User, args));
         }
 
-        [RunningGameRequired]
+        [StartedGameRequired]
         [Command("dos play", true), Alias("dosp", "dosplay")]
         public async Task Play([Remainder] string args)
         {
             await ReplyIfHasMessageAsync(await Game.PlayAsync(Context.User, args));
         }
 
-        [RunningGameRequired]
+        [StartedGameRequired]
         [Command("dos hand", true), Alias("dosh", "doshand")]
         public async Task Hand()
         {
             await ReplyIfHasMessageAsync(await Game.SendHandAsync(Context.User, true));
         }
 
-        [RunningGameRequired]
+        [StartedGameRequired]
         [Command("dos table", true), Alias("dost", "dostable")]
         public Task Table() => Game.SendTableToChannel(true);
     }
