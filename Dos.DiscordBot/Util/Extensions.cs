@@ -86,5 +86,27 @@ namespace Dos.DiscordBot.Util
 
             return await user.SendFileAsync(paths.JoinImages(), name);
         }
+
+        public static void DisposeAll(this IEnumerable<IDisposable> disposables)
+        {
+            var exceptions = new List<Exception>();
+
+            foreach (var disposable in disposables)
+            {
+                try
+                {
+                    disposable.Dispose();
+                }
+                catch (Exception e)
+                {
+                    exceptions.Add(e);
+                }
+            }
+
+            if (exceptions.Any())
+            {
+                throw new AggregateException(exceptions);
+            }
+        }
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -44,6 +45,7 @@ namespace Dos.DiscordBot.Util
         {
             MagickImage separator = null;
             var totalWidth = 0;
+            var trashCan = new DisposableList();
 
             using (var images = new MagickImageCollection())
             {
@@ -51,27 +53,33 @@ namespace Dos.DiscordBot.Util
                 {
                     if (separator != null)
                     {
-                        images.Add(separator.Clone());
+                        var separatorClone = separator.Clone();
+                        images.Add(separatorClone);
+                        trashCan.Add(separatorClone);
                         totalWidth += separatorWidth;
                     }
                     else
                     {
                         separator = new MagickImage(MagickColors.Transparent, separatorWidth, image.Height);
+                        trashCan.Add(separator);
                     }
 
                     images.Add(image);
+                    trashCan.Add(image);
                     totalWidth += image.Width;
                 }
 
                 if (totalWidth < minWidth)
                 {
-                    images.Add(
-                        new MagickImage(MagickColors.Transparent, minWidth - totalWidth, separator?.Height ?? 20));
+                    var filler = new MagickImage(MagickColors.Transparent, minWidth - totalWidth, separator?.Height ?? 20);
+                    images.Add(filler);
+                    trashCan.Add(filler);
                 }
 
+                using (trashCan)
                 using (var result = images.AppendHorizontally())
                 {
-                    var stream = new MemoryStream(2<<20);
+                    var stream = new MemoryStream();
                     result.Write(stream, MagickFormat.Png);
                     stream.Seek(0, SeekOrigin.Begin);
                     return stream;
