@@ -28,6 +28,12 @@ namespace Dos.DiscordBot.Commands
         public async Task InstallCommandsAsync()
         {
             client.MessageReceived += HandleCommandAsync;
+            client.ChannelDestroyed += c =>
+            {
+                if (c is ISocketMessageChannel smc)
+                    gameRouterService.TryDeleteGame(smc);
+                return Task.CompletedTask;
+            };
 
             await commands.AddModulesAsync(Assembly.GetEntryAssembly(), serviceProvider);
         }
