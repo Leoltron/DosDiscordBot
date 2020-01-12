@@ -22,6 +22,9 @@ namespace Dos.Utils
         public Result IfSuccess(Func<Result, Result> successAction) => IsSuccess ? successAction(this) : this;
 
         public Result IfFail(Func<Result, Result> failActon) => IsFail ? failActon(this) : this;
+
+        public override string ToString() =>
+            $"({(IsSuccess ? "Success" : "Fail")}) - \"{Message}\"";
     }
 
     public class Result<T> : Result
@@ -40,10 +43,10 @@ namespace Dos.Utils
                                          Func<Result<T>, Result<TNext>> failActon) =>
             IsSuccess ? successAction(this) : failActon(this);
 
-        public static Result<T> Fail(string message = null) => new Result<T>(false, message: message);
-        public static Result<T> Success(string message = null) => new Result<T>(true, message: message);
+        public new static Result<T> Fail(string message = null) => new Result<T>(false, message: message);
+        public new static Result<T> Success(string message = null) => new Result<T>(true, message: message);
 
         public override string ToString() =>
-            $"({(IsSuccess ? "Success" : "Fail")}) {Value}{(string.IsNullOrWhiteSpace(Message) ? string.Empty : " - " + Message)}";
+            $"({(IsSuccess ? "Success" : "Fail")}) {Value}{(string.IsNullOrWhiteSpace(Message) ? string.Empty : $" - \"{Message}\"")}";
     }
 }

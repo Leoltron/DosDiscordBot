@@ -46,11 +46,13 @@ namespace Dos.DiscordBot.Util
                 : user.SendCardsNames(cardList, newDealtCards);
         }
 
-        public static Task<IUserMessage> SendCards(this IMessageChannel channel, IEnumerable<Card> cards)
+        public static Task<IUserMessage> SendCards(this IMessageChannel channel, IEnumerable<List<Card>> cards)
         {
-            var cardList = cards.OrderByColorAndValue().ToList();
-            var name = string.Join("_", cardList.Select(c => c.ToShortString())) + ".png";
-            return channel.SendFileAsync(cardList.JoinImages(), name);
+            var cardList = cards.OrderBy(c => c.First().Color).ThenBy(c => c.First().Value).ToList();
+            var name = string.Join("_", cardList.Select(cl => string.Join("&", cl.Select(c => c.ToShortString())))) +
+                       ".png";
+            
+            return channel.SendFileAsync(cardList.Select(CardToImageHelper.Stack).JoinImages(10, 1173), name);
         }
 
         public static Task<IUserMessage> SendCardsNames(this IUser user, IList<Card> cards, bool newDealtCards = false)

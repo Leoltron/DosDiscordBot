@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Dos.Game.Model;
 using Dos.Utils;
 
-namespace Dos.Game.State
+namespace Dos.Game.State.Base
 {
     public abstract class GameState : IGame
     {
@@ -21,7 +21,7 @@ namespace Dos.Game.State
         public virtual bool IsFinished => false;
 
         public abstract Result MatchCenterRowCard(int player, Card target, params Card[] cardsToPlay);
-        public abstract Result FinishMatching(int player);
+        public abstract Result EndTurn(int player);
         public abstract Result Draw(int player);
 
         public abstract Result AddCardToCenterRow(int player, Card card);

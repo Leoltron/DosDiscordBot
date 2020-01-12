@@ -1,5 +1,6 @@
 using Dos.Game.Extensions;
 using Dos.Game.Model;
+using Dos.Game.State.Base;
 using Dos.Utils;
 
 namespace Dos.Game.State
@@ -17,7 +18,7 @@ namespace Dos.Game.State
         public override Result MatchCenterRowCard(int player, Card target, params Card[] cardsToPlay) =>
             GameFinishedResult;
 
-        public override Result FinishMatching(int player) => GameFinishedResult;
+        public override Result EndTurn(int player) => GameFinishedResult;
 
         public override Result Draw(int player) => GameFinishedResult;
 

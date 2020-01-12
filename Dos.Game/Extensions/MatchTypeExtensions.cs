@@ -16,9 +16,11 @@ namespace Dos.Game.Extensions
                 case MatchType.DoubleMatch:
                     return MatchResult.NoMatch("Double Number match!");
                 case MatchType.SingleColorMatch:
-                    return MatchResult.NoMatch("Single Color Match!");
+                    return MatchResult.NoMatch("Single Color Match! " +
+                                               "After matching, place one more card to the Center Row");
                 case MatchType.DoubleColorMatch:
-                    return MatchResult.NoMatch("Double Color Match!!");
+                    return MatchResult.NoMatch("Double Color Match!! " +
+                                               "After matching, place one more card to the Center Row. Also, everyone else, draw 1");
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }

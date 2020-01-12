@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using Dos.Game.Extensions;
 using Dos.Game.Model;
+using Dos.Utils;
 using ImageMagick;
 
 namespace Dos.DiscordBot.Util
@@ -71,7 +72,8 @@ namespace Dos.DiscordBot.Util
 
                 if (totalWidth < minWidth)
                 {
-                    var filler = new MagickImage(MagickColors.Transparent, minWidth - totalWidth, separator?.Height ?? 20);
+                    var filler = new MagickImage(MagickColors.Transparent, minWidth - totalWidth,
+                                                 separator?.Height ?? 20);
                     images.Add(filler);
                     trashCan.Add(filler);
                 }
@@ -83,6 +85,40 @@ namespace Dos.DiscordBot.Util
                     result.Write(stream, MagickFormat.Png);
                     stream.Seek(0, SeekOrigin.Begin);
                     return stream;
+                }
+            }
+        }
+
+        public static MagickImage Stack(this IEnumerable<Card> cards) =>
+            cards.Select(ToImage).ToList().Stack();
+
+        public static MagickImage Stack(this IList<MagickImage> images)
+        {
+            if (images.IsEmpty())
+            {
+                throw new ArgumentOutOfRangeException(nameof(images), "Expected list with at least 1 element");
+            }
+
+            if (images.Count == 1)
+            {
+                return images[0];
+            }
+
+            using (var imageCollection = new MagickImageCollection())
+            {
+                imageCollection.Add(images[0]);
+                var xOffset = images[0].Width / 2;
+
+                foreach (var image in images.Skip(1))
+                {
+                    image.Page = new MagickGeometry(xOffset, 0, 100, 100);
+                    imageCollection.Add(image);
+                    xOffset += image.Width / 2;
+                }
+
+                using (var mosaic = imageCollection.Mosaic())
+                {
+                    return new MagickImage(mosaic);
                 }
             }
         }

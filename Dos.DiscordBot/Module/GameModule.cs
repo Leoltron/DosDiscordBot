@@ -22,7 +22,8 @@ namespace Dos.DiscordBot.Module
         [Command("dos join", true), Alias("dosjoin", "dosj")]
         public async Task JoinGame()
         {
-            await ReplyIfHasMessageAsync(await gameRouterService.JoinGameAsync(Context.Guild, Context.Channel, Context.User));
+            await ReplyIfHasMessageAsync(
+                await gameRouterService.JoinGameAsync(Context.Guild, Context.Channel, Context.User));
         }
 
         [NotStartedGameRequired]
@@ -34,10 +35,18 @@ namespace Dos.DiscordBot.Module
 
         [StartedGameRequired]
         [Command("dos draw", true)]
-        [Alias("dosdraw", "dosd", "dos take", "dos pick", "dos done", "dostake", "dospick", "dosdone")]
-        public async Task FinishMatching()
+        [Alias("dosdraw", "dos take", "dostake")]
+        public async Task Draw()
         {
-            await ReplyIfHasMessageAsync(await Game.FinishMatchingAsync(Context.User));
+            await ReplyIfHasMessageAsync(await Game.DrawAsync(Context.User));
+        }
+
+        [StartedGameRequired]
+        [Command("dos done", true)]
+        [Alias("dos end", "dosdone", "dosend")]
+        public async Task EndTurn()
+        {
+            await ReplyIfHasMessageAsync(await Game.EndTurnAsync(Context.User));
         }
 
         [StartedGameRequired]
@@ -48,10 +57,17 @@ namespace Dos.DiscordBot.Module
         }
 
         [StartedGameRequired]
-        [Command("dos play", true), Alias("dosp", "dosplay")]
-        public async Task Play([Remainder] string args)
+        [Command("dos match", true), Alias("dosm", "dosmatch")]
+        public async Task Match([Remainder] string args)
         {
-            await ReplyIfHasMessageAsync(await Game.PlayAsync(Context.User, args));
+            await ReplyIfHasMessageAsync(await Game.MatchAsync(Context.User, args));
+        }
+
+        [StartedGameRequired]
+        [Command("dos add", true), Alias("dosa", "dosadd")]
+        public async Task Add([Remainder] string args)
+        {
+            await ReplyIfHasMessageAsync(await Game.AddToCenterRowAsync(Context.User, args));
         }
 
         [StartedGameRequired]

@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord;
-using Discord.Rest;
 using Discord.WebSocket;
 using Dos.DiscordBot.Util;
 using Dos.Game.Deck;
@@ -129,7 +128,7 @@ namespace Dos.DiscordBot
         {
             await SendTableToChannel(false);
             await Channel.SendMessageAsync(
-                $"Now it's your turn, **{Game.CurrentPlayerName}**");
+                $"Now it's **{Game.CurrentPlayerName}**'s turn");
         }
 
         public Task SendTableToChannel(bool addPlayersStats) => SendTableToChannel(addPlayersStats, Config.UseImages);
@@ -158,35 +157,19 @@ namespace Dos.DiscordBot
                 await Channel.SendMessageAsync("**Center Row:**");
                 if (useImages)
                 {
-                    await Channel.SendCards(Game.centerRow);
+                    await Channel.SendCards(
+                        Game.centerRow.Select((c, i) => Game.centerRowAdditional[i].Prepend(c).ToList()));
                 }
                 else
                 {
                     await Channel.SendMessageAsync(string.Join("\n", Game.GameTableLines()));
                 }
-            }
-        }
 
-
-        public Result GetTable(bool addPlayersStats)
-        {
-            if (!IsGameStarted)
-            {
-                return Result.Fail("Game has not started yet");
-            }
-
-            var lines = new List<string>();
-
-            if (addPlayersStats)
-                for (var i = 0; i < PlayerIds.Count; i++)
+                if (selectedCenterRowCard != null)
                 {
-                    var handSize = Game.playerHands[i].Count;
-                    lines.Add($"{Game.GetPlayerName(i)} - {handSize} {(handSize == 1 ? "card" : "cards")}");
+                    await Channel.SendMessageAsync($"Selected **{selectedCenterRowCard.Value}**");
                 }
-
-            lines.AddRange(Game.GameTableLines());
-
-            return Result.Success(string.Join("\n", lines));
+            }
         }
 
         private Task<IUserMessage> SendHandTo(int playerIndex)
@@ -195,7 +178,7 @@ namespace Dos.DiscordBot
             return Players[id].SendCards(Game.playerHands[playerIndex], Config.UseImages, false);
         }
 
-        private async Task<Result> MatchAsync(IUser player, string args)
+        public async Task<Result> MatchAsync(IUser player, string args)
         {
             if (!Players.ContainsKey(player.Id))
             {
@@ -247,6 +230,11 @@ namespace Dos.DiscordBot
                     return Result.Fail("It's not your turn right now.");
                 }
 
+                if (Game.CurrentState is AddingToCenterRowState)
+                {
+                    return Result.Fail("You cannot match cards if you already started adding cards to the center row");
+                }
+
                 var matchResult = CardParser.ParseCards(args);
                 if (matchResult.IsFail)
                     return matchResult;
@@ -263,7 +251,7 @@ namespace Dos.DiscordBot
                 }
 
                 selectedCenterRowCard = card;
-                return Result.Success($"Selected **{card}**. Now use `dos play <card(s)>` to match it with something");
+                return Result.Success($"Selected **{card}**. Now use `dos match <card(s)>` to match it with something");
             }
             finally
             {
@@ -273,12 +261,7 @@ namespace Dos.DiscordBot
 
         private ulong CurrentPlayerId => PlayerIds[Game.CurrentPlayer];
 
-        public Task<Result> PlayAsync(IUser player, string args) =>
-            Game.CurrentState is MatchingCenterRowState
-                ? MatchAsync(player, args)
-                : AddToCenterRowAsync(player, args);
-
-        private async Task<Result> AddToCenterRowAsync(IUser player, string args)
+        public async Task<Result> AddToCenterRowAsync(IUser player, string args)
         {
             if (!Players.ContainsKey(player.Id))
             {
@@ -323,7 +306,7 @@ namespace Dos.DiscordBot
             }
         }
 
-        public async Task<Result> FinishMatchingAsync(IUser player)
+        public async Task<Result> EndTurnAsync(IUser player)
         {
             if (!Players.ContainsKey(player.Id))
             {
@@ -333,7 +316,25 @@ namespace Dos.DiscordBot
             await semaphoreSlim.WaitAsync();
             try
             {
-                return Game.FinishMatching(PlayerIds.IndexOf(player.Id));
+                return Game.EndTurn(PlayerIds.IndexOf(player.Id));
+            }
+            finally
+            {
+                semaphoreSlim.Release();
+            }
+        }
+
+        public async Task<Result> DrawAsync(IUser player)
+        {
+            if (!Players.ContainsKey(player.Id))
+            {
+                return Result.Fail();
+            }
+
+            await semaphoreSlim.WaitAsync();
+            try
+            {
+                return Game.Draw(PlayerIds.IndexOf(player.Id));
             }
             finally
             {

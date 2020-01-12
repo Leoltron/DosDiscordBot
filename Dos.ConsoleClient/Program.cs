@@ -36,7 +36,7 @@ namespace Dos.ConsoleClient
 
                 if (line == "dosd")
                 {
-                    Console.WriteLine(game.FinishMatching(0));
+                    Console.WriteLine(game.EndTurn(0));
                     continue;
                 }
 

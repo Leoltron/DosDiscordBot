@@ -5,6 +5,7 @@ using Dos.Game.Deck.Generation;
 using Dos.Game.Extensions;
 using Dos.Game.Model;
 using Dos.Game.State;
+using Dos.Game.State.Base;
 using Dos.Utils;
 
 namespace Dos.Game
@@ -13,7 +14,7 @@ namespace Dos.Game
     {
         public List<Card> centerRow = new List<Card>(8);
         public List<List<Card>> centerRowAdditional = new List<List<Card>>(8);
-        public bool CurrentPlayerDidNotCallDos;
+        public int? PlayerWhoDidNotCallDos = null;
         public int CurrentPlayerPenalty;
 
         public Stack<Card> Deck;
@@ -45,12 +46,12 @@ namespace Dos.Game
             for (var i = 0; i < playersCount; i++)
             {
                 playerHands[i] = new List<Card>(10);
-                DealCards(i, initialHandSize);
+                DealCards(i, initialHandSize, false);
             }
 
             EnsureCenterRowIsValid();
             CurrentPlayer = new Random().Next(playersCount);
-            CurrentState = new MatchingCenterRowState(this);
+            CurrentState = new TurnStartState(this);
         }
 
         public List<(string name, int score)> ScoreTable =>
@@ -66,7 +67,7 @@ namespace Dos.Game
         public Result MatchCenterRowCard(int player, Card target, params Card[] cardsToPlay) =>
             CurrentState.MatchCenterRowCard(player, target, cardsToPlay);
 
-        public Result FinishMatching(int player) => CurrentState.FinishMatching(player);
+        public Result EndTurn(int player) => CurrentState.EndTurn(player);
 
         public Result Draw(int player) => CurrentState.Draw(player);
 
@@ -80,34 +81,34 @@ namespace Dos.Game
         public string GetPlayerName(int id) => PlayerNames.TryGetValue(id, out var name) ? name : "Player " + id;
 
 
-        public void DealCard(int player)
+        public void DealCard(int player, bool checkForDos = true)
         {
-            DealCards(player, 1);
+            DealCards(player, 1, checkForDos);
         }
 
-        public void DealCards(int player, int amount)
+        public void DealCards(int player, int amount, bool checkForDos = true)
         {
             if (amount <= 0) return;
 
             var cardsDealt = new Card[amount];
-            for (var i = 0; i < amount; i++) cardsDealt[i] = DealCardInternal(player);
+            for (var i = 0; i < amount; i++) cardsDealt[i] = DealCardInternal(player, checkForDos);
 
             PlayerReceivedCards?.Invoke(player, cardsDealt);
         }
 
-        private Card DealCardInternal(int player)
+        private Card DealCardInternal(int player, bool checkForDos)
         {
             var card = DrawCard();
             playerHands[player].Add(card);
 
-            if (player == CurrentPlayer) CheckCurrentPlayerForDos();
+            if (checkForDos && player == CurrentPlayer) CheckCurrentPlayerForDos();
 
             return card;
         }
 
         public void CheckCurrentPlayerForDos()
         {
-            if (playerHands[CurrentPlayer].Count == 2) CurrentPlayerDidNotCallDos = true;
+            if (playerHands[CurrentPlayer].Count == 2) PlayerWhoDidNotCallDos = CurrentPlayer;
         }
 
         public Card DrawCard()
@@ -136,7 +137,6 @@ namespace Dos.Game
         {
             DealCards(CurrentPlayer, CurrentPlayerPenalty);
             CurrentPlayerPenalty = 0;
-            CurrentPlayerDidNotCallDos = false;
             CurrentPlayer = (CurrentPlayer + 1) % PlayersCount;
             PlayerSwitch?.Invoke(CurrentPlayer);
         }

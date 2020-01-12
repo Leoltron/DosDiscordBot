@@ -1,8 +1,7 @@
-using Dos.Game.Extensions;
 using Dos.Game.Model;
 using Dos.Utils;
 
-namespace Dos.Game.State
+namespace Dos.Game.State.Base
 {
     public abstract class CurrentPlayerOnlyState : CalloutsAllowedState
     {
@@ -16,28 +15,28 @@ namespace Dos.Game.State
         {
         }
 
-        public override Result MatchCenterRowCard(int player, Card target, params Card[] cardsToPlay) =>
+        public sealed override Result MatchCenterRowCard(int player, Card target, params Card[] cardsToPlay) =>
             player == Game.CurrentPlayer
                 ? CurrentPlayerMatchCenterRowCard(target, cardsToPlay)
                 : NonCurrentPlayerFail;
 
         protected abstract Result CurrentPlayerMatchCenterRowCard(Card target, Card[] cardsToPlay);
 
-        public override Result Draw(int player) =>
+        public sealed override Result Draw(int player) =>
             player == Game.CurrentPlayer
                 ? CurrentPlayerDraw()
                 : NonCurrentPlayerFail;
 
         protected abstract Result CurrentPlayerDraw();
 
-        public override Result FinishMatching(int player) =>
+        public sealed override Result EndTurn(int player) =>
             player == Game.CurrentPlayer
-                ? CurrentPlayerFinishMatching()
+                ? CurrentPlayerEndTurn()
                 : NonCurrentPlayerFail;
 
-        protected abstract Result CurrentPlayerFinishMatching();
+        protected abstract Result CurrentPlayerEndTurn();
 
-        public override Result AddCardToCenterRow(int player, Card card) =>
+        public sealed override Result AddCardToCenterRow(int player, Card card) =>
             player == Game.CurrentPlayer
                 ? CurrentPlayerAddCardToCenterRow(card)
                 : NonCurrentPlayerFail;
