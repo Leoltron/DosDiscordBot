@@ -50,6 +50,11 @@ namespace Dos.DiscordBot.Commands
                 message.Author.IsBot)
                 return;
 
+            if (argPos < message.Content.Length && message.Content[argPos] == ' ')
+            {
+                argPos++;
+            }
+
             var context = new DosCommandContext(client, message)
             {
                 DosGame = gameRouterService.TryFindGameByChannel(message.Channel)
@@ -57,7 +62,11 @@ namespace Dos.DiscordBot.Commands
 
             try
             {
-                await commands.ExecuteAsync(context, 0, serviceProvider);
+                await commands.ExecuteAsync(context, argPos, serviceProvider);
+                if ((argPos = message.Content.IndexOf("&&", StringComparison.InvariantCulture)) != -1)
+                {
+                    await commands.ExecuteAsync(context, argPos+2, serviceProvider);
+                }
             }
             catch (Exception e)
             {
@@ -66,7 +75,8 @@ namespace Dos.DiscordBot.Commands
             }
         }
 
-        private async Task OnCommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context, IResult result)
+        private async Task OnCommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context,
+                                                  IResult result)
         {
             if (result.Error != CommandError.UnknownCommand && !(result?.ErrorReason).IsNullOrEmpty())
             {

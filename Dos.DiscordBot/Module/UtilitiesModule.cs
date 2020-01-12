@@ -8,7 +8,6 @@ using ImageMagick;
 
 namespace Dos.DiscordBot.Module
 {
-    [Group("dos")]
     [SuppressMessage("ReSharper", "UnusedType.Global")]
     [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public class UtilitiesModule : ModuleBase<SocketCommandContext>

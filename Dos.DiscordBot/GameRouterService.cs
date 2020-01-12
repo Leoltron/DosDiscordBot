@@ -39,11 +39,25 @@ namespace Dos.DiscordBot
             gamesByChannel.Remove(channel.Id, out _);
             return null;
         }
-        
+
         public DiscordDosGame TryDeleteGame(ISocketMessageChannel channel)
         {
             gamesByChannel.TryRemove(channel.Id, out var game);
             return game;
+        }
+
+        public Result Quit(ISocketMessageChannel channel, IUser user)
+        {
+            var game = gamesByChannel.GetValueOrDefault(channel.Id);
+
+            if (game == null)
+                return Result.Fail();
+
+            if (!game.Players.ContainsKey(user.Id))
+                return Result.Fail();
+
+            gamesByChannel.Remove(channel.Id, out _);
+            return Result.Success("Game has been ended.");
         }
     }
 }
