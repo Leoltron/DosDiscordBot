@@ -24,6 +24,7 @@ namespace Dos.Game
 
         public GameState CurrentState { get; set; }
 
+        public bool AllowCallouts { get; set; } = true;
         public int CalloutPenalty { get; set; }
         public int FalseCalloutPenalty { get; set; }
 
@@ -49,7 +50,7 @@ namespace Dos.Game
                 DealCards(i, initialHandSize, false);
             }
 
-            EnsureCenterRowIsValid();
+            RefillCenterRow();
             CurrentPlayer = new Random().Next(playersCount);
             CurrentState = new TurnStartState(this);
         }
@@ -74,9 +75,9 @@ namespace Dos.Game
         public Result AddCardToCenterRow(int player, Card card) =>
             CurrentState.AddCardToCenterRow(player, card);
 
-        public Result Callout(int caller) => CurrentState.Callout(caller);
+        public Result Callout(int caller) => AllowCallouts ? CurrentState.Callout(caller) : Result.Fail();
 
-        public Result CallDos(int caller) => CurrentState.CallDos(caller);
+        public Result CallDos(int caller) => AllowCallouts ? CurrentState.CallDos(caller) : Result.Fail();
 
         public string GetPlayerName(int id) => PlayerNames.TryGetValue(id, out var name) ? name : "Player " + id;
 
@@ -126,11 +127,14 @@ namespace Dos.Game
             discardPile.Clear();
         }
 
-        public void EnsureCenterRowIsValid()
-        {
-            while (centerRow.Count < 2) centerRow.Add(DrawCard());
+        public int MinCenterRowSize { get; set; } = 2;
 
+        public bool RefillCenterRow()
+        {
+            var refillNeeded = centerRow.Count < MinCenterRowSize;
+            while (centerRow.Count < MinCenterRowSize) centerRow.Add(DrawCard());
             while (centerRowAdditional.Count < centerRow.Count) centerRowAdditional.Add(new List<Card>());
+            return refillNeeded;
         }
 
         public void MoveTurnToNextPlayer()

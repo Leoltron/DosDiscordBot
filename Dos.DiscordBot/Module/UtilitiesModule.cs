@@ -17,8 +17,30 @@ namespace Dos.DiscordBot.Module
         [Command("ping")]
         public async Task Ping() => await Context.Channel.SendMessageAsync(Pongs.RandomElement());
 
+        private const string HelpMessage =
+            "**``dos help``**``             - print this message``\n" +
+            "**``dos ping``**``             - Pong!``\n" +
+            "\n" +
+            "**``dos join``**``             - create a game or join existing``\n" +
+            "**``dos quit``**``             - quit a game``\n" +
+            "**``dos start``**``            - start a game``\n" +
+            "\n" +
+            "**``dos draw``**``             - draw card``\n" +
+            "**``dos select <card>``**``    - select card to match with``\n" +
+            "**``dos match <card(s)>``**``  - match cards with selected one``\n" +
+            "**``dos add card``**``         - add a card to the center row``\n" +
+            "**``dos done``**``             - finish your turn``\n" +
+            "\n" +
+            "**``dos!``**``                 - you have to call dos every time you got 2 cards during your turn, or else``\n" +
+            "**``dos callout``**``          - you can be called out by somebody``\n" +
+            "\n" +
+            "**``dos hand``**``             - I will send you your hand via DM``\n" +
+            "**``dos table``**``            - to see table of the game (players card count, etc.)``\n" +
+            "";
 
-        [Command("card")]
+        [Command("help")]
+        public Task Help() => Context.Channel.SendMessageAsync(HelpMessage);
+
         public async Task Card()
         {
             var embed = new EmbedBuilder
@@ -37,7 +59,7 @@ namespace Dos.DiscordBot.Module
 
             using (var image = new MagickImage("Resources/DOS_Card_Back.png"))
             {
-                using (var s = new MemoryStream(1<<20))
+                using (var s = new MemoryStream(1 << 20))
                 {
                     image.Write(s, MagickFormat.Png);
                     s.Seek(0, SeekOrigin.Begin);

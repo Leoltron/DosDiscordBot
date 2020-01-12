@@ -93,9 +93,11 @@ namespace Dos.DiscordBot
                     return Result.Fail($"Only owner of this game (**{Owner?.Username}**) can start it");
                 }
 
-                Game = new Game.Game(new ShuffledDeckGenerator(Decks.Classic), Players.Count, 3)
+                Game = new Game.Game(new ShuffledDeckGenerator(Decks.Classic), Players.Count, 7)
                 {
-                    PlayerNames = PlayerIds.Select((id, i) => (i, Players[id].Username)).ToDictionary()
+                    PlayerNames = PlayerIds.Select((id, i) => (i, Players[id].Username)).ToDictionary(),
+                    CalloutPenalty = 2,
+                    FalseCalloutPenalty = 2
                 };
                 await Task.WhenAll(Enumerable.Range(0, Players.Count).Select(SendHandTo));
                 await SendTableToChannel(false);

@@ -87,14 +87,20 @@ namespace Dos.Game.State.Base
 
         protected override Result CurrentPlayerEndTurn()
         {
+            ClearMatchedCardsFromCenterRow();
+            var refilled = Game.RefillCenterRow();
+
             if (CardsToAdd > 0 && Game.CurrentPlayerHand.Any())
             {
-                return Result.Fail($"You need to add {CardsToAdd} more {(CardsToAdd == 1 ? "card" : "cards")}");
+                var message = $"You need to add {CardsToAdd} more {(CardsToAdd == 1 ? "card" : "cards")}";
+                if (refilled)
+                {
+                    message = "Refilled Center Row with fresh cards. " + message;
+                }
+
+                return refilled ? Result.Success(message) : Result.Fail(message);
             }
 
-            ClearMatchedCardsFromCenterRow();
-
-            Game.EnsureCenterRowIsValid();
             Game.MoveTurnToNextPlayer();
             Game.CurrentState = new TurnStartState(this);
 
@@ -116,6 +122,9 @@ namespace Dos.Game.State.Base
 
         protected override Result CurrentPlayerAddCardToCenterRow(Card card)
         {
+            ClearMatchedCardsFromCenterRow();
+            Game.RefillCenterRow();
+
             if (!CurrentPlayerHand.Contains(card))
                 return Result.Fail($"You do not have {card}");
 
@@ -132,9 +141,10 @@ namespace Dos.Game.State.Base
             Game.CheckCurrentPlayerForDos();
 
             CardsToAdd--;
-            Game.CurrentState = new AddingToCenterRowState(this, CardsToAdd);
-            
-            return CardsToAdd == 0 ? CurrentPlayerEndTurn() : Result.Success($"{CardsToAdd} more");
+            var state = new AddingToCenterRowState(this, CardsToAdd);
+            Game.CurrentState = state;
+
+            return CardsToAdd == 0 ? state.CurrentPlayerEndTurn() : Result.Success($"{CardsToAdd} more");
         }
     }
 }

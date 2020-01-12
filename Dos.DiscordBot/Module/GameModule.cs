@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading.Tasks;
 using Discord.Commands;
 using Dos.DiscordBot.Attributes;
@@ -56,21 +57,21 @@ namespace Dos.DiscordBot.Module
         [Command("select"), Alias("choose")]
         public async Task Select([Remainder] string args)
         {
-            await ReplyIfHasMessageAsync(await Game.SelectAsync(Context.User, args));
+            await ReplyIfHasMessageAsync(await Game.SelectAsync(Context.User, args.Split("&&").First()));
         }
 
         [StartedGameRequired]
         [Command("match", true), Alias("m")]
         public async Task Match([Remainder] string args)
         {
-            await ReplyIfHasMessageAsync(await Game.MatchAsync(Context.User, args));
+            await ReplyIfHasMessageAsync(await Game.MatchAsync(Context.User, args.Split("&&").First()));
         }
 
         [StartedGameRequired]
         [Command("add", true), Alias("a")]
         public async Task Add([Remainder] string args)
         {
-            await ReplyIfHasMessageAsync(await Game.AddToCenterRowAsync(Context.User, args));
+            await ReplyIfHasMessageAsync(await Game.AddToCenterRowAsync(Context.User, args.Split("&&").First()));
         }
 
         [StartedGameRequired]
