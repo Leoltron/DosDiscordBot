@@ -20,7 +20,7 @@ namespace Dos.Game.State.Base
         {
         }
 
-        public BaseCurrentPlayerState(BaseCurrentPlayerState gameState) : this((GameState)gameState)
+        public BaseCurrentPlayerState(BaseCurrentPlayerState gameState) : this((GameState) gameState)
         {
             DrewCard = gameState.DrewCard;
             CardsToAdd = gameState.CardsToAdd;
@@ -51,7 +51,7 @@ namespace Dos.Game.State.Base
             }
 
             foreach (var card in cardsToPlay) CurrentPlayerHand.Remove(card);
-            
+
             Game.CheckCurrentPlayerForDos();
 
             additional.AddRange(cardsToPlay);
@@ -74,7 +74,7 @@ namespace Dos.Game.State.Base
                 Game.CurrentState = new FinishedGameState(this);
                 return Result.Success(matchType.DefaultResult().AddText($"{CurrentPlayerName} won!").Message);
             }
-            
+
             Game.CurrentState = new BaseCurrentPlayerState(this);
 
             return Game.centerRowAdditional.All(c => c.Any()) && CardsToAdd == 0
@@ -132,15 +132,9 @@ namespace Dos.Game.State.Base
             Game.CheckCurrentPlayerForDos();
 
             CardsToAdd--;
-            if (CardsToAdd != 0)
-            {
-                Game.CurrentState = new AddingToCenterRowState(this, CardsToAdd);
-                return Result.Success($"{CardsToAdd} more");
-            }
-
-            Game.MoveTurnToNextPlayer();
-            Game.CurrentState = new TurnStartState(this);
-            return Result.Success();
+            Game.CurrentState = new AddingToCenterRowState(this, CardsToAdd);
+            
+            return CardsToAdd == 0 ? CurrentPlayerEndTurn() : Result.Success($"{CardsToAdd} more");
         }
     }
 }

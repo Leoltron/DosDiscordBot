@@ -341,5 +341,41 @@ namespace Dos.DiscordBot
                 semaphoreSlim.Release();
             }
         }
+
+        public async Task<Result> CallDosAsync(IUser player)
+        {
+            if (!Players.ContainsKey(player.Id))
+            {
+                return Result.Fail();
+            }
+
+            await semaphoreSlim.WaitAsync();
+            try
+            {
+                return Game.CallDos(PlayerIds.IndexOf(player.Id));
+            }
+            finally
+            {
+                semaphoreSlim.Release();
+            }
+        }
+
+        public async Task<Result> CalloutAsync(IUser player)
+        {
+            if (!Players.ContainsKey(player.Id))
+            {
+                return Result.Fail();
+            }
+
+            await semaphoreSlim.WaitAsync();
+            try
+            {
+                return Game.Callout(PlayerIds.IndexOf(player.Id));
+            }
+            finally
+            {
+                semaphoreSlim.Release();
+            }
+        }
     }
 }

@@ -80,5 +80,13 @@ namespace Dos.DiscordBot.Module
         [StartedGameRequired]
         [Command("dos table", true), Alias("dost", "dostable")]
         public Task Table() => Game.SendTableToChannel(true);
+
+        [StartedGameRequired]
+        [Command("dos!", true)]
+        public async Task CallDos() => await ReplyIfHasMessageAsync(await Game.CallDosAsync(Context.User));
+
+        [StartedGameRequired]
+        [Command("dos callout", true)]
+        public async Task Callout() => await ReplyIfHasMessageAsync(await Game.CalloutAsync(Context.User));
     }
 }
