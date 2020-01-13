@@ -72,7 +72,9 @@ namespace Dos.Game.State.Base
             if (CurrentPlayerHand.IsEmpty())
             {
                 Game.CurrentState = new FinishedGameState(this);
-                return Result.Success(matchType.DefaultResult().AddText($"{CurrentPlayerName} won!").Message);
+                return Result.Success(matchType.DefaultResult()
+                                               .AddText($"**{CurrentPlayerName}** won! Total score: **{Game.TotalScore}**")
+                                               .Message);
             }
 
             Game.CurrentState = new BaseCurrentPlayerState(this);
@@ -92,9 +94,10 @@ namespace Dos.Game.State.Base
 
             if (CardsToAdd > 0 && Game.CurrentPlayerHand.Any())
             {
-                var message = $"You need to add {CardsToAdd} more {(CardsToAdd == 1 ? "card" : "cards")}";
+                var message = $"You need to add **{CardsToAdd}** more {(CardsToAdd == 1 ? "card" : "cards")}";
                 if (refilled)
                 {
+                    Game.CurrentState = new AddingToCenterRowState(this, CardsToAdd);
                     message = "Refilled Center Row with fresh cards. " + message;
                 }
 
@@ -126,7 +129,7 @@ namespace Dos.Game.State.Base
             Game.RefillCenterRow();
 
             if (!CurrentPlayerHand.Contains(card))
-                return Result.Fail($"You do not have {card}");
+                return Result.Fail($"You don't have {card}");
 
             CurrentPlayerHand.Remove(card);
             Game.centerRow.Add(card);
@@ -135,7 +138,7 @@ namespace Dos.Game.State.Base
             if (CurrentPlayerHand.IsEmpty())
             {
                 Game.CurrentState = new FinishedGameState(this);
-                return Result.Success($"{CurrentPlayerName} won!");
+                return Result.Success($"**{CurrentPlayerName}** won! Total score: **{Game.TotalScore}**");
             }
 
             Game.CheckCurrentPlayerForDos();
@@ -144,7 +147,7 @@ namespace Dos.Game.State.Base
             var state = new AddingToCenterRowState(this, CardsToAdd);
             Game.CurrentState = state;
 
-            return CardsToAdd == 0 ? state.CurrentPlayerEndTurn() : Result.Success($"{CardsToAdd} more");
+            return CardsToAdd == 0 ? state.CurrentPlayerEndTurn() : Result.Success($"**{CardsToAdd}** more");
         }
     }
 }

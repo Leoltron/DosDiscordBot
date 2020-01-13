@@ -49,7 +49,7 @@ namespace Dos.DiscordBot.Util
         public static Task<IUserMessage> SendCards(this IMessageChannel channel, IEnumerable<List<Card>> cards)
         {
             var cardList = cards.OrderBy(c => c.First().Color).ThenBy(c => c.First().Value).ToList();
-            var name = string.Join("_", cardList.Select(cl => string.Join("&", cl.Select(c => c.ToShortString())))) +
+            var name = string.Join("_", cardList.Select(cl => string.Join("-", cl.Select(c => c.ToShortString())))) +
                        ".png";
             
             return channel.SendFileAsync(cardList.Select(CardToImageHelper.Stack).JoinImages(10, 1173), name);

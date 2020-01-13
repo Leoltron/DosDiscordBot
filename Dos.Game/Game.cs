@@ -35,6 +35,8 @@ namespace Dos.Game
         public List<Card> CurrentPlayerHand => playerHands[CurrentPlayer];
         public string CurrentPlayerName => GetPlayerName(CurrentPlayer);
 
+        public int TotalScore => playerHands.SelectMany(h => h).Sum(c => c.Points);
+
         public event Action<int> PlayerSwitch;
         public event Action<int, Card[]> PlayerReceivedCards;
 
