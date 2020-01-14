@@ -14,6 +14,9 @@ namespace Dos.Game.State.Base
 
         public override Result Callout(int caller)
         {
+			if (caller == Game.PlayerWhoDidNotCallDos)
+				return Result.Fail();
+
             if (Game.PlayerWhoDidNotCallDos == null)
             {
                 Punish(caller, Game.FalseCalloutPenalty);
@@ -41,7 +44,7 @@ namespace Dos.Game.State.Base
             }
 
             return Result.Success($"{victimName}, you have been caught not calling DOS with two cards " +
-                                  $"in hand! Draw {Game.CurrentPlayerPenalty}.");
+                                  $"in hand! Draw {Game.CalloutPenalty}.");
         }
 
         private void Punish(int player, int amount)

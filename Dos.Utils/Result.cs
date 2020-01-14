@@ -46,6 +46,10 @@ namespace Dos.Utils
         public new static Result<T> Fail(string message = null) => new Result<T>(false, message: message);
         public new static Result<T> Success(string message = null) => new Result<T>(true, message: message);
 
+        public Result IfSuccess(Func<Result<T>, Result> successAction) => IsSuccess ? successAction(this) : this;
+
+        public Result IfFail(Func<Result<T>, Result> failActon) => IsFail ? failActon(this) : this;
+
         public override string ToString() =>
             $"({(IsSuccess ? "Success" : "Fail")}) {Value}{(string.IsNullOrWhiteSpace(Message) ? string.Empty : $" - \"{Message}\"")}";
     }

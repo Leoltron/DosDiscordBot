@@ -20,7 +20,7 @@ namespace Dos.DiscordBot
                                          .WriteTo.File("logs/bot-.log", rollingInterval: RollingInterval.Day)
                                          .CreateLogger();
 
-        public async Task StartAsync()
+        public async Task StartAsync(string token)
         {
             client = new DiscordSocketClient(new DiscordSocketConfig
             {
@@ -33,7 +33,7 @@ namespace Dos.DiscordBot
             commandHandler = new CommandHandler(client, commandService, ServiceProviderBuilder.BuildProvider(logger));
 
             await commandHandler.InstallCommandsAsync();
-            await client.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("DiscordToken"));
+            await client.LoginAsync(TokenType.Bot, token);
             await client.StartAsync();
 
             await Task.Delay(-1);

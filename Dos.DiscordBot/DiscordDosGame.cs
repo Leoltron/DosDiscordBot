@@ -106,7 +106,7 @@ namespace Dos.DiscordBot
                     (id, cards) => Players[PlayerIds[id]].SendCards(cards, Config.UseImages, true);
 
                 Info($"Game started, center row: {string.Join(", ", Game.centerRow)}");
-                for (int i = 0; i < Players.Count; i++)
+                for (var i = 0; i < Players.Count; i++)
                 {
                     Info($"{Game.GetPlayerName(i)}'s hand: {Game.playerHands[i].ToDiscordString()}");
                 }
@@ -128,6 +128,7 @@ namespace Dos.DiscordBot
 
         private async Task NotifyChannelAboutPlayerSwitch()
         {
+            Info($"{Game.CurrentPlayerName}'s turn, hand: {Game.CurrentPlayerHand.ToDiscordString()}");
             await SendTableToChannel(false);
             await Channel.SendMessageAsync(
                 $"Now it's **{Game.CurrentPlayerName}**'s turn");
@@ -171,6 +172,8 @@ namespace Dos.DiscordBot
                 {
                     await Channel.SendMessageAsync($"Selected **{selectedCenterRowCard.Value}**");
                 }
+
+                await Channel.SendMessageAsync($"Now it's **{Game.CurrentPlayerName}**'s turn");
             }
         }
 
@@ -190,20 +193,20 @@ namespace Dos.DiscordBot
             await semaphoreSlim.WaitAsync();
             try
             {
+                var playerIndex = PlayerIds.IndexOf(player.Id);
                 if (selectedCenterRowCard == null || args.Contains(" on ", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    var matchResult = CardParser.ParseMatchCards(args);
-                    return matchResult.IsFail
-                        ? matchResult
-                        : Game.MatchCenterRowCard(PlayerIds.IndexOf(player.Id), matchResult.Value.target,
-                                                  matchResult.Value.matchers);
+                    return CardParser.ParseMatchCards(args)
+                                     .IfSuccess(result => Game.MatchCenterRowCard(playerIndex,
+                                                                                  result.Value.target,
+                                                                                  result.Value.matchers));
                 }
                 else
                 {
                     return CardParser.ParseCards(args)
                                      .IfSuccess(r => Game.MatchCenterRowCard(
-                                                    PlayerIds.IndexOf(player.Id), selectedCenterRowCard.Value,
-                                                    CardParser.ParseCards(args).Value.ToArray()))
+                                                    playerIndex, selectedCenterRowCard.Value,
+                                                    r.Value.ToArray()))
                                      .IfSuccess(r =>
                                       {
                                           selectedCenterRowCard = null;
