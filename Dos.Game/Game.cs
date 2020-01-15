@@ -84,7 +84,7 @@ namespace Dos.Game
             if (!AllowCallouts || caller == playerWhoDidNotCallDos) return Result.Fail();
 
             return CurrentState.Callout(caller)
-                               .DoIfSuccess(_ => CalledOut?.Invoke(caller, playerWhoDidNotCallDos.Value))
+                               .DoIfSuccess(_ => CalledOut?.Invoke(caller, playerWhoDidNotCallDos ?? -1))
                                .DoIfFail(_ => FalseCallout?.Invoke(caller));
         }
 

@@ -93,6 +93,7 @@ namespace Dos.Game.Extensions
 
         public static string ToDiscordString(this IEnumerable<Card> cards) =>
             $"**{string.Join(" | ", cards.OrderByColorAndValue())}**";
+
         public static string ToLogString(this IEnumerable<Card> cards) =>
             $"{string.Join(", ", cards.OrderByColorAndValue())}";
 

@@ -37,6 +37,8 @@ namespace Dos.DiscordBot
             Info($"{owner.Username} have created the game");
         }
 
+        public DateTime CreateDate { get; } = DateTime.UtcNow;
+
         public ISocketMessageChannel Channel { get; }
         public IUser Owner => PlayerIds.Any() ? Players[PlayerIds[0]] : null;
         public Dictionary<ulong, IUser> Players { get; }
@@ -49,6 +51,8 @@ namespace Dos.DiscordBot
         public GameConfig Config { get; } = new GameConfig();
 
         private ulong CurrentPlayerId => PlayerIds[Game.CurrentPlayer];
+
+        private IUser CurrentUser => User(Game.CurrentPlayer);
 
         private void Info(string message)
         {
@@ -129,7 +133,6 @@ namespace Dos.DiscordBot
             SendTableToChannel(false);
         }
 
-        private IUser CurrentUser => User(Game.CurrentPlayer);
         private IUser User(int i) => Players[PlayerIds[i]];
 
         public Task SendTableToChannel(bool addPlayersStats) => SendTableToChannel(addPlayersStats, Config.UseImages);

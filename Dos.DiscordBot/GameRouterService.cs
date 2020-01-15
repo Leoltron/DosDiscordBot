@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -10,6 +11,8 @@ namespace Dos.DiscordBot
 {
     public class GameRouterService
     {
+        private static readonly TimeSpan InactiveGameTimeout = TimeSpan.FromMinutes(1);
+
         private readonly ConcurrentDictionary<ulong, DiscordDosGame> gamesByChannel =
             new ConcurrentDictionary<ulong, DiscordDosGame>();
 
@@ -20,9 +23,10 @@ namespace Dos.DiscordBot
         public async Task<Result> JoinGameAsync(IGuild guild, ISocketMessageChannel channel, IUser player)
         {
             if (gamesByChannel.TryGetValue(channel.Id, out var gameWrapper) && !gameWrapper.IsFinished)
-                return await gameWrapper.JoinAsync(player);
+                return await gameWrapper.JoinAsync(player).ConfigureAwait(false);
 
             gamesByChannel[channel.Id] = new DiscordDosGame(channel, player, logger, guild.Name);
+            DeleteIfNoActivity(channel, InactiveGameTimeout);
             return Result.Success("You have created a game! Wait for others to join or start with `dos start`");
         }
 
@@ -41,6 +45,17 @@ namespace Dos.DiscordBot
         {
             gamesByChannel.TryRemove(channel.Id, out var game);
             return game;
+        }
+
+        private async void DeleteIfNoActivity(ISocketMessageChannel channel, TimeSpan timeout)
+        {
+            var expectedCreateDate = TryFindGameByChannel(channel)?.CreateDate;
+            await Task.Delay(timeout).ConfigureAwait(false);
+            if (TryFindGameByChannel(channel).CreateDate != expectedCreateDate)
+                return;
+
+            gamesByChannel.TryRemove(channel.Id, out _);
+            await channel.SendMessageAsync("The game has been cancelled due to inactivity.").ConfigureAwait(false);
         }
 
         public Result Quit(ISocketMessageChannel channel, IUser user)
