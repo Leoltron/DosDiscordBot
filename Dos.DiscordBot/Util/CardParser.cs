@@ -42,7 +42,7 @@ namespace Dos.DiscordBot.Util
             Values.Add("uno", CardValue.One);
             Values.Add("dos", CardValue.Two);
             Values.Add("hash", CardValue.Sharp);
-            
+
             ShortValues.Add("d", CardValue.Two);
             ShortValues.Add("h", CardValue.Sharp);
             ShortValues.Add("s", CardValue.Sharp);
@@ -64,34 +64,24 @@ namespace Dos.DiscordBot.Util
         public static Result<(Card[] matchers, Card target)> ParseMatchCards(string s)
         {
             if (!s.Contains(" on ", StringComparison.InvariantCultureIgnoreCase))
-            {
                 return Result<(Card[] matchers, Card target)>.Fail(
                     "You supposed to select target using `dos select <card>` or say `dos match <card1> [<card2>] on <centerRowCard>`");
-            }
 
             var split = s.ToLowerInvariant().Split(" on ", 2);
             if (split.Length != 2)
-            {
                 return Result<(Card[] matchers, Card target)>.Fail(
                     "You supposed to select target using `dos select <card>` or say `dos match <card1> [<card2>] on <centerRowCard>`");
-            }
 
             var matcherCardsResult = ParseCards(split[0]);
             if (!matcherCardsResult.IsSuccess)
-            {
                 return Result<(Card[] matchers, Card target)>.Fail(matcherCardsResult.Message);
-            }
 
             var targetCardResult = ParseCards(split[1]);
             if (!targetCardResult.IsSuccess)
-            {
                 return Result<(Card[] matchers, Card target)>.Fail(matcherCardsResult.Message);
-            }
 
             if (targetCardResult.Value.Count != 1)
-            {
                 return Result<(Card[] matchers, Card target)>.Fail("There must be one target card");
-            }
 
             return (matcherCardsResult.Value.ToArray(), targetCardResult.Value.First()).ToSuccess();
         }
@@ -133,7 +123,9 @@ namespace Dos.DiscordBot.Util
                     }
                 }
                 else if (ShortCards.TryGetValue(word, out var card))
+                {
                     cards.Add(card);
+                }
                 else if (AllValues.TryGetValue(word, out var parsedValue))
                 {
                     value = parsedValue;

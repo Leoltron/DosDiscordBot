@@ -10,7 +10,8 @@ namespace Dos.DiscordBot.Attributes
         private const string GameNotFoundMessage = "Sorry, but there's no game in this channel. " +
                                                    "If you want to create one, use `dos join`";
 
-        private static readonly PreconditionResult GameNotFoundResult = PreconditionResult.FromError(GameNotFoundMessage);
+        private static readonly PreconditionResult GameNotFoundResult =
+            PreconditionResult.FromError(GameNotFoundMessage);
 
         public override Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo command,
                                                                        IServiceProvider services) =>

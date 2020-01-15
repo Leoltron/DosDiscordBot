@@ -18,23 +18,16 @@ namespace Dos.DiscordBot.Util
 
         public static LogEventLevel ToLogLevel(this LogSeverity severity)
         {
-            switch (severity)
+            return severity switch
             {
-                case LogSeverity.Critical:
-                    return LogEventLevel.Fatal;
-                case LogSeverity.Error:
-                    return LogEventLevel.Error;
-                case LogSeverity.Warning:
-                    return LogEventLevel.Warning;
-                case LogSeverity.Info:
-                    return LogEventLevel.Information;
-                case LogSeverity.Verbose:
-                    return LogEventLevel.Debug;
-                case LogSeverity.Debug:
-                    return LogEventLevel.Verbose;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(severity), severity, null);
-            }
+                LogSeverity.Critical => LogEventLevel.Fatal,
+                LogSeverity.Error => LogEventLevel.Error,
+                LogSeverity.Warning => LogEventLevel.Warning,
+                LogSeverity.Info => LogEventLevel.Information,
+                LogSeverity.Verbose => LogEventLevel.Debug,
+                LogSeverity.Debug => LogEventLevel.Verbose,
+                _ => throw new ArgumentOutOfRangeException(nameof(severity), severity, null)
+            };
         }
 
         public static Task<IUserMessage> SendCards(this IUser user, IEnumerable<Card> cards, bool images,
@@ -51,7 +44,7 @@ namespace Dos.DiscordBot.Util
             var cardList = cards.OrderBy(c => c.First().Color).ThenBy(c => c.First().Value).ToList();
             var name = string.Join("_", cardList.Select(cl => string.Join("-", cl.Select(c => c.ToShortString())))) +
                        ".png";
-            
+
             return channel.SendFileAsync(cardList.Select(CardToImageHelper.Stack).JoinImages(10, 1173), name);
         }
 
@@ -75,16 +68,11 @@ namespace Dos.DiscordBot.Util
                 name = "Plus_" + name;
 
             var paths = cards.Select(c => c.ToImagePath());
-            if (addPlus)
-            {
-                paths = paths.Prepend(CardToImageHelper.PlusPath);
-            }
+            if (addPlus) paths = paths.Prepend(CardToImageHelper.PlusPath);
 
             if (!addPlus)
-            {
                 await user.SendMessageAsync(
                     $"Your current hand ({cards.Count} {(cards.Count == 1 ? "card" : "cards")}):");
-            }
 
             return await user.SendFileAsync(paths.JoinImages(), name);
         }
@@ -94,7 +82,6 @@ namespace Dos.DiscordBot.Util
             var exceptions = new List<Exception>();
 
             foreach (var disposable in disposables)
-            {
                 try
                 {
                     disposable.Dispose();
@@ -103,12 +90,8 @@ namespace Dos.DiscordBot.Util
                 {
                     exceptions.Add(e);
                 }
-            }
 
-            if (exceptions.Any())
-            {
-                throw new AggregateException(exceptions);
-            }
+            if (exceptions.Any()) throw new AggregateException(exceptions);
         }
     }
 }

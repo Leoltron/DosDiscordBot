@@ -45,15 +45,12 @@ namespace Dos.Game.Extensions
 
         public static MatchType MatchWith(this Card target, Card[] matchers)
         {
-            switch (matchers.Length)
+            return matchers.Length switch
             {
-                case 1:
-                    return target.MatchWith(matchers[0]);
-                case 2:
-                    return target.MatchWith(matchers[0], matchers[1]);
-                default:
-                    return MatchType.NoMatch;
-            }
+                1 => target.MatchWith(matchers[0]),
+                2 => target.MatchWith(matchers[0], matchers[1]),
+                _ => MatchType.NoMatch
+            };
         }
 
         public static MatchType MatchWith(this Card target, Card matcher)
@@ -93,7 +90,10 @@ namespace Dos.Game.Extensions
         {
             return cards.OrderBy(c => c.Color).ThenBy(c => c.Value);
         }
-        public static string ToDiscordString(this IEnumerable<Card> cards) => $"**{string.Join(" | ", cards.OrderByColorAndValue())}**";
+
+        public static string ToDiscordString(this IEnumerable<Card> cards) =>
+            $"**{string.Join(" | ", cards.OrderByColorAndValue())}**";
+
         public static string Join(this IEnumerable<Card> cards) => $"{string.Join(",", cards.OrderByColorAndValue())}";
     }
 }

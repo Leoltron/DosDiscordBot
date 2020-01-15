@@ -20,10 +20,7 @@ namespace Dos.DiscordBot.Util
 
         public static string ToImagePath(this Card card)
         {
-            if (card == Card.WildDos)
-            {
-                return Path.Combine(Folder, CardPrefix + "Wild_2.png");
-            }
+            if (card == Card.WildDos) return Path.Combine(Folder, CardPrefix + "Wild_2.png");
 
             if (card.Color == CardColor.Wild)
                 return Default;
@@ -95,14 +92,9 @@ namespace Dos.DiscordBot.Util
         public static MagickImage Stack(this IList<MagickImage> images)
         {
             if (images.IsEmpty())
-            {
                 throw new ArgumentOutOfRangeException(nameof(images), "Expected list with at least 1 element");
-            }
 
-            if (images.Count == 1)
-            {
-                return images[0];
-            }
+            if (images.Count == 1) return images[0];
 
             using (var imageCollection = new MagickImageCollection())
             {

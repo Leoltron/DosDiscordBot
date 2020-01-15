@@ -1,4 +1,3 @@
-using System;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -12,13 +11,13 @@ namespace Dos.DiscordBot
 {
     public class DosBot
     {
-        private DiscordSocketClient client;
-        private CommandHandler commandHandler;
-
         private readonly ILogger logger = new LoggerConfiguration()
                                          .WriteTo.Console(LogEventLevel.Information)
                                          .WriteTo.File("logs/bot-.log", rollingInterval: RollingInterval.Day)
                                          .CreateLogger();
+
+        private DiscordSocketClient client;
+        private CommandHandler commandHandler;
 
         public async Task StartAsync(string token)
         {

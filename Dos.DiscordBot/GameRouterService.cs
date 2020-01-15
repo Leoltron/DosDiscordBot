@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
-using Dos.Game.Extensions;
 using Dos.Utils;
 using Serilog;
 
@@ -21,9 +20,7 @@ namespace Dos.DiscordBot
         public async Task<Result> JoinGameAsync(IGuild guild, ISocketMessageChannel channel, IUser player)
         {
             if (gamesByChannel.TryGetValue(channel.Id, out var gameWrapper) && !gameWrapper.IsFinished)
-            {
                 return await gameWrapper.JoinAsync(player);
-            }
 
             gamesByChannel[channel.Id] = new DiscordDosGame(channel, player, logger, guild.Name);
             return Result.Success("You have created a game! Wait for others to join or start with `dos start`");

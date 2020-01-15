@@ -18,15 +18,9 @@ namespace Dos.ConsoleClient
             {
                 var line = Console.ReadLine();
                 line = line?.ToLowerInvariant().Trim();
-                if (line == "quit")
-                {
-                    return;
-                }
+                if (line == "quit") return;
 
-                if (string.IsNullOrWhiteSpace(line))
-                {
-                    continue;
-                }
+                if (string.IsNullOrWhiteSpace(line)) continue;
 
                 if (line == "dos cards" || line == "dosc")
                 {
@@ -57,7 +51,6 @@ namespace Dos.ConsoleClient
                     var target = (Card?) null;
                     var lookingForTarget = false;
                     foreach (var cardWord in cardWords)
-                    {
                         if (!lookingForTarget)
                         {
                             if (cardWord == "on")
@@ -66,30 +59,19 @@ namespace Dos.ConsoleClient
                                 continue;
                             }
 
-                            if (CardParser.TryParse(cardWord, out var card))
-                            {
-                                cards.Add(card);
-                            }
+                            if (CardParser.TryParse(cardWord, out var card)) cards.Add(card);
                         }
                         else
                         {
-                            if (CardParser.TryParse(cardWord, out var card))
-                            {
-                                target = card;
-                            }
+                            if (CardParser.TryParse(cardWord, out var card)) target = card;
 
                             break;
                         }
-                    }
 
                     if (cards.IsEmpty() || target == null)
-                    {
                         Console.WriteLine("Failed to parse your matching cards, sorry");
-                    }
                     else
-                    {
                         Console.WriteLine(game.MatchCenterRowCard(0, target.Value, cards.ToArray()));
-                    }
                 }
             }
         }
@@ -108,10 +90,7 @@ namespace Dos.ConsoleClient
         {
             card = Card.WildDos;
             var match = shortCardRegex.Match(cardString);
-            if (!match.Success)
-            {
-                return false;
-            }
+            if (!match.Success) return false;
 
             card = ParseValue(match.Groups["value"].Value).Of(ParseColor(match.Groups["color"].Value));
             return true;
@@ -120,9 +99,7 @@ namespace Dos.ConsoleClient
         private static CardValue ParseValue(string valueString)
         {
             if (!TryParseValue(valueString, out var value))
-            {
                 throw new ArgumentOutOfRangeException($"Unknown value \"{valueString}\"");
-            }
 
             return value;
         }
@@ -189,9 +166,7 @@ namespace Dos.ConsoleClient
         private static CardColor ParseColor(string colorString)
         {
             if (!TryParseColor(colorString, out var color))
-            {
                 throw new ArgumentOutOfRangeException($"Unknown color \"{colorString}\"");
-            }
 
             return color;
         }

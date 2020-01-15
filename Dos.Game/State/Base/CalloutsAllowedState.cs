@@ -14,8 +14,8 @@ namespace Dos.Game.State.Base
 
         public override Result Callout(int caller)
         {
-			if (caller == Game.PlayerWhoDidNotCallDos)
-				return Result.Fail();
+            if (caller == Game.PlayerWhoDidNotCallDos)
+                return Result.Fail();
 
             if (Game.PlayerWhoDidNotCallDos == null)
             {
@@ -38,10 +38,8 @@ namespace Dos.Game.State.Base
             Punish(victimIndex, Game.CalloutPenalty);
 
             if (victimIndex == CurrentPlayer)
-            {
                 return Result.Success($"{victimName}, you have been caught not calling DOS with two cards " +
                                       $"in hand! Draw {Game.CurrentPlayerPenalty} when your turn ends.");
-            }
 
             return Result.Success($"{victimName}, you have been caught not calling DOS with two cards " +
                                   $"in hand! Draw {Game.CalloutPenalty}.");
@@ -51,13 +49,9 @@ namespace Dos.Game.State.Base
         {
             if (amount <= 0) return;
             if (player == CurrentPlayer)
-            {
                 Game.CurrentPlayerPenalty += amount;
-            }
             else
-            {
                 Game.DealCards(player, amount);
-            }
         }
 
         public override Result CallDos(int caller)

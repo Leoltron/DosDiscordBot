@@ -13,25 +13,25 @@ namespace Dos.DiscordBot.Module
     {
         private readonly GameRouterService gameRouterService;
 
-        public GameModule(GameRouterService gameRouterService)
-        {
-            this.gameRouterService = gameRouterService;
-        }
+        public GameModule(GameRouterService gameRouterService) => this.gameRouterService = gameRouterService;
 
         private DiscordDosGame Game => Context.GetGame();
 
-        [Command("join", true), Alias("j")]
+        [Command("join", true)]
+        [Alias("j")]
         public async Task JoinGame()
         {
             await ReplyIfHasMessageAsync(
                 await gameRouterService.JoinGameAsync(Context.Guild, Context.Channel, Context.User));
         }
-        
-        [Command("quit", true), Alias("q")]
+
+        [Command("quit", true)]
+        [Alias("q")]
         public Task QuitGame() => ReplyIfHasMessageAsync(gameRouterService.Quit(Context.Channel, Context.User));
 
         [NotStartedGameRequired]
-        [Command("start", true), Alias("s")]
+        [Command("start", true)]
+        [Alias("s")]
         public async Task StartGame()
         {
             await ReplyIfHasMessageAsync(await Game.StartAsync(Context.User));
@@ -54,35 +54,40 @@ namespace Dos.DiscordBot.Module
         }
 
         [StartedGameRequired]
-        [Command("select"), Alias("choose")]
+        [Command("select")]
+        [Alias("choose")]
         public async Task Select([Remainder] string args)
         {
             await ReplyIfHasMessageAsync(await Game.SelectAsync(Context.User, args.Split("&&").First()));
         }
 
         [StartedGameRequired]
-        [Command("match", true), Alias("m")]
+        [Command("match", true)]
+        [Alias("m")]
         public async Task Match([Remainder] string args)
         {
             await ReplyIfHasMessageAsync(await Game.MatchAsync(Context.User, args.Split("&&").First()));
         }
 
         [StartedGameRequired]
-        [Command("add", true), Alias("a")]
+        [Command("add", true)]
+        [Alias("a")]
         public async Task Add([Remainder] string args)
         {
             await ReplyIfHasMessageAsync(await Game.AddToCenterRowAsync(Context.User, args.Split("&&").First()));
         }
 
         [StartedGameRequired]
-        [Command("hand", true), Alias("h")]
+        [Command("hand", true)]
+        [Alias("h")]
         public async Task Hand()
         {
             await ReplyIfHasMessageAsync(await Game.SendHandAsync(Context.User, true));
         }
 
         [StartedGameRequired]
-        [Command("table", true), Alias("t")]
+        [Command("table", true)]
+        [Alias("t")]
         public Task Table() => Game.SendTableToChannel(true);
 
         [StartedGameRequired]

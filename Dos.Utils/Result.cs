@@ -4,15 +4,15 @@ namespace Dos.Utils
 {
     public class Result
     {
-        public bool IsSuccess { get; }
-        public bool IsFail => !IsSuccess;
-        public string Message { get; }
-
         public Result(bool isSuccess, string message = null)
         {
             IsSuccess = isSuccess;
             Message = message;
         }
+
+        public bool IsSuccess { get; }
+        public bool IsFail => !IsSuccess;
+        public string Message { get; }
 
         public bool HasMessage => !string.IsNullOrEmpty(Message);
 
@@ -32,10 +32,8 @@ namespace Dos.Utils
         public static readonly Result<T> DefaultFail = new Result<T>(false);
         public static readonly Result<T> DefaultSuccess = new Result<T>(true);
 
-        public Result(bool isSuccess, T value = default(T), string message = null) : base(isSuccess, message)
-        {
+        public Result(bool isSuccess, T value = default, string message = null) : base(isSuccess, message) =>
             Value = value;
-        }
 
         public T Value { get; }
 

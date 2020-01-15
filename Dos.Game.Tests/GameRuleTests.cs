@@ -1,20 +1,18 @@
 using System.Linq;
-using Dos.Game.Deck;
 using Dos.Game.Deck.Generation;
 using Dos.Game.Extensions;
 using Dos.Game.Model;
 using Dos.Game.Tests.Util;
 using Dos.Utils;
-using FluentAssertions;
 using NUnit.Framework;
 
 namespace Dos.Game.Tests
 {
     public class GameRuleTests
     {
-        private Game game;
         private static readonly Card GreenSharp = CardValue.Sharp.Of(CardColor.Green);
         private static readonly Card[] TwentyGreenSharps = GreenSharp.Repeat(20).ToArray();
+        private Game game;
 
         [SetUp]
         public void SetUp()
@@ -45,7 +43,7 @@ namespace Dos.Game.Tests
         {
             game = new Game(new DeterminedDeckGenerator(TwentyGreenSharps), 1, 3);
             game.MatchCenterRowCard(0, GreenSharp, GreenSharp);
-            
+
             game.CallDos(0).ShouldBeSuccess();
         }
 
@@ -54,7 +52,7 @@ namespace Dos.Game.Tests
         {
             game = new Game(new DeterminedDeckGenerator(TwentyGreenSharps), 1, 3);
             game.MatchCenterRowCard(0, GreenSharp, GreenSharp, GreenSharp);
-            
+
             game.CallDos(0).ShouldBeFail();
         }
 

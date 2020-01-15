@@ -9,9 +9,6 @@ namespace Dos.Game.State.Base
 {
     public class BaseCurrentPlayerState : CurrentPlayerOnlyState
     {
-        public bool DrewCard { get; set; }
-        public int CardsToAdd { get; set; }
-
         public BaseCurrentPlayerState(Game game) : base(game)
         {
         }
@@ -25,6 +22,9 @@ namespace Dos.Game.State.Base
             DrewCard = gameState.DrewCard;
             CardsToAdd = gameState.CardsToAdd;
         }
+
+        public bool DrewCard { get; set; }
+        public int CardsToAdd { get; set; }
 
         protected override Result CurrentPlayerMatchCenterRowCard(Card target, Card[] cardsToPlay)
         {
@@ -45,10 +45,7 @@ namespace Dos.Game.State.Base
             if (additional == null) return Result.Fail($"{target} was already matched");
 
             var missingCards = cardsToPlay.Where(c => !CurrentPlayerHand.Contains(c)).ToList();
-            if (missingCards.Any())
-            {
-                return Result.Fail($"You don't have {string.Join(" and ", missingCards)}");
-            }
+            if (missingCards.Any()) return Result.Fail($"You don't have {string.Join(" and ", missingCards)}");
 
             foreach (var card in cardsToPlay) CurrentPlayerHand.Remove(card);
 
@@ -57,23 +54,19 @@ namespace Dos.Game.State.Base
             additional.AddRange(cardsToPlay);
 
             var (discardCount, drawCount) = matchType.ToColorMatchBonus();
-            if (discardCount != 0)
-            {
-                CardsToAdd += discardCount;
-            }
+            if (discardCount != 0) CardsToAdd += discardCount;
 
             if (drawCount != 0)
-            {
                 for (var i = 0; i < Game.PlayersCount; i++)
                     if (i != CurrentPlayer)
                         Game.DealCards(i, drawCount, false);
-            }
 
             if (CurrentPlayerHand.IsEmpty())
             {
                 Game.CurrentState = new FinishedGameState(this);
                 return Result.Success(matchType.DefaultResult()
-                                               .AddText($"**{CurrentPlayerName}** won! Total score: **{Game.TotalScore}**")
+                                               .AddText(
+                                                    $"**{CurrentPlayerName}** won! Total score: **{Game.TotalScore}**")
                                                .Message);
             }
 

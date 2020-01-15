@@ -14,31 +14,13 @@ namespace Dos.Game
     {
         public List<Card> centerRow = new List<Card>(8);
         public List<List<Card>> centerRowAdditional = new List<List<Card>>(8);
-        public int? PlayerWhoDidNotCallDos = null;
         public int CurrentPlayerPenalty;
 
         public Stack<Card> Deck;
         public Stack<Card> discardPile;
 
         public List<Card>[] playerHands;
-
-        public GameState CurrentState { get; set; }
-
-        public bool AllowCallouts { get; set; } = true;
-        public int CalloutPenalty { get; set; }
-        public int FalseCalloutPenalty { get; set; }
-
-        public int CurrentPlayer { get; set; }
-        public Dictionary<int, string> PlayerNames { get; set; } = new Dictionary<int, string>();
-        public int PlayersCount => playerHands.Length;
-
-        public List<Card> CurrentPlayerHand => playerHands[CurrentPlayer];
-        public string CurrentPlayerName => GetPlayerName(CurrentPlayer);
-
-        public int TotalScore => playerHands.SelectMany(h => h).Sum(c => c.Points);
-
-        public event Action<int> PlayerSwitch;
-        public event Action<int, Card[]> PlayerReceivedCards;
+        public int? PlayerWhoDidNotCallDos;
 
         public Game(IDeckGenerator deckGenerator, int playersCount, int initialHandSize)
         {
@@ -57,6 +39,21 @@ namespace Dos.Game
             CurrentState = new TurnStartState(this);
         }
 
+        public GameState CurrentState { get; set; }
+
+        public bool AllowCallouts { get; set; } = true;
+        public int CalloutPenalty { get; set; }
+        public int FalseCalloutPenalty { get; set; }
+
+        public int CurrentPlayer { get; set; }
+        public Dictionary<int, string> PlayerNames { get; set; } = new Dictionary<int, string>();
+        public int PlayersCount => playerHands.Length;
+
+        public List<Card> CurrentPlayerHand => playerHands[CurrentPlayer];
+        public string CurrentPlayerName => GetPlayerName(CurrentPlayer);
+
+        public int TotalScore => playerHands.SelectMany(h => h).Sum(c => c.Points);
+
         public List<(string name, int score)> ScoreTable =>
             Enumerable.Range(0, PlayersCount)
                       .Select(i => (GetPlayerName(i), playerHands[i].Sum(c => c.Points)))
@@ -66,6 +63,8 @@ namespace Dos.Game
             Enumerable.Range(0, PlayersCount)
                       .Select(i => (GetPlayerName(i), playerHands[i].Count))
                       .ToList();
+
+        public int MinCenterRowSize { get; set; } = 2;
 
         public Result MatchCenterRowCard(int player, Card target, params Card[] cardsToPlay) =>
             CurrentState.MatchCenterRowCard(player, target, cardsToPlay);
@@ -80,6 +79,9 @@ namespace Dos.Game
         public Result Callout(int caller) => AllowCallouts ? CurrentState.Callout(caller) : Result.Fail();
 
         public Result CallDos(int caller) => AllowCallouts ? CurrentState.CallDos(caller) : Result.Fail();
+
+        public event Action<int> PlayerSwitch;
+        public event Action<int, Card[]> PlayerReceivedCards;
 
         public string GetPlayerName(int id) => PlayerNames.TryGetValue(id, out var name) ? name : "Player " + id;
 
@@ -128,8 +130,6 @@ namespace Dos.Game
             Deck = new Stack<Card>(newDeck);
             discardPile.Clear();
         }
-
-        public int MinCenterRowSize { get; set; } = 2;
 
         public bool RefillCenterRow()
         {

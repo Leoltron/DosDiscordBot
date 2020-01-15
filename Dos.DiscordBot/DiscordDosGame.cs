@@ -19,22 +19,12 @@ namespace Dos.DiscordBot
 {
     public class DiscordDosGame
     {
+        private readonly ILogger logger;
         private readonly SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
-        public ISocketMessageChannel Channel { get; }
-        public IUser Owner => PlayerIds.Any() ? Players[PlayerIds[0]] : null;
-        public Dictionary<ulong, IUser> Players { get; }
-        private List<ulong> PlayerIds { get; }
-        public Game.Game Game { get; private set; }
-        public bool IsGameStarted => Game != null;
-
-        private Card? selectedCenterRowCard;
 
         private readonly string serverName;
-        private readonly ILogger logger;
 
-        public bool IsFinished => IsGameStarted && Game.CurrentState.IsFinished;
-
-        public GameConfig Config { get; } = new GameConfig();
+        private Card? selectedCenterRowCard;
 
         public DiscordDosGame(ISocketMessageChannel channel, IUser owner, ILogger logger, string serverName)
         {
@@ -47,6 +37,19 @@ namespace Dos.DiscordBot
             Info($"{owner.Username} have created the game");
         }
 
+        public ISocketMessageChannel Channel { get; }
+        public IUser Owner => PlayerIds.Any() ? Players[PlayerIds[0]] : null;
+        public Dictionary<ulong, IUser> Players { get; }
+        private List<ulong> PlayerIds { get; }
+        public Game.Game Game { get; private set; }
+        public bool IsGameStarted => Game != null;
+
+        public bool IsFinished => IsGameStarted && Game.CurrentState.IsFinished;
+
+        public GameConfig Config { get; } = new GameConfig();
+
+        private ulong CurrentPlayerId => PlayerIds[Game.CurrentPlayer];
+
         private void Info(string message)
         {
             logger.Information($"[{serverName} - #{Channel.Name}] {message}");
@@ -57,10 +60,7 @@ namespace Dos.DiscordBot
             await semaphoreSlim.WaitAsync();
             try
             {
-                if (PlayerIds.Contains(player.Id))
-                {
-                    return Result.Fail("You have already joined this game");
-                }
+                if (PlayerIds.Contains(player.Id)) return Result.Fail("You have already joined this game");
 
                 PlayerIds.Add(player.Id);
                 Players.Add(player.Id, player);
@@ -75,23 +75,15 @@ namespace Dos.DiscordBot
 
         public async Task<Result> StartAsync(IUser player)
         {
-            if (!Players.ContainsKey(player.Id))
-            {
-                return Result.Fail();
-            }
+            if (!Players.ContainsKey(player.Id)) return Result.Fail();
 
-            if (IsGameStarted)
-            {
-                return Result.Fail("Game has already started");
-            }
+            if (IsGameStarted) return Result.Fail("Game has already started");
 
             await semaphoreSlim.WaitAsync();
             try
             {
                 if (Owner.Id != player.Id)
-                {
                     return Result.Fail($"Only owner of this game (**{Owner?.Username}**) can start it");
-                }
 
                 Game = new Game.Game(new ShuffledDeckGenerator(Decks.Classic), Players.Count, 7)
                 {
@@ -107,9 +99,7 @@ namespace Dos.DiscordBot
 
                 Info($"Game started, center row: {string.Join(", ", Game.centerRow)}");
                 for (var i = 0; i < Players.Count; i++)
-                {
                     Info($"{Game.GetPlayerName(i)}'s hand: {Game.playerHands[i].ToDiscordString()}");
-                }
 
                 return Result.Success();
             }
@@ -157,19 +147,13 @@ namespace Dos.DiscordBot
 
                 await Channel.SendMessageAsync("**Center Row:**");
                 if (useImages)
-                {
                     await Channel.SendCards(
                         Game.centerRow.Select((c, i) => Game.centerRowAdditional[i].Prepend(c).ToList()));
-                }
                 else
-                {
                     await Channel.SendMessageAsync(string.Join("\n", Game.GameTableLines()));
-                }
 
                 if (selectedCenterRowCard != null)
-                {
                     await Channel.SendMessageAsync($"Selected **{selectedCenterRowCard.Value}**");
-                }
 
                 await Channel.SendMessageAsync($"Now it's **{Game.CurrentPlayerName}**'s turn");
             }
@@ -178,29 +162,23 @@ namespace Dos.DiscordBot
         private Task<IUserMessage> SendHandTo(int playerIndex)
         {
             var id = PlayerIds[playerIndex];
-            return Players[id].SendCards(Game.playerHands[playerIndex], Config.UseImages, false);
+            return Players[id].SendCards(Game.playerHands[playerIndex], Config.UseImages);
         }
 
         public async Task<Result> MatchAsync(IUser player, string args)
         {
-            if (!Players.ContainsKey(player.Id))
-            {
-                return Result.Fail();
-            }
+            if (!Players.ContainsKey(player.Id)) return Result.Fail();
 
             await semaphoreSlim.WaitAsync();
             try
             {
                 var playerIndex = PlayerIds.IndexOf(player.Id);
                 if (selectedCenterRowCard == null || args.Contains(" on ", StringComparison.InvariantCultureIgnoreCase))
-                {
                     return CardParser.ParseMatchCards(args)
                                      .IfSuccess(result => Game.MatchCenterRowCard(playerIndex,
                                                                                   result.Value.target,
                                                                                   result.Value.matchers));
-                }
                 else
-                {
                     return CardParser.ParseCards(args)
                                      .IfSuccess(r => Game.MatchCenterRowCard(
                                                     playerIndex, selectedCenterRowCard.Value,
@@ -210,7 +188,6 @@ namespace Dos.DiscordBot
                                           selectedCenterRowCard = null;
                                           return r;
                                       });
-                }
             }
             finally
             {
@@ -220,38 +197,25 @@ namespace Dos.DiscordBot
 
         public async Task<Result> SelectAsync(IUser player, string args)
         {
-            if (!Players.ContainsKey(player.Id))
-            {
-                return Result.Fail();
-            }
+            if (!Players.ContainsKey(player.Id)) return Result.Fail();
 
             await semaphoreSlim.WaitAsync();
             try
             {
-                if (CurrentPlayerId != player.Id)
-                {
-                    return Result.Fail("It's not your turn right now.");
-                }
+                if (CurrentPlayerId != player.Id) return Result.Fail("It's not your turn right now.");
 
                 if (Game.CurrentState is AddingToCenterRowState)
-                {
                     return Result.Fail("You cannot match cards if you already started adding cards to the center row");
-                }
 
                 var matchResult = CardParser.ParseCards(args);
                 if (matchResult.IsFail)
                     return matchResult;
 
                 if (matchResult.Value.IsEmpty())
-                {
                     return Result.Fail("If you want to select card, you need to tell me which one");
-                }
 
                 var card = matchResult.Value.First();
-                if (!Game.centerRow.Contains(card))
-                {
-                    return Result.Fail($"There's no **{card}** in the Center Row");
-                }
+                if (!Game.centerRow.Contains(card)) return Result.Fail($"There's no **{card}** in the Center Row");
 
                 selectedCenterRowCard = card;
                 return Result.Success($"Selected **{card}**. Now use `dos match <card(s)>` to match it with something");
@@ -262,14 +226,9 @@ namespace Dos.DiscordBot
             }
         }
 
-        private ulong CurrentPlayerId => PlayerIds[Game.CurrentPlayer];
-
         public async Task<Result> AddToCenterRowAsync(IUser player, string args)
         {
-            if (!Players.ContainsKey(player.Id))
-            {
-                return Result.Fail();
-            }
+            if (!Players.ContainsKey(player.Id)) return Result.Fail();
 
             await semaphoreSlim.WaitAsync();
             try
@@ -278,9 +237,7 @@ namespace Dos.DiscordBot
                 if (matchResult.IsFail)
                     return matchResult;
                 else if (matchResult.Value.IsEmpty())
-                {
                     return Result.Fail("You have to put something there");
-                }
                 else
                     return Game.AddCardToCenterRow(PlayerIds.IndexOf(player.Id), matchResult.Value.First());
             }
@@ -292,10 +249,7 @@ namespace Dos.DiscordBot
 
         public async Task<Result> SendHandAsync(IUser player, bool reportToChannel)
         {
-            if (!Players.ContainsKey(player.Id))
-            {
-                return Result.Fail();
-            }
+            if (!Players.ContainsKey(player.Id)) return Result.Fail();
 
             await semaphoreSlim.WaitAsync();
             try
@@ -311,10 +265,7 @@ namespace Dos.DiscordBot
 
         public async Task<Result> EndTurnAsync(IUser player)
         {
-            if (!Players.ContainsKey(player.Id))
-            {
-                return Result.Fail();
-            }
+            if (!Players.ContainsKey(player.Id)) return Result.Fail();
 
             await semaphoreSlim.WaitAsync();
             try
@@ -329,10 +280,7 @@ namespace Dos.DiscordBot
 
         public async Task<Result> DrawAsync(IUser player)
         {
-            if (!Players.ContainsKey(player.Id))
-            {
-                return Result.Fail();
-            }
+            if (!Players.ContainsKey(player.Id)) return Result.Fail();
 
             await semaphoreSlim.WaitAsync();
             try
@@ -347,10 +295,7 @@ namespace Dos.DiscordBot
 
         public async Task<Result> CallDosAsync(IUser player)
         {
-            if (!Players.ContainsKey(player.Id))
-            {
-                return Result.Fail();
-            }
+            if (!Players.ContainsKey(player.Id)) return Result.Fail();
 
             await semaphoreSlim.WaitAsync();
             try
@@ -365,10 +310,7 @@ namespace Dos.DiscordBot
 
         public async Task<Result> CalloutAsync(IUser player)
         {
-            if (!Players.ContainsKey(player.Id))
-            {
-                return Result.Fail();
-            }
+            if (!Players.ContainsKey(player.Id)) return Result.Fail();
 
             await semaphoreSlim.WaitAsync();
             try

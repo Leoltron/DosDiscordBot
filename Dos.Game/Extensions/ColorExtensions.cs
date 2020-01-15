@@ -1,4 +1,3 @@
-using System;
 using Dos.Game.Model;
 
 namespace Dos.Game.Extensions
@@ -9,21 +8,15 @@ namespace Dos.Game.Extensions
 
         public static string ShortName(this CardColor color)
         {
-            switch (color)
+            return color switch
             {
-                case CardColor.Red:
-                    return "R";
-                case CardColor.Green:
-                    return "G";
-                case CardColor.Yellow:
-                    return "Y";
-                case CardColor.Blue:
-                    return "B";
-                case CardColor.Wild:
-                    return "W";
-                default:
-                    return color.ToString().Substring(0, 1);
-            }
+                CardColor.Red => "R",
+                CardColor.Green => "G",
+                CardColor.Yellow => "Y",
+                CardColor.Blue => "B",
+                CardColor.Wild => "W",
+                _ => color.ToString().Substring(0, 1)
+            };
         }
     }
 }

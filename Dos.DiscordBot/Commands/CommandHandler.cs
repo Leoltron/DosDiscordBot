@@ -14,9 +14,9 @@ namespace Dos.DiscordBot.Commands
     {
         private readonly DiscordSocketClient client;
         private readonly CommandService commands;
-        private readonly IServiceProvider serviceProvider;
         private readonly GameRouterService gameRouterService;
         private readonly ILogger logger;
+        private readonly IServiceProvider serviceProvider;
 
         public CommandHandler(DiscordSocketClient client, CommandService commands, IServiceProvider serviceProvider)
         {
@@ -50,10 +50,7 @@ namespace Dos.DiscordBot.Commands
                 message.Author.IsBot)
                 return;
 
-            if (argPos < message.Content.Length && message.Content[argPos] == ' ')
-            {
-                argPos++;
-            }
+            if (argPos < message.Content.Length && message.Content[argPos] == ' ') argPos++;
 
             var context = new DosCommandContext(client, message)
             {
@@ -64,9 +61,7 @@ namespace Dos.DiscordBot.Commands
             {
                 await commands.ExecuteAsync(context, argPos, serviceProvider);
                 if ((argPos = message.Content.IndexOf("&&", StringComparison.InvariantCulture)) != -1)
-                {
-                    await commands.ExecuteAsync(context, argPos+2, serviceProvider);
-                }
+                    await commands.ExecuteAsync(context, argPos + 2, serviceProvider);
             }
             catch (Exception e)
             {
@@ -79,9 +74,7 @@ namespace Dos.DiscordBot.Commands
                                                   IResult result)
         {
             if (result.Error != CommandError.UnknownCommand && !(result?.ErrorReason).IsNullOrEmpty())
-            {
                 await context.Channel.SendMessageAsync(result.ErrorReason);
-            }
 
             var commandName = command.IsSpecified ? command.Value.Name : "A command";
             logger.Information(
