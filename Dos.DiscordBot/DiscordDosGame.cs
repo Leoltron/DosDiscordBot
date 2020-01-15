@@ -111,7 +111,7 @@ namespace Dos.DiscordBot
                     Info($"{Game.GetPlayerName(i)}'s hand: {Game.playerHands[i].ToDiscordString()}");
                 }
 
-                return Result.Success($"\u200b\nPlay! (It's your turn, **{Game.CurrentPlayerName}**)");
+                return Result.Success();
             }
             finally
             {
@@ -130,8 +130,6 @@ namespace Dos.DiscordBot
         {
             Info($"{Game.CurrentPlayerName}'s turn, hand: {Game.CurrentPlayerHand.ToDiscordString()}");
             await SendTableToChannel(false);
-            await Channel.SendMessageAsync(
-                $"Now it's **{Game.CurrentPlayerName}**'s turn");
         }
 
         public Task SendTableToChannel(bool addPlayersStats) => SendTableToChannel(addPlayersStats, Config.UseImages);
