@@ -23,6 +23,29 @@ namespace Dos.Utils
 
         public Result IfFail(Func<Result, Result> failActon) => IsFail ? failActon(this) : this;
 
+        public Result DoIfSuccess(Action<Result> successAction)
+        {
+            if (IsSuccess)
+                successAction(this);
+            return this;
+        }
+
+        public Result DoIfFail(Action<Result> failAction)
+        {
+            if (IsFail)
+                failAction(this);
+            return this;
+        }
+
+        public Result ThenDo(Action<Result> successAction, Action<Result> failAction)
+        {
+            if (IsSuccess)
+                successAction(this);
+            else
+                failAction(this);
+            return this;
+        }
+
         public override string ToString() =>
             $"({(IsSuccess ? "Success" : "Fail")}) - \"{Message}\"";
     }
@@ -47,6 +70,29 @@ namespace Dos.Utils
         public Result IfSuccess(Func<Result<T>, Result> successAction) => IsSuccess ? successAction(this) : this;
 
         public Result IfFail(Func<Result<T>, Result> failActon) => IsFail ? failActon(this) : this;
+
+        public Result<T> DoIfSuccess(Action<Result<T>> successAction)
+        {
+            if (IsSuccess)
+                successAction(this);
+            return this;
+        }
+
+        public Result<T> DoIfFail(Action<Result<T>> failAction)
+        {
+            if (IsFail)
+                failAction(this);
+            return this;
+        }
+
+        public Result<T> ThenDo(Action<Result<T>> successAction, Action<Result<T>> failAction)
+        {
+            if (IsSuccess)
+                successAction(this);
+            else
+                failAction(this);
+            return this;
+        }
 
         public override string ToString() =>
             $"({(IsSuccess ? "Success" : "Fail")}) {Value}{(string.IsNullOrWhiteSpace(Message) ? string.Empty : $" - \"{Message}\"")}";

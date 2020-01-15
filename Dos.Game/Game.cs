@@ -67,21 +67,38 @@ namespace Dos.Game
         public int MinCenterRowSize { get; set; } = 2;
 
         public Result MatchCenterRowCard(int player, Card target, params Card[] cardsToPlay) =>
-            CurrentState.MatchCenterRowCard(player, target, cardsToPlay);
+            CurrentState.MatchCenterRowCard(player, target, cardsToPlay)
+                        .DoIfSuccess(_ => PlayerMatchedCard?.Invoke(player, cardsToPlay, target));
 
         public Result EndTurn(int player) => CurrentState.EndTurn(player);
 
         public Result Draw(int player) => CurrentState.Draw(player);
 
         public Result AddCardToCenterRow(int player, Card card) =>
-            CurrentState.AddCardToCenterRow(player, card);
+            CurrentState.AddCardToCenterRow(player, card)
+                        .DoIfSuccess(_ => PlayerAddedCard?.Invoke(player, card));
 
-        public Result Callout(int caller) => AllowCallouts ? CurrentState.Callout(caller) : Result.Fail();
+        public Result Callout(int caller)
+        {
+            var playerWhoDidNotCallDos = PlayerWhoDidNotCallDos;
+            if (!AllowCallouts || caller == playerWhoDidNotCallDos) return Result.Fail();
 
-        public Result CallDos(int caller) => AllowCallouts ? CurrentState.CallDos(caller) : Result.Fail();
+            return CurrentState.Callout(caller)
+                               .DoIfSuccess(_ => CalledOut?.Invoke(caller, playerWhoDidNotCallDos.Value))
+                               .DoIfFail(_ => FalseCallout?.Invoke(caller));
+        }
+
+        public Result CallDos(int caller) => AllowCallouts
+            ? CurrentState.CallDos(caller).DoIfSuccess(_ => DosCall?.Invoke(caller))
+            : Result.Fail();
 
         public event Action<int> PlayerSwitch;
         public event Action<int, Card[]> PlayerReceivedCards;
+        public event Action<int, Card[], Card> PlayerMatchedCard;
+        public event Action<int, Card> PlayerAddedCard;
+        public event Action<int> DosCall;
+        public event Action<int> FalseCallout;
+        public event Action<int, int> CalledOut;
 
         public string GetPlayerName(int id) => PlayerNames.TryGetValue(id, out var name) ? name : "Player " + id;
 

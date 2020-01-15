@@ -14,9 +14,6 @@ namespace Dos.Game.State.Base
 
         public override Result Callout(int caller)
         {
-            if (caller == Game.PlayerWhoDidNotCallDos)
-                return Result.Fail();
-
             if (Game.PlayerWhoDidNotCallDos == null)
             {
                 Punish(caller, Game.FalseCalloutPenalty);

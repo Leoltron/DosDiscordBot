@@ -52,7 +52,7 @@ namespace Dos.DiscordBot
 
         private void Info(string message)
         {
-            logger.Information($"[{serverName} - #{Channel.Name}] {message}");
+            logger.Information($"[{serverName} - #{Channel.Name}] [game] {message}");
         }
 
         public async Task<Result> JoinAsync(IUser player)
@@ -95,11 +95,23 @@ namespace Dos.DiscordBot
                 await SendTableToChannel(false);
                 Game.PlayerSwitch += OnPlayerSwitch;
                 Game.PlayerReceivedCards +=
-                    (id, cards) => Players[PlayerIds[id]].SendCards(cards, Config.UseImages, true);
+                    (id, cards) =>
+                    {
+                        Info($"{User(id).DiscordTag()} received [{cards.ToLogString()}]");
+                        Players[PlayerIds[id]].SendCards(cards, Config.UseImages, true);
+                    };
+
+                Game.CalledOut += (caller, calledOut) =>
+                    Info($"{User(caller).DiscordTag()} called out {User(calledOut).DiscordTag()}");
+                Game.DosCall += caller => Info($"{User(caller).DiscordTag()} called DOS!");
+                Game.FalseCallout += caller => Info($"{User(caller).DiscordTag()} made a false callout");
+                Game.PlayerAddedCard += (i, card) => Info($"{User(i).DiscordTag()} added {card} to the center row");
+                Game.PlayerMatchedCard += (i, cards, target) =>
+                    Info($"{User(i).DiscordTag()} put {string.Join("and", cards)} to {target}");
 
                 Info($"Game started, center row: {string.Join(", ", Game.centerRow)}");
                 for (var i = 0; i < Players.Count; i++)
-                    Info($"{Game.GetPlayerName(i)}'s hand: {Game.playerHands[i].ToDiscordString()}");
+                    Info($"{User(i).DiscordTag()}'s hand: {Game.playerHands[i].ToLogString()}");
 
                 return Result.Success();
             }
@@ -113,14 +125,12 @@ namespace Dos.DiscordBot
         {
             selectedCenterRowCard = null;
             SendHandTo(nextPlayer);
-            NotifyChannelAboutPlayerSwitch();
+            Info($"{CurrentUser.DiscordTag()}'s turn, hand: {Game.CurrentPlayerHand.ToLogString()}");
+            SendTableToChannel(false);
         }
 
-        private async Task NotifyChannelAboutPlayerSwitch()
-        {
-            Info($"{Game.CurrentPlayerName}'s turn, hand: {Game.CurrentPlayerHand.ToDiscordString()}");
-            await SendTableToChannel(false);
-        }
+        private IUser CurrentUser => User(Game.CurrentPlayer);
+        private IUser User(int i) => Players[PlayerIds[i]];
 
         public Task SendTableToChannel(bool addPlayersStats) => SendTableToChannel(addPlayersStats, Config.UseImages);
 

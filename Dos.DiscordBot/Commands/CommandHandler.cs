@@ -73,12 +73,12 @@ namespace Dos.DiscordBot.Commands
         private async Task OnCommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context,
                                                   IResult result)
         {
-            if (result.Error != CommandError.UnknownCommand && !(result?.ErrorReason).IsNullOrEmpty())
+            if (result.Error != CommandError.UnknownCommand && !result.ErrorReason.IsNullOrEmpty())
                 await context.Channel.SendMessageAsync(result.ErrorReason);
 
             var commandName = command.IsSpecified ? command.Value.Name : "A command";
             logger.Information(
-                $"[{context.Guild.Name} #{context.Channel.Name}] {commandName} was executed at {DateTime.UtcNow}.");
+                $"[{context.Guild.Name} - #{context.Channel.Name}] {commandName} was executed.");
         }
     }
 }
