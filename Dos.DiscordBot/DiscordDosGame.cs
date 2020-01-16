@@ -109,11 +109,11 @@ namespace Dos.DiscordBot
                     Info($"{User(caller).DiscordTag()} called out {User(calledOut).DiscordTag()}");
                 Game.DosCall += caller => Info($"{User(caller).DiscordTag()} called DOS!");
                 Game.FalseCallout += caller => Info($"{User(caller).DiscordTag()} made a false callout");
-                Game.PlayerAddedCard += (i, card) => Info($"{User(i).DiscordTag()} added {card} to the center row");
+                Game.PlayerAddedCard += (i, card) => Info($"{User(i).DiscordTag()} added {card} to the Center Row");
                 Game.PlayerMatchedCard += (i, cards, target) =>
-                    Info($"{User(i).DiscordTag()} put {string.Join("and", cards)} to {target}");
+                    Info($"{User(i).DiscordTag()} put {string.Join(" and ", cards)} to {target}");
 
-                Info($"Game started, center row: {string.Join(", ", Game.centerRow)}");
+                Info($"Game started, Center Row: {string.Join(", ", Game.centerRow)}");
                 for (var i = 0; i < Players.Count; i++)
                     Info($"{User(i).DiscordTag()}'s hand: {Game.playerHands[i].ToLogString()}");
 
@@ -218,7 +218,7 @@ namespace Dos.DiscordBot
                 if (CurrentPlayerId != player.Id) return Result.Fail("It's not your turn right now.");
 
                 if (Game.CurrentState is AddingToCenterRowState)
-                    return Result.Fail("You cannot match cards if you already started adding cards to the center row");
+                    return Result.Fail("You cannot match cards if you already started adding cards to the Center Row");
 
                 var matchResult = CardParser.ParseCards(args);
                 if (matchResult.IsFail)

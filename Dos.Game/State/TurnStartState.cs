@@ -19,7 +19,7 @@ namespace Dos.Game.State
             Game.DealCard(CurrentPlayer);
             Game.CurrentState = new JustDrewCardState(this);
 
-            return Result.Success("Here's your card. Now make a match or place one card to the center row.");
+            return Result.Success("Here's your card. Now make a match or place one card to the Center Row.");
         }
 
         protected override Result CurrentPlayerEndTurn() => Result.Fail("You need to make a match or draw.");

@@ -78,7 +78,7 @@ namespace Dos.Game.State.Base
         }
 
         protected override Result CurrentPlayerDraw() =>
-            Result.Fail(DrewCard ? "One card is enough for you, play already." : "Too late, you can't draw cards now.");
+            Result.Fail(DrewCard ? "You may only draw once." : "You've already made matches, you're not able to draw.");
 
         protected override Result CurrentPlayerEndTurn()
         {
@@ -87,7 +87,7 @@ namespace Dos.Game.State.Base
 
             if (CardsToAdd > 0 && Game.CurrentPlayerHand.Any())
             {
-                var message = $"You need to add **{CardsToAdd}** more {(CardsToAdd == 1 ? "card" : "cards")}";
+                var message = $"Now add **{CardsToAdd}** more {(CardsToAdd == 1 ? "card" : "cards")}";
                 if (refilled)
                 {
                     Game.CurrentState = new AddingToCenterRowState(this, CardsToAdd);
