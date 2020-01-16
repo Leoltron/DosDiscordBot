@@ -52,7 +52,7 @@ namespace Dos.DiscordBot
             var expectedCreateDate = TryFindGameByChannel(channel)?.CreateDate;
             await Task.Delay(timeout).ConfigureAwait(false);
             var game = TryFindGameByChannel(channel);
-            if (game == null || game.CreateDate != expectedCreateDate || game.Players.Count > 1)
+            if (game == null || game.CreateDate != expectedCreateDate || game.Players.Count > 1 || game.IsGameStarted)
                 return;
 
             gamesByChannel.TryRemove(channel.Id, out _);
