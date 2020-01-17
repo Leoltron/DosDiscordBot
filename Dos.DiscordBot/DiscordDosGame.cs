@@ -174,10 +174,20 @@ namespace Dos.DiscordBot
             }
         }
 
-        private Task<IUserMessage> SendHandTo(int playerIndex)
+        private async Task SendHandTo(int playerIndex)
         {
             var id = PlayerIds[playerIndex];
-            return Players[id].SendCards(Game.playerHands[playerIndex], Config.UseImages);
+            var player = Players[id];
+            try
+            {
+                await player.SendCards(Game.playerHands[playerIndex], Config.UseImages);
+            }
+            catch (Exception e)
+            {
+                logger.Error(e, $"Failed to send hand to @{player.DiscordTag()}");
+                await Info.Channel.SendMessageAsync($"Failed to send hand to {player.Mention}." +
+                                                    "Try check if DM is closed and use `dos hand` to try again.");
+            }
         }
 
         public async Task<Result> MatchAsync(IUser player, string args)
