@@ -63,7 +63,7 @@ namespace Dos.Game.State.Base
 
             if (CurrentPlayerHand.IsEmpty())
             {
-                Game.CurrentState = new FinishedGameState(this);
+                Game.SetFinished();
                 return Result.Success(matchType.DefaultResult()
                                                .AddText(
                                                     $"**{CurrentPlayerName}** won! Total score: **{Game.TotalScore}**")
@@ -130,7 +130,7 @@ namespace Dos.Game.State.Base
 
             if (CurrentPlayerHand.IsEmpty())
             {
-                Game.CurrentState = new FinishedGameState(this);
+                Game.SetFinished();
                 return Result.Success($"**{CurrentPlayerName}** won! Total score: **{Game.TotalScore}**");
             }
 

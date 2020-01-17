@@ -78,7 +78,7 @@ namespace Dos.DiscordBot.Commands
 
             var commandName = command.IsSpecified ? command.Value.Name : "A command";
             logger.Information(
-                $"[{context.Guild.Name} - #{context.Channel.Name}] {commandName} was executed.");
+                $"[{context.Guild?.Name ?? "DM"} - #{context.Channel.Name}] {commandName} was executed.");
         }
     }
 }

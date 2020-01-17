@@ -19,6 +19,8 @@ namespace Dos.DiscordBot
         private DiscordSocketClient client;
         private CommandHandler commandHandler;
 
+        public const string AdminDiscordTag = "Leoltron#9479";
+
         public async Task StartAsync(string token)
         {
             client = new DiscordSocketClient(new DiscordSocketConfig

@@ -22,29 +22,29 @@ namespace Dos.DiscordBot
         private readonly ILogger logger;
         private readonly SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
 
-        private readonly string serverName;
+        public DiscordDosGameInfo Info { get; }
 
         private Card? selectedCenterRowCard;
 
         public DiscordDosGame(ISocketMessageChannel channel, IUser owner, ILogger logger, string serverName)
         {
-            Channel = channel;
             this.logger = logger;
-            this.serverName = serverName;
+            Info = new DiscordDosGameInfo(serverName, CreateDate, channel, owner);
             PlayerIds = new List<ulong> {owner.Id};
             Players = new Dictionary<ulong, IUser> {[owner.Id] = owner};
 
-            Info($"{owner.Username} have created the game");
+            LogInfo($"{owner.Username} have created the game");
         }
 
         public DateTime CreateDate { get; } = DateTime.UtcNow;
 
-        public ISocketMessageChannel Channel { get; }
         public IUser Owner => PlayerIds.Any() ? Players[PlayerIds[0]] : null;
         public Dictionary<ulong, IUser> Players { get; }
         private List<ulong> PlayerIds { get; }
         public Game.Game Game { get; private set; }
         public bool IsGameStarted => Game != null;
+
+        public event Action Finished;
 
         public bool IsFinished => IsGameStarted && Game.CurrentState.IsFinished;
 
@@ -54,9 +54,9 @@ namespace Dos.DiscordBot
 
         private IUser CurrentUser => User(Game.CurrentPlayer);
 
-        private void Info(string message)
+        private void LogInfo(string message)
         {
-            logger.Information($"[{serverName} - #{Channel.Name}] [game] {message}");
+            logger.Information($"[{Info.ServerName} - #{Info.Channel.Name}] [game] {message}");
         }
 
         public async Task<Result> JoinAsync(IUser player)
@@ -95,27 +95,29 @@ namespace Dos.DiscordBot
                     CalloutPenalty = 2,
                     FalseCalloutPenalty = 2
                 };
+                Game.Finished += Finished;
+
                 await Task.WhenAll(Enumerable.Range(0, Players.Count).Select(SendHandTo));
                 await SendTableToChannel(false);
                 Game.PlayerSwitch += OnPlayerSwitch;
                 Game.PlayerReceivedCards +=
                     (id, cards) =>
                     {
-                        Info($"{User(id).DiscordTag()} received [{cards.ToLogString()}]");
+                        LogInfo($"{User(id).DiscordTag()} received [{cards.ToLogString()}]");
                         Players[PlayerIds[id]].SendCards(cards, Config.UseImages, true);
                     };
 
                 Game.CalledOut += (caller, calledOut) =>
-                    Info($"{User(caller).DiscordTag()} called out {User(calledOut).DiscordTag()}");
-                Game.DosCall += caller => Info($"{User(caller).DiscordTag()} called DOS!");
-                Game.FalseCallout += caller => Info($"{User(caller).DiscordTag()} made a false callout");
-                Game.PlayerAddedCard += (i, card) => Info($"{User(i).DiscordTag()} added {card} to the Center Row");
+                    LogInfo($"{User(caller).DiscordTag()} called out {User(calledOut).DiscordTag()}");
+                Game.DosCall += caller => LogInfo($"{User(caller).DiscordTag()} called DOS!");
+                Game.FalseCallout += caller => LogInfo($"{User(caller).DiscordTag()} made a false callout");
+                Game.PlayerAddedCard += (i, card) => LogInfo($"{User(i).DiscordTag()} added {card} to the Center Row");
                 Game.PlayerMatchedCard += (i, cards, target) =>
-                    Info($"{User(i).DiscordTag()} put {string.Join(" and ", cards)} to {target}");
+                    LogInfo($"{User(i).DiscordTag()} put {string.Join(" and ", cards)} to {target}");
 
-                Info($"Game started, Center Row: {string.Join(", ", Game.centerRow)}");
+                LogInfo($"Game started, Center Row: {string.Join(", ", Game.centerRow)}");
                 for (var i = 0; i < Players.Count; i++)
-                    Info($"{User(i).DiscordTag()}'s hand: {Game.playerHands[i].ToLogString()}");
+                    LogInfo($"{User(i).DiscordTag()}'s hand: {Game.playerHands[i].ToLogString()}");
 
                 return Result.Success();
             }
@@ -129,7 +131,7 @@ namespace Dos.DiscordBot
         {
             selectedCenterRowCard = null;
             SendHandTo(nextPlayer);
-            Info($"{CurrentUser.DiscordTag()}'s turn, hand: {Game.CurrentPlayerHand.ToLogString()}");
+            LogInfo($"{CurrentUser.DiscordTag()}'s turn, hand: {Game.CurrentPlayerHand.ToLogString()}");
             SendTableToChannel(false);
         }
 
@@ -141,7 +143,7 @@ namespace Dos.DiscordBot
         {
             if (!IsGameStarted)
             {
-                await Channel.SendMessageAsync("Game has not started yet");
+                await Info.Channel.SendMessageAsync("Game has not started yet");
             }
             else
             {
@@ -155,20 +157,20 @@ namespace Dos.DiscordBot
                             $"{Game.GetPlayerName(i)} - {handSize} {(handSize == 1 ? "card" : "cards")}\n");
                     }
 
-                    await Channel.SendMessageAsync(messageBuilder.ToString());
+                    await Info.Channel.SendMessageAsync(messageBuilder.ToString());
                 }
 
-                await Channel.SendMessageAsync("**Center Row:**");
+                await Info.Channel.SendMessageAsync("**Center Row:**");
                 if (useImages)
-                    await Channel.SendCards(
+                    await Info.Channel.SendCards(
                         Game.centerRow.Select((c, i) => Game.centerRowAdditional[i].Prepend(c).ToList()));
                 else
-                    await Channel.SendMessageAsync(string.Join("\n", Game.GameTableLines()));
+                    await Info.Channel.SendMessageAsync(string.Join("\n", Game.GameTableLines()));
 
                 if (selectedCenterRowCard != null)
-                    await Channel.SendMessageAsync($"Selected **{selectedCenterRowCard.Value}**");
+                    await Info.Channel.SendMessageAsync($"Selected **{selectedCenterRowCard.Value}**");
 
-                await Channel.SendMessageAsync($"Now it's **{Game.CurrentPlayerName}**'s turn");
+                await Info.Channel.SendMessageAsync($"Now it's **{Game.CurrentPlayerName}**'s turn");
             }
         }
 

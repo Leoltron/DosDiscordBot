@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
@@ -20,14 +21,30 @@ namespace Dos.DiscordBot
 
         public GameRouterService(ILogger logger) => this.logger = logger;
 
+        public bool PreventStartNewGames { get; private set; } = false;
+
+        public event Action LastGameEnded;
+
         public async Task<Result> JoinGameAsync(IGuild guild, ISocketMessageChannel channel, IUser player)
         {
             if (gamesByChannel.TryGetValue(channel.Id, out var gameWrapper) && !gameWrapper.IsFinished)
                 return await gameWrapper.JoinAsync(player).ConfigureAwait(false);
 
-            gamesByChannel[channel.Id] = new DiscordDosGame(channel, player, logger, guild.Name);
+            if (PreventStartNewGames)
+            {
+                return Result.Fail("Bot is waiting for all active games to end to restart.");
+            }
+
+            gamesByChannel[channel.Id] = CreateNewGame(guild, channel, player);
             DeleteIfNoActivity(channel, InactiveGameTimeout);
             return Result.Success("You have created a game! Wait for others to join or start with `dos start`");
+        }
+
+        private DiscordDosGame CreateNewGame(IGuild guild, ISocketMessageChannel channel, IUser player)
+        {
+            var game = new DiscordDosGame(channel, player, logger, guild?.Name ?? "DM");
+            game.Finished += () => TryDeleteGame(channel);
+            return game;
         }
 
         public DiscordDosGame TryFindGameByChannel(ISocketMessageChannel channel)
@@ -37,14 +54,18 @@ namespace Dos.DiscordBot
             if (game == null || !game.IsFinished)
                 return game;
 
-            gamesByChannel.Remove(channel.Id, out _);
+            TryDeleteGame(channel);
             return null;
         }
 
-        public DiscordDosGame TryDeleteGame(ISocketMessageChannel channel)
+        public void TryDeleteGame(ISocketMessageChannel channel)
         {
-            gamesByChannel.TryRemove(channel.Id, out var game);
-            return game;
+            gamesByChannel.TryRemove(channel.Id, out _);
+
+            if (GetActiveGamesCount == 0)
+            {
+                LastGameEnded?.Invoke();
+            }
         }
 
         private async void DeleteIfNoActivity(ISocketMessageChannel channel, TimeSpan timeout)
@@ -55,7 +76,7 @@ namespace Dos.DiscordBot
             if (game == null || game.CreateDate != expectedCreateDate || game.Players.Count > 1 || game.IsGameStarted)
                 return;
 
-            gamesByChannel.TryRemove(channel.Id, out _);
+            TryDeleteGame(channel);
             await channel.SendMessageAsync("The game has been cancelled due to inactivity.").ConfigureAwait(false);
         }
 
@@ -69,8 +90,19 @@ namespace Dos.DiscordBot
             if (!game.Players.ContainsKey(user.Id))
                 return Result.Fail();
 
-            gamesByChannel.Remove(channel.Id, out _);
+            TryDeleteGame(channel);
             return Result.Success("Game has been ended.");
         }
+
+        public void NoNewGames()
+        {
+            PreventStartNewGames = true;
+        }
+
+        public int GetActiveGamesCount => gamesByChannel.Count(pair => !pair.Value.IsFinished);
+
+        public IEnumerable<DiscordDosGameInfo>
+            GetRunningGamesInfo() => gamesByChannel.Select(pair => pair.Value)
+                                                   .Select(g => g.Info);
     }
 }

@@ -99,6 +99,7 @@ namespace Dos.Game
         public event Action<int> DosCall;
         public event Action<int> FalseCallout;
         public event Action<int, int> CalledOut;
+        public event Action Finished;
 
         public string GetPlayerName(int id) => PlayerNames.TryGetValue(id, out var name) ? name : "Player " + id;
 
@@ -185,5 +186,11 @@ namespace Dos.Game
                                           .Any()
                                            ? $" with {string.Join(" and ", centerRowAdditional[i])} on top"
                                            : string.Empty));
+
+        public void SetFinished()
+        {
+            CurrentState = new FinishedGameState(this);
+            Finished?.Invoke();
+        }
     }
 }

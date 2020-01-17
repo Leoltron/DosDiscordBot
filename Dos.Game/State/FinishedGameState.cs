@@ -8,7 +8,7 @@ namespace Dos.Game.State
     {
         private static readonly Result GameFinishedResult = Result.Fail("Game has finished");
 
-        public FinishedGameState(GameState gameState) : base(gameState)
+        public FinishedGameState(Game game) : base(game)
         {
         }
 

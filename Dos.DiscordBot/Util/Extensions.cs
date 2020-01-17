@@ -94,6 +94,6 @@ namespace Dos.DiscordBot.Util
             if (exceptions.Any()) throw new AggregateException(exceptions);
         }
 
-        public static string DiscordTag(this IUser user) => $"{user.Username}${user.Discriminator}";
+        public static string DiscordTag(this IUser user) => $"{user.Username}#{user.Discriminator}";
     }
 }
