@@ -7,6 +7,7 @@ using Discord.WebSocket;
 using Dos.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
+using Serilog.Core;
 
 namespace Dos.DiscordBot.Commands
 {
@@ -73,12 +74,25 @@ namespace Dos.DiscordBot.Commands
         private async Task OnCommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context,
                                                   IResult result)
         {
-            if (result.Error != CommandError.UnknownCommand && !result.ErrorReason.IsNullOrEmpty())
-                await context.Channel.SendMessageAsync(result.ErrorReason);
-
             var commandName = command.IsSpecified ? command.Value.Name : "A command";
-            logger.Information(
-                $"[{context.Guild?.Name ?? "DM"} - #{context.Channel.Name}] {commandName} was executed.");
+
+            if (!result.IsSuccess && result.Error != CommandError.UnknownCommand)
+            {
+                if (result.Error == CommandError.Exception)
+                {
+                    logger.Error(
+                        $"[{context.Guild?.Name ?? "DM"} - #{context.Channel.Name}] " +
+                        $"{commandName} was executed with an exception: {result}");
+                }
+
+                if (!result.ErrorReason.IsNullOrEmpty())
+                {
+                    await context.Channel.SendMessageAsync(result.ErrorReason);
+                }
+            }
+            else
+                logger.Information($"[{context.Guild?.Name ?? "DM"} - #{context.Channel.Name}] " +
+                                   $"{commandName} was executed.");
         }
     }
 }

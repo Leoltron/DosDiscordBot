@@ -184,7 +184,7 @@ namespace Dos.DiscordBot
             }
             catch (Exception e)
             {
-                logger.Error(e, $"Failed to send hand to @{player.DiscordTag()}");
+                logger.Warning(e, $"Failed to send hand to @{player.DiscordTag()}");
                 await Info.Channel.SendMessageAsync($"Failed to send hand to {player.Mention}." +
                                                     "Try check if DM is closed and use `dos hand` to try again.");
             }
