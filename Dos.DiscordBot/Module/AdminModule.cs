@@ -53,6 +53,7 @@ namespace Dos.DiscordBot.Module
             if (!gameRouterService.PreventStartNewGames)
             {
                 gameRouterService.NoNewGames();
+                await Context.Client.SetStatusAsync(UserStatus.DoNotDisturb);
                 if (gameRouterService.GetActiveGamesCount == 0)
                 {
                     await Context.Channel.SendMessageAsync(
