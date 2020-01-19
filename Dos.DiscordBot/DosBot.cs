@@ -21,6 +21,8 @@ namespace Dos.DiscordBot
 
         public const string AdminDiscordTag = "Leoltron#9479";
 
+        private const string VersionStatus = "v1.0.0 (18.01.2020)";
+
         public async Task StartAsync(string token)
         {
             client = new DiscordSocketClient(new DiscordSocketConfig
@@ -28,6 +30,7 @@ namespace Dos.DiscordBot
                 LogLevel = LogSeverity.Verbose,
                 MessageCacheSize = 1000
             });
+            await client.SetGameAsync(VersionStatus);
 
             client.Log += Log;
             var commandService = new CommandService(new CommandServiceConfig {LogLevel = LogSeverity.Verbose});
