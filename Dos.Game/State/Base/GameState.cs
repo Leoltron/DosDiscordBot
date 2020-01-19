@@ -8,11 +8,16 @@ namespace Dos.Game.State.Base
     {
         protected readonly Game Game;
 
-        protected GameState(Game game) => Game = game;
+        protected GameState(Game game)
+        {
+            Game = game;
+        }
 
         protected GameState(GameState gameState) : this(gameState.Game)
         {
         }
+
+        protected GameConfig Config => Game.Config;
 
         protected int CurrentPlayer => Game.CurrentPlayer;
         protected List<Card> CurrentPlayerHand => Game.CurrentPlayerHand;

@@ -11,13 +11,16 @@ namespace Dos.Game.Extensions
 
         public static bool Matches(this CardValue target, CardValue first, CardValue second)
         {
-            if (target == CardValue.Sharp) return first.MinValue() + second.MinValue() <= 10;
+            if (target == CardValue.Sharp)
+                return first.MinValue() + second.MinValue() <= 10;
 
             var targetValue = (int) target;
 
-            if (first == CardValue.Sharp) return second.MinValue() < targetValue;
+            if (first == CardValue.Sharp)
+                return second.MinValue() < targetValue;
 
-            if (second == CardValue.Sharp) return first.MinValue() < targetValue;
+            if (second == CardValue.Sharp)
+                return first.MinValue() < targetValue;
 
             return (int) first + (int) second == targetValue;
         }

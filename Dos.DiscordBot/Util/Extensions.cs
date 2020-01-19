@@ -30,25 +30,35 @@ namespace Dos.DiscordBot.Util
             };
         }
 
-        public static Task<IUserMessage> SendCards(this IUser user, IEnumerable<Card> cards, bool images,
-                                                   bool newDealtCards = false)
+        public static async Task SendCardsAsync(this IUser user, IEnumerable<Card> cards, bool images,
+                                                bool newDealtCards = false, int chunkSize = 7)
         {
             var cardList = cards.OrderByColorAndValue().ToList();
-            return images
-                ? user.SendCardsImages(cardList, newDealtCards)
-                : user.SendCardsNames(cardList, newDealtCards);
+            if (images)
+                await user.SendCardsImages(cardList, newDealtCards, chunkSize);
+            else
+                await user.SendCardsNames(cardList, newDealtCards);
         }
 
-        public static Task<IUserMessage> SendCards(this IMessageChannel channel, IEnumerable<List<Card>> cards)
+        public static async Task SendCardsAsync(this IMessageChannel channel, IEnumerable<List<Card>> cards,
+                                                int chunkSize = 5)
         {
             var cardList = cards.OrderBy(c => c.First().Color).ThenBy(c => c.First().Value).ToList();
-            var name = string.Join("_", cardList.Select(cl => string.Join("-", cl.Select(c => c.ToShortString())))) +
-                       ".png";
+            if (cardList.IsEmpty())
+                return;
 
-            return channel.SendFileAsync(cardList.Select(CardToImageHelper.Stack).JoinImages(10, 1173), name);
+            foreach (var chunk in cardList.ToChunks(chunkSize))
+            {
+                var name = string.Join("_",
+                                       chunk.Select(cl =>
+                                                        string.Join("-",
+                                                                    cl.Select(c => c.ToShortString())))) + ".png";
+
+                await channel.SendFileAsync(chunk.Select(CardToImageHelper.Stack).JoinImages(10, 1173), name);
+            }
         }
 
-        public static Task<IUserMessage> SendCardsNames(this IUser user, IList<Card> cards, bool newDealtCards = false)
+        private static Task<IUserMessage> SendCardsNames(this IUser user, IList<Card> cards, bool newDealtCards = false)
         {
             var prefix = newDealtCards
                 ? "You were dealt"
@@ -58,23 +68,26 @@ namespace Dos.DiscordBot.Util
             return user.SendMessageAsync($"{prefix}\n​\n{message}");
         }
 
-        public static async Task<IUserMessage> SendCardsImages(this IUser user, IList<Card> cards, bool addPlus = false)
+        private static async Task SendCardsImages(this IUser user, IList<Card> cards, bool addPlus = false,
+                                                  int chunkSize = 7)
         {
             if (cards.IsEmpty())
-                return null;
+                return;
 
             var name = string.Join("_", cards.Select(c => c.ToShortString())) + ".png";
             if (addPlus)
                 name = "Plus_" + name;
 
             var paths = cards.Select(c => c.ToImagePath());
-            if (addPlus) paths = paths.Prepend(CardToImageHelper.PlusPath);
+            if (addPlus)
+                paths = paths.Prepend(CardToImageHelper.PlusPath);
 
             if (!addPlus)
                 await user.SendMessageAsync(
                     $"Your current hand ({cards.Count} {(cards.Count == 1 ? "card" : "cards")}):");
 
-            return await user.SendFileAsync(paths.JoinImages(), name);
+            foreach (var pathsChunk in paths.ToChunks(chunkSize))
+                await user.SendFileAsync(pathsChunk.JoinImages(), name);
         }
 
         public static void DisposeAll(this IEnumerable<IDisposable> disposables)
@@ -91,7 +104,8 @@ namespace Dos.DiscordBot.Util
                     exceptions.Add(e);
                 }
 
-            if (exceptions.Any()) throw new AggregateException(exceptions);
+            if (exceptions.Any())
+                throw new AggregateException(exceptions);
         }
 
         public static string DiscordTag(this IUser user) => $"{user.Username}#{user.Discriminator}";

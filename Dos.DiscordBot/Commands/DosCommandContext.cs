@@ -1,3 +1,4 @@
+using System;
 using Discord.Commands;
 using Discord.WebSocket;
 
@@ -10,5 +11,7 @@ namespace Dos.DiscordBot.Commands
         }
 
         public DiscordDosGame DosGame { get; set; }
+
+        public int? NextCommandArgPos { get; set; }
     }
 }

@@ -78,7 +78,8 @@ namespace Dos.Game.Extensions
                                .ToDictionary(g => g.Key, g => g.Count());
             foreach (var element in sublist)
             {
-                if (!elementsCount.TryGetValue(element, out var c) || c <= 0) return false;
+                if (!elementsCount.TryGetValue(element, out var c) || c <= 0)
+                    return false;
 
                 elementsCount[element] = --c;
             }

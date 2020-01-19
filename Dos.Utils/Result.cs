@@ -4,7 +4,7 @@ namespace Dos.Utils
 {
     public class Result
     {
-        public Result(bool isSuccess, string message = null)
+        protected Result(bool isSuccess, string message = null)
         {
             IsSuccess = isSuccess;
             Message = message;
@@ -52,11 +52,10 @@ namespace Dos.Utils
 
     public class Result<T> : Result
     {
-        public static readonly Result<T> DefaultFail = new Result<T>(false);
-        public static readonly Result<T> DefaultSuccess = new Result<T>(true);
-
-        public Result(bool isSuccess, T value = default, string message = null) : base(isSuccess, message) =>
+        public Result(bool isSuccess, T value = default, string message = null) : base(isSuccess, message)
+        {
             Value = value;
+        }
 
         public T Value { get; }
 

@@ -36,25 +36,30 @@ namespace Dos.Game.State.Base
             if (matchType == MatchType.NoMatch)
                 return Result.Fail($"{target} cannot be matched with {string.Join(" and ", cardsToPlay)}");
 
-            if (!Game.centerRow.Contains(target)) return Result.Fail($"{target} is not present at the Central Row");
+            if (!Game.centerRow.Contains(target))
+                return Result.Fail($"{target} is not present at the Central Row");
 
             var additional = Game.centerRowAdditional
                                  .Where((e, i) => Game.centerRow[i] == target && e.IsEmpty())
                                  .FirstOrDefault();
 
-            if (additional == null) return Result.Fail($"{target} was already matched");
+            if (additional == null)
+                return Result.Fail($"{target} was already matched");
 
             var missingCards = cardsToPlay.Where(c => !CurrentPlayerHand.Contains(c)).ToList();
-            if (missingCards.Any()) return Result.Fail($"You don't have {string.Join(" and ", missingCards)}");
+            if (missingCards.Any())
+                return Result.Fail($"You don't have {string.Join(" and ", missingCards)}");
 
-            foreach (var card in cardsToPlay) CurrentPlayerHand.Remove(card);
+            foreach (var card in cardsToPlay)
+                CurrentPlayerHand.Remove(card);
 
             Game.CheckCurrentPlayerForDos();
 
             additional.AddRange(cardsToPlay);
 
             var (discardCount, drawCount) = matchType.ToColorMatchBonus();
-            if (discardCount != 0) CardsToAdd += discardCount;
+            if (discardCount != 0)
+                CardsToAdd += discardCount;
 
             if (drawCount != 0)
                 for (var i = 0; i < Game.PlayersCount; i++)
@@ -107,7 +112,8 @@ namespace Dos.Game.State.Base
         {
             for (var i = 0; i < Game.centerRow.Count; i++)
             {
-                if (Game.centerRowAdditional[i].IsEmpty()) continue;
+                if (Game.centerRowAdditional[i].IsEmpty())
+                    continue;
                 Game.discardPile.Push(Game.centerRow[i]);
                 Game.centerRow.RemoveAt(i);
                 Game.centerRowAdditional[i].ForEach(c => Game.discardPile.Push(c));

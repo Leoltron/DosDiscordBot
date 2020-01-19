@@ -11,6 +11,10 @@ namespace Dos.DiscordBot
 {
     public class DosBot
     {
+        public const string AdminDiscordTag = "Leoltron#9479";
+
+        private const string VersionStatus = "v1.0.0 (18.01.2020)";
+
         private readonly ILogger logger = new LoggerConfiguration()
                                          .WriteTo.Console(LogEventLevel.Information)
                                          .WriteTo.File("logs/bot-.log", rollingInterval: RollingInterval.Day)
@@ -18,10 +22,6 @@ namespace Dos.DiscordBot
 
         private DiscordSocketClient client;
         private CommandHandler commandHandler;
-
-        public const string AdminDiscordTag = "Leoltron#9479";
-
-        private const string VersionStatus = "v1.0.0 (18.01.2020)";
 
         public async Task StartAsync(string token)
         {
@@ -33,7 +33,11 @@ namespace Dos.DiscordBot
             await client.SetGameAsync(VersionStatus);
 
             client.Log += Log;
-            var commandService = new CommandService(new CommandServiceConfig {LogLevel = LogSeverity.Verbose});
+            var commandService = new CommandService(new CommandServiceConfig
+            {
+                LogLevel = LogSeverity.Verbose,
+                DefaultRunMode = RunMode.Async
+            });
             commandHandler = new CommandHandler(client, commandService, ServiceProviderBuilder.BuildProvider(logger));
 
             await commandHandler.InstallCommandsAsync();
