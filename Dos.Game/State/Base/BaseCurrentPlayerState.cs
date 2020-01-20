@@ -124,6 +124,11 @@ namespace Dos.Game.State.Base
 
         protected override Result CurrentPlayerAddCardToCenterRow(Card card)
         {
+            if (CardsToAdd <= 0)
+            {
+                return Result.Fail("You can't add cards now.");
+            }
+
             ClearMatchedCardsFromCenterRow();
             Game.RefillCenterRow();
 
