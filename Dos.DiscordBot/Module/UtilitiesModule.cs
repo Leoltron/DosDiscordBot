@@ -32,7 +32,7 @@ namespace Dos.DiscordBot.Module
             "**dos hand**              - I will send you your hand via DM\n" +
             "**dos table**             - to see table of the game (players card count, etc.)\n" +
             "\n" +
-            "Combine commands with `dos <command1> &&<command2>`. For example, `dos add g1 &&!`" +
+            "Combine commands with `dos <command1> && <command2>`. For example, `dos add g1 && !`" +
             "";
 
         private static readonly string[] Pongs = {"Pong!", "pong", "Ping! I mean, pong!", "...", "Yeah, I'm alive"};
