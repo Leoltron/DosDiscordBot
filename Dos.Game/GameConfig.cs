@@ -15,5 +15,6 @@ namespace Dos.Game
         public ushort InitialHandSize { get; set; }
         public ushort MinCenterRowSize { get; set; }
         public bool CenterRowPenalty { get; set; }
+        public bool DrawEndsTurn { get; set; }
     }
 }

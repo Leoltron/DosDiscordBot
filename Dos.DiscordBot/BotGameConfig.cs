@@ -16,6 +16,7 @@ namespace Dos.DiscordBot
                 ["InitialHandSize"] = "InitialHandSize description",
                 ["MinCenterRowSize"] = "MinCenterRowSize description",
                 ["CenterRowPenalty"] = "CenterRowPenalty description",
+                ["DrawEndsTurn"] = "DrawEndsTurn description",
                 ["UseImages"] = "UseImages description"
             };
 
@@ -28,6 +29,7 @@ namespace Dos.DiscordBot
                 ["InitialHandSize"] = (c, s) => TryParseUShort(s).DoIfSuccess(v => c.InitialHandSize = v.Value),
                 ["MinCenterRowSize"] = (c, s) => TryParseUShort(s, 1, 10).DoIfSuccess(v => c.MinCenterRowSize = v.Value),
                 ["CenterRowPenalty"] = (c, s) => TryParseBool(s).DoIfSuccess(v => c.CenterRowPenalty = v.Value),
+                ["DrawEndsTurn"] = (c, s) => TryParseBool(s).DoIfSuccess(v => c.DrawEndsTurn = v.Value),
                 ["UseImages"] = (c, s) => TryParseBool(s).DoIfSuccess(v => c.UseImages = v.Value)
             };
 
@@ -43,6 +45,7 @@ namespace Dos.DiscordBot
             $"MinCenterRowSize     {MinCenterRowSize}\n" +
             "\n" +
             $"CenterRowPenalty     {CenterRowPenalty.ToString().ToLower()}\n" +
+            $"DrawEndsTurn         {DrawEndsTurn.ToString().ToLower()}\n" +
             "\n" +
             $"UseImages            {UseImages.ToString().ToLower()}\n" +
             "```";
