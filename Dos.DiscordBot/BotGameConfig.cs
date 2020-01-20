@@ -30,6 +30,11 @@ namespace Dos.DiscordBot
                 ["MinCenterRowSize"] = (c, s) => TryParseUShort(s, 1, 10).DoIfSuccess(v => c.MinCenterRowSize = v.Value),
                 ["CenterRowPenalty"] = (c, s) => TryParseBool(s).DoIfSuccess(v => c.CenterRowPenalty = v.Value),
                 ["DrawEndsTurn"] = (c, s) => TryParseBool(s).DoIfSuccess(v => c.DrawEndsTurn = v.Value),
+                ["AllRules"] = (c, s) => TryParseBool(s).DoIfSuccess(v =>
+                {
+                    c.CenterRowPenalty = v.Value;
+                    c.DrawEndsTurn = v.Value;
+                }),
                 ["UseImages"] = (c, s) => TryParseBool(s).DoIfSuccess(v => c.UseImages = v.Value)
             };
 
