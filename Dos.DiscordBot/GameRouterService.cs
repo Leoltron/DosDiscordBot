@@ -40,7 +40,7 @@ namespace Dos.DiscordBot
 
             var createdGame = gamesByChannel[channel.Id] = CreateNewGame(guild, channel, player);
             DeleteIfNoActivity(channel, InactiveGameTimeout);
-            return Result.Success("You have created a game with following configuration: \n" +
+            return Result.Success("You have created a game with following configuration (change with `dos config <key> <value>`): \n" +
                                   createdGame.Config.ToDiscordTable() +
                                   "\n Wait for others to join or start with `dos start`");
         }
