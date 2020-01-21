@@ -74,15 +74,11 @@ namespace Dos.Game
                       .ToList();
 
         private int CenterRowSizeAtTurnStart { get; set; }
-        private int MatchCount { get; set; }
+        public int MatchCount { get; set; }
 
         public Result MatchCenterRowCard(int player, Card target, params Card[] cardsToPlay) =>
             CurrentState.MatchCenterRowCard(player, target, cardsToPlay)
-                        .DoIfSuccess(_ =>
-                         {
-                             MatchCount++;
-                             PlayerMatchedCard?.Invoke(player, cardsToPlay, target);
-                         });
+                        .DoIfSuccess(_ => PlayerMatchedCard?.Invoke(player, cardsToPlay, target));
 
         public Result EndTurn(int player) => CurrentState.EndTurn(player);
 

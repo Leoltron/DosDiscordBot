@@ -66,6 +66,8 @@ namespace Dos.Game.State.Base
                     if (i != CurrentPlayer)
                         Game.DealCards(i, drawCount, false);
 
+            Game.MatchCount++;
+
             if (CurrentPlayerHand.IsEmpty())
             {
                 Game.SetFinished();
