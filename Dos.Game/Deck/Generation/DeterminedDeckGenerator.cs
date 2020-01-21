@@ -7,7 +7,10 @@ namespace Dos.Game.Deck.Generation
     {
         private readonly Card[] deck;
 
-        public DeterminedDeckGenerator(Card[] deck) => this.deck = deck;
+        public DeterminedDeckGenerator(Card[] deck)
+        {
+            this.deck = deck;
+        }
 
         public Card[] Generate()
         {

@@ -6,7 +6,10 @@ namespace Dos.Game.State
 {
     public class JustDrewCardState : BaseCurrentPlayerState
     {
-        public JustDrewCardState(GameState gameState) : base(gameState) => DrewCard = true;
+        public JustDrewCardState(GameState gameState) : base(gameState)
+        {
+            DrewCard = true;
+        }
 
         protected override Result CurrentPlayerAddCardToCenterRow(Card card)
         {

@@ -70,11 +70,36 @@ namespace Dos.Utils
             this IEnumerable<ValueTuple<TKey, TValue>> enumerable) =>
             enumerable.ToDictionary(t => t.Item1, t => t.Item2);
 
-        public static bool IsNullOrWhiteSpace(this string s) => string.IsNullOrWhiteSpace(s);
-        public static bool IsNullOrEmpty(this string s) => string.IsNullOrEmpty(s);
-
         public static Dictionary<TKey, TValue> UnionWith<TKey, TValue>(this IDictionary<TKey, TValue> one,
                                                                        IDictionary<TKey, TValue> other) =>
             new Dictionary<TKey, TValue>(one.Concat(other));
+
+        public static IEnumerable<T> TakeWhileNotNull<T>(this IEnumerable<T?> source) where T : struct
+        {
+            foreach (var element in source)
+                if (element.HasValue)
+                    yield return element.Value;
+                else
+                    yield break;
+        }
+
+        public static IEnumerable<IList<T>> ToChunks<T>(this IEnumerable<T> source, int maxChunkSize)
+        {
+            if (maxChunkSize <= 0)
+                throw new ArgumentOutOfRangeException(nameof(maxChunkSize), maxChunkSize, "Expected positive value");
+
+            var list = new List<T>(maxChunkSize);
+            foreach (var element in source)
+            {
+                list.Add(element);
+                if (list.Count != maxChunkSize)
+                    continue;
+                yield return list;
+                list = new List<T>(maxChunkSize);
+            }
+
+            if (list.Count != 0)
+                yield return list;
+        }
     }
 }

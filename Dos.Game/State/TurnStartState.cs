@@ -16,7 +16,25 @@ namespace Dos.Game.State
 
         protected override Result CurrentPlayerDraw()
         {
+            if (Game.Config.DrawEndsTurn)
+            {
+                Game.CurrentState = new AddingToCenterRowState(this, 0);
+                string message;
+                if (!Game.Config.CenterRowPenalty)
+                {
+                    Game.CurrentPlayerPenalty += 1;
+                    message = "Here's your card. Also, skip a turn.";
+                }
+                else
+                    message = "Skip a turn.";
+                
+                Game.CurrentState.EndTurn(CurrentPlayer);
+                
+                return Result.Success(message);
+            }
+            
             Game.DealCard(CurrentPlayer);
+
             Game.CurrentState = new JustDrewCardState(this);
 
             return Result.Success("Here's your card. Now make a match or place one card to the Center Row.");

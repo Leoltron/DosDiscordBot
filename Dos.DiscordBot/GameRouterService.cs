@@ -12,16 +12,21 @@ namespace Dos.DiscordBot
 {
     public class GameRouterService
     {
-        private static readonly TimeSpan InactiveGameTimeout = TimeSpan.FromMinutes(1);
+        private static readonly TimeSpan InactiveGameTimeout = TimeSpan.FromMinutes(5);
 
         private readonly ConcurrentDictionary<ulong, DiscordDosGame> gamesByChannel =
             new ConcurrentDictionary<ulong, DiscordDosGame>();
 
         private readonly ILogger logger;
 
-        public GameRouterService(ILogger logger) => this.logger = logger;
+        public GameRouterService(ILogger logger)
+        {
+            this.logger = logger;
+        }
 
-        public bool PreventStartNewGames { get; private set; } = false;
+        public bool PreventStartNewGames { get; private set; }
+
+        public int GetActiveGamesCount => gamesByChannel.Count(pair => !pair.Value.IsFinished);
 
         public event Action LastGameEnded;
 
@@ -31,13 +36,13 @@ namespace Dos.DiscordBot
                 return await gameWrapper.JoinAsync(player).ConfigureAwait(false);
 
             if (PreventStartNewGames)
-            {
                 return Result.Fail("Bot is waiting for all active games to end to restart.");
-            }
 
-            gamesByChannel[channel.Id] = CreateNewGame(guild, channel, player);
+            var createdGame = gamesByChannel[channel.Id] = CreateNewGame(guild, channel, player);
             DeleteIfNoActivity(channel, InactiveGameTimeout);
-            return Result.Success("You have created a game! Wait for others to join or start with `dos start`");
+            return Result.Success("You have created a game with following configuration (change with `dos config <key> <value>`): \n" +
+                                  createdGame.Config.ToDiscordTable() +
+                                  "\n Wait for others to join or start with `dos start`");
         }
 
         private DiscordDosGame CreateNewGame(IGuild guild, ISocketMessageChannel channel, IUser player)
@@ -63,9 +68,7 @@ namespace Dos.DiscordBot
             gamesByChannel.TryRemove(channel.Id, out _);
 
             if (GetActiveGamesCount == 0)
-            {
                 LastGameEnded?.Invoke();
-            }
         }
 
         private async void DeleteIfNoActivity(ISocketMessageChannel channel, TimeSpan timeout)
@@ -98,8 +101,6 @@ namespace Dos.DiscordBot
         {
             PreventStartNewGames = true;
         }
-
-        public int GetActiveGamesCount => gamesByChannel.Count(pair => !pair.Value.IsFinished);
 
         public IEnumerable<DiscordDosGameInfo>
             GetRunningGamesInfo() => gamesByChannel.Select(pair => pair.Value)

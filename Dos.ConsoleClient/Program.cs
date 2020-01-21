@@ -18,9 +18,11 @@ namespace Dos.ConsoleClient
             {
                 var line = Console.ReadLine();
                 line = line?.ToLowerInvariant().Trim();
-                if (line == "quit") return;
+                if (line == "quit")
+                    return;
 
-                if (string.IsNullOrWhiteSpace(line)) continue;
+                if (string.IsNullOrWhiteSpace(line))
+                    continue;
 
                 if (line == "dos cards" || line == "dosc")
                 {
@@ -59,11 +61,13 @@ namespace Dos.ConsoleClient
                                 continue;
                             }
 
-                            if (CardParser.TryParse(cardWord, out var card)) cards.Add(card);
+                            if (CardParser.TryParse(cardWord, out var card))
+                                cards.Add(card);
                         }
                         else
                         {
-                            if (CardParser.TryParse(cardWord, out var card)) target = card;
+                            if (CardParser.TryParse(cardWord, out var card))
+                                target = card;
 
                             break;
                         }
@@ -90,7 +94,8 @@ namespace Dos.ConsoleClient
         {
             card = Card.WildDos;
             var match = shortCardRegex.Match(cardString);
-            if (!match.Success) return false;
+            if (!match.Success)
+                return false;
 
             card = ParseValue(match.Groups["value"].Value).Of(ParseColor(match.Groups["color"].Value));
             return true;

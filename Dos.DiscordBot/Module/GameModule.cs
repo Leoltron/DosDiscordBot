@@ -13,7 +13,10 @@ namespace Dos.DiscordBot.Module
     {
         private readonly GameRouterService gameRouterService;
 
-        public GameModule(GameRouterService gameRouterService) => this.gameRouterService = gameRouterService;
+        public GameModule(GameRouterService gameRouterService)
+        {
+            this.gameRouterService = gameRouterService;
+        }
 
         private DiscordDosGame Game => Context.GetGame();
 
@@ -97,5 +100,35 @@ namespace Dos.DiscordBot.Module
         [StartedGameRequired]
         [Command("callout", true)]
         public async Task Callout() => await ReplyIfHasMessageAsync(await Game.CalloutAsync(Context.User));
+
+        [CreatedGameRequired]
+        [Command("config")]
+        public async Task GetConfig()
+        {
+            await Context.Channel.SendMessageAsync(Game.Config.ToDiscordTable());
+        }
+
+        [Command("config")]
+        public async Task GetConfigDescription(string key)
+        {
+            await Context.Channel.SendMessageAsync(BotGameConfig.GetDescription(key));
+        }
+
+        [NotStartedGameRequired]
+        [Command("config")]
+        public async Task SetConfig(string key, string value)
+        {
+            if (Game.Owner.Id != Context.User.Id)
+            {
+                await Context.Channel.SendMessageAsync($"Sorry, but only game's owner **{Game.Owner.Username}** can change config");
+                return;
+            }
+            
+            var result = Game.Config.Set(key, value);
+            if (result.IsFail)
+                await Context.Channel.SendMessageAsync(result.Message);
+            else
+                await GetConfig();
+        }
     }
 }

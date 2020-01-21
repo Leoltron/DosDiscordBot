@@ -4,10 +4,10 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Dos.DiscordBot.Util;
 using Dos.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
-using Serilog.Core;
 
 namespace Dos.DiscordBot.Commands
 {
@@ -30,8 +30,9 @@ namespace Dos.DiscordBot.Commands
 
         public async Task InstallCommandsAsync()
         {
-            client.MessageReceived += HandleCommandAsync;
             commands.CommandExecuted += OnCommandExecutedAsync;
+            commands.Log += Log;
+            client.MessageReceived += HandleCommandAsync;
             client.ChannelDestroyed += c =>
             {
                 if (c is ISocketMessageChannel smc)
@@ -42,33 +43,40 @@ namespace Dos.DiscordBot.Commands
             await commands.AddModulesAsync(Assembly.GetEntryAssembly(), serviceProvider);
         }
 
+        private Task Log(LogMessage msg)
+        {
+            logger.Write(msg.Severity.ToLogLevel(), msg.Exception, $"[{msg.Source}] {msg.Message}");
+            return Task.CompletedTask;
+        }
+
         private async Task HandleCommandAsync(SocketMessage messageParam)
         {
-            if (!(messageParam is SocketUserMessage message)) return;
+            if (!(messageParam is SocketUserMessage message))
+                return;
 
             var argPos = 0;
             if (!message.HasStringPrefix("dos", ref argPos, StringComparison.InvariantCultureIgnoreCase) ||
                 message.Author.IsBot)
                 return;
 
-            if (argPos < message.Content.Length && message.Content[argPos] == ' ') argPos++;
+            while (argPos < message.Content.Length && message.Content[argPos] == ' ')
+                argPos++;
 
             var context = new DosCommandContext(client, message)
             {
                 DosGame = gameRouterService.TryFindGameByChannel(message.Channel)
             };
 
-            try
+            int nextArgPos;
+            if ((nextArgPos = message.Content.IndexOf("&&", StringComparison.InvariantCulture)) != -1)
             {
-                await commands.ExecuteAsync(context, argPos, serviceProvider);
-                if ((argPos = message.Content.IndexOf("&&", StringComparison.InvariantCulture)) != -1)
-                    await commands.ExecuteAsync(context, argPos + 2, serviceProvider);
+                nextArgPos += 2;
+                while (nextArgPos < message.Content.Length && message.Content[nextArgPos] == ' ')
+                    nextArgPos++;
+                context.NextCommandArgPos = nextArgPos;
             }
-            catch (Exception e)
-            {
-                logger.Error(e, "An error occured during execution of a command:");
-                throw;
-            }
+
+            await commands.ExecuteAsync(context, argPos, serviceProvider);
         }
 
         private async Task OnCommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context,
@@ -78,21 +86,24 @@ namespace Dos.DiscordBot.Commands
 
             if (!result.IsSuccess && result.Error != CommandError.UnknownCommand)
             {
-                if (result.Error == CommandError.Exception)
-                {
-                    logger.Error(
-                        $"[{context.Guild?.Name ?? "DM"} - #{context.Channel.Name}] " +
-                        $"{commandName} was executed with an exception: {result}");
-                }
-
-                if (!result.ErrorReason.IsNullOrEmpty())
-                {
+                if (result.Error != CommandError.Exception && !result.ErrorReason.IsNullOrEmpty())
                     await context.Channel.SendMessageAsync(result.ErrorReason);
-                }
             }
             else
+            {
                 logger.Information($"[{context.Guild?.Name ?? "DM"} - #{context.Channel.Name}] " +
-                                   $"{commandName} was executed.");
+                                   $"{commandName} was executed by {context.User.DiscordTag()}.");
+            }
+
+            if (context is DosCommandContext dosContext)
+            {
+                var nextArgPos = dosContext.NextCommandArgPos;
+                if (result.IsSuccess && nextArgPos.HasValue)
+                {
+                    dosContext.NextCommandArgPos = null;
+                    await commands.ExecuteAsync(dosContext, nextArgPos.Value, serviceProvider);
+                }
+            }
         }
     }
 }

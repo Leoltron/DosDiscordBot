@@ -8,8 +8,10 @@ namespace Dos.Game.State
     {
         private static readonly Result MatchingFail = Result.Fail("You are already finished matching cards");
 
-        public AddingToCenterRowState(GameState gameState, int cardsToAdd) : base(gameState) =>
+        public AddingToCenterRowState(GameState gameState, int cardsToAdd) : base(gameState)
+        {
             CardsToAdd = cardsToAdd;
+        }
 
         protected override Result CurrentPlayerMatchCenterRowCard(Card target, Card[] cardsToPlay) =>
             MatchingFail;

@@ -6,11 +6,6 @@ namespace Dos.DiscordBot
 {
     public class DiscordDosGameInfo
     {
-        public string ServerName { get; }
-        public DateTime CreateDate { get; }
-        public ISocketMessageChannel Channel { get; }
-        public IUser Owner { get; }
-
         public DiscordDosGameInfo(string serverName, DateTime date, ISocketMessageChannel channel, IUser owner)
         {
             ServerName = serverName;
@@ -18,5 +13,10 @@ namespace Dos.DiscordBot
             Channel = channel;
             Owner = owner;
         }
+
+        public string ServerName { get; }
+        public DateTime CreateDate { get; }
+        public ISocketMessageChannel Channel { get; }
+        public IUser Owner { get; }
     }
 }

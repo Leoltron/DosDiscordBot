@@ -30,9 +30,7 @@ namespace Dos.DiscordBot.Module
             var runningGames = gameRouterService.GetRunningGamesInfo().ToList();
 
             if (runningGames.IsEmpty())
-            {
                 return Context.Channel.SendMessageAsync("No running games right now.");
-            }
 
             var message = new StringBuilder($"Currently running games ({runningGames.Count}):");
             foreach (var gameInfo in runningGames)
