@@ -37,7 +37,7 @@ namespace Dos.Game.State.Base
                 return Result.Fail($"{target} cannot be matched with {string.Join(" and ", cardsToPlay)}");
 
             if (!Game.centerRow.Contains(target))
-                return Result.Fail($"{target} is not present at the Central Row");
+                return Result.Fail($"{target} is not present at the Center Row");
 
             var additional = Game.centerRowAdditional
                                  .Where((e, i) => Game.centerRow[i] == target && e.IsEmpty())
