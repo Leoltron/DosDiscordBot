@@ -10,14 +10,14 @@ namespace Dos.DiscordBot
         private static readonly Dictionary<string, string> Descriptions =
             new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
-                ["Decks"] = "Decks description",
-                ["CalloutPenalty"] = "CalloutPenalty description",
-                ["FalseCalloutPenalty"] = "FalseCalloutPenalty description",
-                ["InitialHandSize"] = "InitialHandSize description",
-                ["MinCenterRowSize"] = "MinCenterRowSize description",
-                ["CenterRowPenalty"] = "CenterRowPenalty description",
-                ["DrawEndsTurn"] = "DrawEndsTurn description",
-                ["UseImages"] = "UseImages description"
+                ["Decks"] = "Amount of decks used in game",
+                ["CalloutPenalty"] = "Penalty for being called out for not saying DOS while having two cards",
+                ["FalseCalloutPenalty"] = "Penalty for false callout",
+                ["InitialHandSize"] = "Amount of cards given to the players at the start of the game",
+                ["MinCenterRowSize"] = "Minimal amount of cards on the center row.",
+                ["CenterRowPenalty"] = "Enables **Center Row Penalty*** house rule: at the end of your turn, draw as much cards as you left unmatched in the center row",
+                ["DrawEndsTurn"] = "Enables **Draw Ends Turn** house rule: if you draw a card, your turn ends immediately",
+                ["UseImages"] = "If enabled, images will be used instead of text to show cards"
             };
 
         private static readonly Dictionary<string, Func<BotGameConfig, string, Result>> Setters =
