@@ -13,7 +13,7 @@ namespace Dos.DiscordBot
     {
         public const string AdminDiscordTag = "Leoltron#9479";
 
-        private const string VersionStatus = "v1.1.0 (21.01.2020)";
+        private const string VersionStatus = "v1.1.1 (23.01.2020)";
 
         private readonly ILogger logger = new LoggerConfiguration()
                                          .WriteTo.Console(LogEventLevel.Information)

@@ -64,7 +64,7 @@ namespace Dos.Game.Extensions
         public static MatchType MatchWith(this Card target, Card first, Card second)
         {
             if (target.Value.Matches(first.Value, second.Value))
-                return target.Color.Matches(first.Color) && target.Color.Matches(second.Color)
+                return target.Color.Matches(first.Color) && target.Color.Matches(second.Color) && first.Color.Matches(second.Color)
                     ? MatchType.DoubleColorMatch
                     : MatchType.DoubleMatch;
 
