@@ -21,7 +21,7 @@ namespace Dos.DiscordBot.Module
             "**dos config <key> <val>**- set configuration value\n" +
             "\n" +
             "**dos draw**              - draw card\n" +
-            "**dos select <card>**     - select card to match with\n" +
+            "**dos select <card>**     - select card from Center Row to match with\n" +
             "**dos match <card(s)>**   - match cards with selected one\n" +
             "**dos add card**          - add a card to the Center Row\n" +
             "**dos done**              - finish your turn. You can also use this to explicitly finish matching and refill Center Row before adding cards to it. \n" +
