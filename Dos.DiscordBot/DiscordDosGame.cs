@@ -96,7 +96,7 @@ namespace Dos.DiscordBot
                                      Players.Count,
                                      Config)
                 {
-                    PlayerNames = PlayerIds.Select((id, i) => (i, Players[id].Username)).ToDictionary(),
+                    PlayerNames = PlayerIds.Select((id, i) => (i, Players[id].Username)).ToDictionary()
                 };
                 Game.Finished += Finished;
 
@@ -161,9 +161,7 @@ namespace Dos.DiscordBot
                 {
                     var messageBuilder = new StringBuilder();
                     foreach (var (player, cardsCount) in Game.HandsTable)
-                    {
                         messageBuilder.Append($"{player} - {cardsCount} {(cardsCount == 1 ? "card" : "cards")}\n");
-                    }
 
                     await Info.Channel.SendMessageAsync(messageBuilder.ToString());
                 }

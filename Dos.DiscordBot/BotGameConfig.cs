@@ -15,8 +15,10 @@ namespace Dos.DiscordBot
                 ["FalseCalloutPenalty"] = "Penalty for false callout",
                 ["InitialHandSize"] = "Amount of cards given to the players at the start of the game",
                 ["MinCenterRowSize"] = "Minimal amount of cards on the center row.",
-                ["CenterRowPenalty"] = "Enables **Center Row Penalty*** house rule: at the end of your turn, draw as much cards as you left unmatched in the center row",
-                ["DrawEndsTurn"] = "Enables **Draw Ends Turn** house rule: if you draw a card, your turn ends immediately",
+                ["CenterRowPenalty"] =
+                    "Enables **Center Row Penalty*** house rule: at the end of your turn, draw as much cards as you left unmatched in the center row",
+                ["DrawEndsTurn"] =
+                    "Enables **Draw Ends Turn** house rule: if you draw a card, your turn ends immediately",
                 ["UseImages"] = "If enabled, images will be used instead of text to show cards"
             };
 
@@ -27,7 +29,8 @@ namespace Dos.DiscordBot
                 ["CalloutPenalty"] = (c, s) => TryParseUShort(s).DoIfSuccess(v => c.CalloutPenalty = v.Value),
                 ["FalseCalloutPenalty"] = (c, s) => TryParseUShort(s).DoIfSuccess(v => c.FalseCalloutPenalty = v.Value),
                 ["InitialHandSize"] = (c, s) => TryParseUShort(s).DoIfSuccess(v => c.InitialHandSize = v.Value),
-                ["MinCenterRowSize"] = (c, s) => TryParseUShort(s, 1, 10).DoIfSuccess(v => c.MinCenterRowSize = v.Value),
+                ["MinCenterRowSize"] =
+                    (c, s) => TryParseUShort(s, 1, 10).DoIfSuccess(v => c.MinCenterRowSize = v.Value),
                 ["CenterRowPenalty"] = (c, s) => TryParseBool(s).DoIfSuccess(v => c.CenterRowPenalty = v.Value),
                 ["DrawEndsTurn"] = (c, s) => TryParseBool(s).DoIfSuccess(v => c.DrawEndsTurn = v.Value),
                 ["AllRules"] = (c, s) => TryParseBool(s).DoIfSuccess(v =>

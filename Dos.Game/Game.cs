@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using Dos.Game.Deck.Generation;
 using Dos.Game.Extensions;
 using Dos.Game.Model;
@@ -13,6 +12,8 @@ namespace Dos.Game
 {
     public class Game : IGame
     {
+        public delegate void OnPlayerSwitched(int nextPlayer, int unmatchedCardsCount);
+
         public List<Card> centerRow = new List<Card>(8);
         public List<List<Card>> centerRowAdditional = new List<List<Card>>(8);
         public int CurrentPlayerPenalty;
@@ -22,8 +23,6 @@ namespace Dos.Game
 
         public List<Card>[] playerHands;
         public int? PlayerWhoDidNotCallDos;
-
-        public GameConfig Config { get; }
 
         public Game(IDeckGenerator deckGenerator, int playersCount, ushort initialHandSize) : this(
             deckGenerator, playersCount, new GameConfig {InitialHandSize = initialHandSize})
@@ -48,6 +47,8 @@ namespace Dos.Game
             CurrentState = new TurnStartState(this);
             CenterRowSizeAtTurnStart = centerRow.Count;
         }
+
+        public GameConfig Config { get; }
 
         public GameState CurrentState { get; set; }
 
@@ -102,8 +103,6 @@ namespace Dos.Game
         public Result CallDos(int caller) => AllowCallouts
             ? CurrentState.CallDos(caller).DoIfSuccess(_ => DosCall?.Invoke(caller))
             : Result.Fail();
-
-        public delegate void OnPlayerSwitched(int nextPlayer, int unmatchedCardsCount);
 
         public event OnPlayerSwitched PlayerSwitched;
         public event Action<int, Card[]> PlayerReceivedCards;

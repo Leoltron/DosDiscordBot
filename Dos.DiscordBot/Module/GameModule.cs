@@ -120,10 +120,11 @@ namespace Dos.DiscordBot.Module
         {
             if (Game.Owner.Id != Context.User.Id)
             {
-                await Context.Channel.SendMessageAsync($"Sorry, but only game's owner **{Game.Owner.Username}** can change config");
+                await Context.Channel.SendMessageAsync(
+                    $"Sorry, but only game's owner **{Game.Owner.Username}** can change config");
                 return;
             }
-            
+
             var result = Game.Config.Set(key, value);
             if (result.IsFail)
                 await Context.Channel.SendMessageAsync(result.Message);

@@ -26,13 +26,15 @@ namespace Dos.Game.State
                     message = "Here's your card. Also, skip a turn.";
                 }
                 else
+                {
                     message = "Skip a turn.";
-                
+                }
+
                 Game.CurrentState.EndTurn(CurrentPlayer);
-                
+
                 return Result.Success(message);
             }
-            
+
             Game.DealCard(CurrentPlayer);
 
             Game.CurrentState = new JustDrewCardState(this);

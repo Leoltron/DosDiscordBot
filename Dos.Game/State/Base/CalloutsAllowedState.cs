@@ -18,8 +18,9 @@ namespace Dos.Game.State.Base
             {
                 Punish(caller, Config.FalseCalloutPenalty);
                 return Config.FalseCalloutPenalty > 0
-                    ? Result.Fail($"False callout! {Game.GetPlayerName(caller)}, draw {Config.FalseCalloutPenalty} more" +
-                                  (caller == Game.CurrentPlayer ? " after you turn ends." : "."))
+                    ? Result.Fail(
+                        $"False callout! {Game.GetPlayerName(caller)}, draw {Config.FalseCalloutPenalty} more" +
+                        (caller == Game.CurrentPlayer ? " after you turn ends." : "."))
                     : Result.Fail("False callout!");
             }
 

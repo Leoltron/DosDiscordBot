@@ -12,7 +12,7 @@ namespace Dos.DiscordBot.Module
         private const string HelpMessage =
             "**dos help**              - print this message\n" +
             "**dos ping**              - Pong!\n" +
-            "\n" + 
+            "\n" +
             "**dos join**              - create a game or join existing\n" +
             "**dos quit**              - quit a game\n" +
             "**dos start**             - start a game\n" +
