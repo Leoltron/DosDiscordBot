@@ -46,44 +46,42 @@ namespace Dos.DiscordBot.Util
             var totalWidth = 0;
             var trashCan = new DisposableList();
 
-            using (var images = new MagickImageCollection())
+            using var images = new MagickImageCollection();
+            foreach (var image in imageEnumerable)
             {
-                foreach (var image in imageEnumerable)
+                if (separator != null)
                 {
-                    if (separator != null)
-                    {
-                        var separatorClone = separator.Clone();
-                        images.Add(separatorClone);
-                        trashCan.Add(separatorClone);
-                        totalWidth += separatorWidth;
-                    }
-                    else
-                    {
-                        separator = new MagickImage(MagickColors.Transparent, separatorWidth, image.Height);
-                        trashCan.Add(separator);
-                    }
-
-                    images.Add(image);
-                    trashCan.Add(image);
-                    totalWidth += image.Width;
+                    var separatorClone = separator.Clone();
+                    images.Add(separatorClone);
+                    trashCan.Add(separatorClone);
+                    totalWidth += separatorWidth;
+                }
+                else
+                {
+                    separator = new MagickImage(MagickColors.Transparent, separatorWidth, image.Height);
+                    trashCan.Add(separator);
                 }
 
-                if (totalWidth < minWidth)
-                {
-                    var filler = new MagickImage(MagickColors.Transparent, minWidth - totalWidth,
-                                                 separator?.Height ?? 20);
-                    images.Add(filler);
-                    trashCan.Add(filler);
-                }
+                images.Add(image);
+                trashCan.Add(image);
+                totalWidth += image.Width;
+            }
 
-                using (trashCan)
-                using (var result = images.AppendHorizontally())
-                {
-                    var stream = new MemoryStream();
-                    result.Write(stream, MagickFormat.Png);
-                    stream.Seek(0, SeekOrigin.Begin);
-                    return stream;
-                }
+            if (totalWidth < minWidth)
+            {
+                var filler = new MagickImage(MagickColors.Transparent, minWidth - totalWidth,
+                                             separator?.Height ?? 20);
+                images.Add(filler);
+                trashCan.Add(filler);
+            }
+
+            using (trashCan)
+            {
+                using var result = images.AppendHorizontally();
+                var stream = new MemoryStream();
+                result.Write(stream, MagickFormat.Png);
+                stream.Seek(0, SeekOrigin.Begin);
+                return stream;
             }
         }
 
@@ -98,23 +96,19 @@ namespace Dos.DiscordBot.Util
             if (images.Count == 1)
                 return images[0];
 
-            using (var imageCollection = new MagickImageCollection())
+            using var imageCollection = new MagickImageCollection();
+            imageCollection.Add(images[0]);
+            var xOffset = images[0].Width / 2;
+
+            foreach (var image in images.Skip(1))
             {
-                imageCollection.Add(images[0]);
-                var xOffset = images[0].Width / 2;
-
-                foreach (var image in images.Skip(1))
-                {
-                    image.Page = new MagickGeometry(xOffset, 0, 100, 100);
-                    imageCollection.Add(image);
-                    xOffset += image.Width / 2;
-                }
-
-                using (var mosaic = imageCollection.Mosaic())
-                {
-                    return new MagickImage(mosaic);
-                }
+                image.Page = new MagickGeometry(xOffset, 0, 100, 100);
+                imageCollection.Add(image);
+                xOffset += image.Width / 2;
             }
+
+            using var mosaic = imageCollection.Mosaic();
+            return new MagickImage(mosaic);
         }
     }
 }

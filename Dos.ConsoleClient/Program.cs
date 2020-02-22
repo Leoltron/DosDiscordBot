@@ -85,14 +85,14 @@ namespace Dos.ConsoleClient
         private const string ValueShort = "(?<value>[1-9ds#]|10)";
         private const string ColorShort = "(?<color>w|g|b|y|r)";
 
-        public static readonly Regex shortCardRegex =
+        public static readonly Regex ShortCardRegex =
             new Regex($"^(?:(?:{ColorShort}{ValueShort})|(?:{ValueShort}{ColorShort}))$",
                       RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         public static bool TryParse(string cardString, out Card card)
         {
             card = Card.WildDos;
-            var match = shortCardRegex.Match(cardString);
+            var match = ShortCardRegex.Match(cardString);
             if (!match.Success)
                 return false;
 

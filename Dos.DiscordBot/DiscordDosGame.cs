@@ -112,9 +112,9 @@ namespace Dos.DiscordBot
                 Game.PlayerMatchedCard += (i, cards, target) =>
                     LogInfo($"{User(i).DiscordTag()} put {string.Join(" and ", cards)} to {target}");
 
-                LogInfo($"Game started, Center Row: {string.Join(", ", Game.centerRow)}");
+                LogInfo($"Game started, Center Row: {string.Join(", ", Game.CenterRow)}");
                 for (var i = 0; i < Players.Count; i++)
-                    LogInfo($"{User(i).DiscordTag()}'s hand: {Game.playerHands[i].ToLogString()}");
+                    LogInfo($"{User(i).DiscordTag()}'s hand: {Game.PlayerHands[i].ToLogString()}");
 
                 return Result.Success();
             }
@@ -168,7 +168,7 @@ namespace Dos.DiscordBot
                 await Info.Channel.SendMessageAsync("**Center Row:**");
                 if (useImages)
                     await Info.Channel.SendCardsAsync(
-                        Game.centerRow.Select((c, i) => Game.centerRowAdditional[i].Prepend(c).ToList()));
+                        Game.CenterRow.Select((c, i) => Game.CenterRowAdditional[i].Prepend(c).ToList()));
                 else
                     await Info.Channel.SendMessageAsync(string.Join("\n", Game.GameTableLines()));
 
@@ -185,7 +185,7 @@ namespace Dos.DiscordBot
             var player = Players[id];
             try
             {
-                await player.SendCardsAsync(Game.playerHands[playerIndex], Config.UseImages);
+                await player.SendCardsAsync(Game.PlayerHands[playerIndex], Config.UseImages);
             }
             catch (Exception e)
             {
@@ -248,7 +248,7 @@ namespace Dos.DiscordBot
                     return Result.Fail("If you want to select card, you need to tell me which one");
 
                 var card = matchResult.Value.First();
-                if (!Game.centerRow.Contains(card))
+                if (!Game.CenterRow.Contains(card))
                     return Result.Fail($"There's no **{card}** in the Center Row");
 
                 selectedCenterRowCard = card;

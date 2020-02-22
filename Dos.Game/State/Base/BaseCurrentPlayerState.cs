@@ -36,11 +36,11 @@ namespace Dos.Game.State.Base
             if (matchType == MatchType.NoMatch)
                 return Result.Fail($"{target} cannot be matched with {string.Join(" and ", cardsToPlay)}");
 
-            if (!Game.centerRow.Contains(target))
+            if (!Game.CenterRow.Contains(target))
                 return Result.Fail($"{target} is not present at the Center Row");
 
-            var additional = Game.centerRowAdditional
-                                 .Where((e, i) => Game.centerRow[i] == target && e.IsEmpty())
+            var additional = Game.CenterRowAdditional
+                                 .Where((e, i) => Game.CenterRow[i] == target && e.IsEmpty())
                                  .FirstOrDefault();
 
             if (additional == null)
@@ -79,7 +79,7 @@ namespace Dos.Game.State.Base
 
             Game.CurrentState = new BaseCurrentPlayerState(this);
 
-            return Game.centerRowAdditional.All(c => c.Any()) && CardsToAdd == 0
+            return Game.CenterRowAdditional.All(c => c.Any()) && CardsToAdd == 0
                 ? Result.Success(matchType.DefaultResult().AddText(CurrentPlayerEndTurn().Message).Message)
                 : Result.Success(matchType.DefaultResult().Message);
         }
@@ -112,14 +112,14 @@ namespace Dos.Game.State.Base
 
         private void ClearMatchedCardsFromCenterRow()
         {
-            for (var i = 0; i < Game.centerRow.Count; i++)
+            for (var i = 0; i < Game.CenterRow.Count; i++)
             {
-                if (Game.centerRowAdditional[i].IsEmpty())
+                if (Game.CenterRowAdditional[i].IsEmpty())
                     continue;
-                Game.Dealer.DiscardCard(Game.centerRow[i]);
-                Game.centerRow.RemoveAt(i);
-                Game.Dealer.DiscardCards(Game.centerRowAdditional[i]);
-                Game.centerRowAdditional.RemoveAt(i);
+                Game.Dealer.DiscardCard(Game.CenterRow[i]);
+                Game.CenterRow.RemoveAt(i);
+                Game.Dealer.DiscardCards(Game.CenterRowAdditional[i]);
+                Game.CenterRowAdditional.RemoveAt(i);
                 i--;
             }
         }
@@ -136,8 +136,8 @@ namespace Dos.Game.State.Base
                 return Result.Fail($"You don't have {card}");
 
             CurrentPlayerHand.Remove(card);
-            Game.centerRow.Add(card);
-            Game.centerRowAdditional.Add(new List<Card>());
+            Game.CenterRow.Add(card);
+            Game.CenterRowAdditional.Add(new List<Card>());
 
             if (CurrentPlayerHand.IsEmpty())
             {
