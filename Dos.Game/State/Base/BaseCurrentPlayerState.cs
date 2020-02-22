@@ -116,9 +116,9 @@ namespace Dos.Game.State.Base
             {
                 if (Game.centerRowAdditional[i].IsEmpty())
                     continue;
-                Game.discardPile.Push(Game.centerRow[i]);
+                Game.Dealer.DiscardCard(Game.centerRow[i]);
                 Game.centerRow.RemoveAt(i);
-                Game.centerRowAdditional[i].ForEach(c => Game.discardPile.Push(c));
+                Game.Dealer.DiscardCards(Game.centerRowAdditional[i]);
                 Game.centerRowAdditional.RemoveAt(i);
                 i--;
             }

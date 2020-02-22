@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Dos.Game.Deck;
-using Dos.Game.Deck.Generation;
 using Dos.Game.Extensions;
 using Dos.Game.Model;
 using Dos.Utils;
@@ -11,9 +10,9 @@ namespace Dos.ConsoleClient
 {
     internal static class Program
     {
-        private static void Main(string[] args)
+        private static void Main()
         {
-            var game = new Game.Game(new ShuffledDeckGenerator(Decks.Classic), 1, 7);
+            var game = new Game.Game(new ShufflingDealer(Decks.Classic), 1, 7);
             while (true)
             {
                 var line = Console.ReadLine();

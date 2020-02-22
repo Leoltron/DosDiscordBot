@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Dos.Game.Deck.Generation;
+using Dos.Game.Deck;
 using Dos.Game.Extensions;
 using Dos.Game.Model;
 using Dos.Game.State;
@@ -18,22 +18,19 @@ namespace Dos.Game
         public List<List<Card>> centerRowAdditional = new List<List<Card>>(8);
         public int CurrentPlayerPenalty;
 
-        public Stack<Card> Deck;
-        public Stack<Card> discardPile;
-
         public List<Card>[] playerHands;
         public int? PlayerWhoDidNotCallDos;
+        public readonly Dealer Dealer;
 
-        public Game(IDeckGenerator deckGenerator, int playersCount, ushort initialHandSize) : this(
-            deckGenerator, playersCount, new GameConfig {InitialHandSize = initialHandSize})
+        public Game(Dealer dealer, int playersCount, ushort initialHandSize) : this(
+            dealer, playersCount, new GameConfig {InitialHandSize = initialHandSize})
         {
         }
 
-        public Game(IDeckGenerator deckGenerator, int playersCount, GameConfig config)
+        public Game(Dealer dealer, int playersCount, GameConfig config)
         {
+            this.Dealer = dealer;
             Config = config;
-            Deck = new Stack<Card>(deckGenerator.Generate());
-            discardPile = new Stack<Card>();
 
             playerHands = new List<Card>[playersCount];
             for (var i = 0; i < playersCount; i++)
@@ -149,24 +146,9 @@ namespace Dos.Game
 
         private Card? DrawCard()
         {
-            if (EnsureDeckHasCards())
-                return Deck.Pop();
+            if (Dealer.CanDealCards)
+                return Dealer.DealCard();
             return null;
-        }
-
-        private bool EnsureDeckHasCards()
-        {
-            if (Deck.Any())
-                return true;
-
-            if (discardPile.IsEmpty())
-                return false;
-
-            var newDeck = discardPile.ToList();
-            newDeck.Shuffle();
-            Deck = new Stack<Card>(newDeck);
-            discardPile.Clear();
-            return true;
         }
 
         public bool RefillCenterRow()

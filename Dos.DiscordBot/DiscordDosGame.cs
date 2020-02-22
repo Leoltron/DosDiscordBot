@@ -8,7 +8,6 @@ using Discord;
 using Discord.WebSocket;
 using Dos.DiscordBot.Util;
 using Dos.Game.Deck;
-using Dos.Game.Deck.Generation;
 using Dos.Game.Extensions;
 using Dos.Game.Model;
 using Dos.Game.State;
@@ -92,7 +91,7 @@ namespace Dos.DiscordBot
                 if (Owner.Id != player.Id)
                     return Result.Fail($"Only owner of this game (**{Owner?.Username}**) can start it");
 
-                Game = new Game.Game(new ShuffledDeckGenerator(Decks.Classic.Times(Config.Decks).ToArray()),
+                Game = new Game.Game(new ShufflingDealer(Decks.Classic.Times(Config.Decks).ToArray()), 
                                      Players.Count,
                                      Config)
                 {

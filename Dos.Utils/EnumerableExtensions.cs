@@ -101,5 +101,12 @@ namespace Dos.Utils
             if (list.Count != 0)
                 yield return list;
         }
+
+        public static T RemoveAtAndReturn<T>(this IList<T> list, int index)
+        {
+            var element = list[index];
+            list.RemoveAt(index);
+            return element;
+        }
     }
 }

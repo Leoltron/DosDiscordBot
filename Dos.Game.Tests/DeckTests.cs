@@ -1,7 +1,5 @@
-using System;
 using System.Linq;
 using Dos.Game.Deck;
-using Dos.Game.Deck.Generation;
 using Dos.Game.Model;
 using FluentAssertions;
 using NUnit.Framework;
@@ -20,13 +18,6 @@ namespace Dos.Game.Tests
         public void TestDeckNumberedColoredCount()
         {
             Decks.Classic.Count(c => c.Color != CardColor.Wild).Should().Be(96);
-        }
-
-        [Test]
-        public void JustShuffle()
-        {
-            var deck = new ShuffledDeckGenerator(Decks.Classic).Generate();
-            Console.WriteLine();
         }
     }
 }
