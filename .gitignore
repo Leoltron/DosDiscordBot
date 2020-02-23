@@ -1,5 +1,8 @@
 bin/
 obj/
 /packages/
-/.idea/
-/DosDiscordBot.sln.DotSettings.user
+.vs
+.idea
+
+*.user
+*.pubxml
