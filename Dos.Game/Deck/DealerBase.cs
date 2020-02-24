@@ -33,9 +33,7 @@ namespace Dos.Game.Deck
         public override Card DealCard()
         {
             if (DrawPile.Any())
-            {
                 return DrawCardFromDrawPile();
-            }
 
             if (DiscardPile.IsEmpty())
                 throw new InvalidOperationException("Cannot deal card: both discard and draw piles are empty");

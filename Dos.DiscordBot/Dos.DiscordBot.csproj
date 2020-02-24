@@ -1,11 +1,9 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<Project Sdk="Microsoft.NET.Sdk;Microsoft.NET.Sdk.Publish">
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <TargetFramework>netcoreapp3.1</TargetFramework>
         <LangVersion>latest</LangVersion>
     </PropertyGroup>
-
     <ItemGroup>
         <PackageReference Include="Discord.Net" Version="2.1.1" />
         <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="7.15.0" />
@@ -13,16 +11,13 @@
         <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
         <PackageReference Include="Serilog.Sinks.File" Version="4.1.0" />
     </ItemGroup>
-
     <ItemGroup>
         <ProjectReference Include="..\Dos.Game\Dos.Game.csproj" />
         <ProjectReference Include="..\Dos.Utils\Dos.Utils.csproj" />
     </ItemGroup>
-
     <ItemGroup>
         <Content Include="Resources\**">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
     </ItemGroup>
-
 </Project>

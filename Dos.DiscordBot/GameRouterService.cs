@@ -91,7 +91,7 @@ namespace Dos.DiscordBot
             if (game == null)
                 return Result.Fail();
 
-            if (!game.Players.ContainsKey(user.Id))
+            if (!game.IdToUserPlayers.ContainsKey(user.Id))
                 return Result.Fail();
 
             TryDeleteGame(channel);

@@ -5,8 +5,7 @@ namespace Dos.Game.Deck
 {
     public class NonShufflingDealer : DealerBase
     {
-
-        public NonShufflingDealer(IEnumerable<Card> cards):base(cards)
+        public NonShufflingDealer(IEnumerable<Card> cards) : base(cards)
         {
         }
 

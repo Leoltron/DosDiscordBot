@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Dos.Game;
 using Dos.Game.Deck;
@@ -14,6 +15,7 @@ namespace Dos.ConsoleClient
         private static void Main()
         {
             var game = new DosGame(new ShufflingDealer(Decks.Classic), 1, 7);
+            var p = game.Players.First();
             while (true)
             {
                 var line = Console.ReadLine();
@@ -26,13 +28,13 @@ namespace Dos.ConsoleClient
 
                 if (line == "dos cards" || line == "dosc")
                 {
-                    Console.WriteLine(string.Join(Environment.NewLine, game.PersonalGameTableLines(0)));
+                    Console.WriteLine(string.Join(Environment.NewLine, game.PersonalGameTableLines(p)));
                     continue;
                 }
 
                 if (line == "dosd")
                 {
-                    Console.WriteLine(game.EndTurn(0));
+                    Console.WriteLine(game.EndTurn(p));
                     continue;
                 }
 
@@ -41,7 +43,7 @@ namespace Dos.ConsoleClient
                     var cardString = line.Substring(9).Trim();
                     Console.WriteLine(
                         CardParser.TryParse(cardString, out var card)
-                            ? game.AddCardToCenterRow(0, card).Message
+                            ? game.AddCardToCenterRow(p, card).Message
                             : $"Did not recognise the card \"{cardString}\", expected something like b9");
                     continue;
                 }
@@ -75,7 +77,7 @@ namespace Dos.ConsoleClient
                     if (cards.IsEmpty() || target == null)
                         Console.WriteLine("Failed to parse your matching cards, sorry");
                     else
-                        Console.WriteLine(game.MatchCenterRowCard(0, target.Value, cards.ToArray()));
+                        Console.WriteLine(game.MatchCenterRowCard(p, target.Value, cards.ToArray()));
                 }
             }
         }
