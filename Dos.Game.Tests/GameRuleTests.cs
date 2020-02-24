@@ -12,12 +12,12 @@ namespace Dos.Game.Tests
     {
         private static readonly Card GreenSharp = CardValue.Sharp.Of(CardColor.Green);
         private static readonly Card[] TwentyGreenSharps = GreenSharp.Repeat(20).ToArray();
-        private Game game;
+        private DosGame game;
 
         [SetUp]
         public void SetUp()
         {
-            game = new Game(new NonShufflingDealer(TwentyGreenSharps), 1, 7);
+            game = new DosGame(new NonShufflingDealer(TwentyGreenSharps), 1, 7);
         }
 
         [Test]
@@ -41,7 +41,7 @@ namespace Dos.Game.Tests
         [Test]
         public void CanCallDos_AfterHavingTwoCards()
         {
-            game = new Game(new NonShufflingDealer(TwentyGreenSharps), 1, 3);
+            game = new DosGame(new NonShufflingDealer(TwentyGreenSharps), 1, 3);
             game.MatchCenterRowCard(0, GreenSharp, GreenSharp);
 
             game.CallDos(0).ShouldBeSuccess();
@@ -50,7 +50,7 @@ namespace Dos.Game.Tests
         [Test]
         public void ShouldNotCallDos_AfterMatchingTwoCardsWhileHavingThree()
         {
-            game = new Game(new NonShufflingDealer(TwentyGreenSharps), 1, 3);
+            game = new DosGame(new NonShufflingDealer(TwentyGreenSharps), 1, 3);
             game.MatchCenterRowCard(0, GreenSharp, GreenSharp, GreenSharp);
 
             game.CallDos(0).ShouldBeFail();
@@ -59,7 +59,7 @@ namespace Dos.Game.Tests
         [Test]
         public void ShouldCallDos_AfterTurnEnd()
         {
-            game = new Game(new NonShufflingDealer(TwentyGreenSharps), 2, 3) {CurrentPlayer = 0};
+            game = new DosGame(new NonShufflingDealer(TwentyGreenSharps), 2, 3) {CurrentPlayer = 0};
             game.MatchCenterRowCard(0, GreenSharp, GreenSharp);
             game.AddCardToCenterRow(0, GreenSharp);
             game.EndTurn(0);
@@ -70,7 +70,7 @@ namespace Dos.Game.Tests
         [Test]
         public void ShouldCallout_AfterTurnEnd()
         {
-            game = new Game(new NonShufflingDealer(TwentyGreenSharps), 2, 3) {CurrentPlayer = 0};
+            game = new DosGame(new NonShufflingDealer(TwentyGreenSharps), 2, 3) {CurrentPlayer = 0};
             game.MatchCenterRowCard(0, GreenSharp, GreenSharp);
             game.AddCardToCenterRow(0, GreenSharp);
             game.EndTurn(0);
@@ -81,7 +81,7 @@ namespace Dos.Game.Tests
         [Test]
         public void ShouldNotCallDos_AfterNextPlayerMadeAMove()
         {
-            game = new Game(new NonShufflingDealer(TwentyGreenSharps), 2, 3) {CurrentPlayer = 0};
+            game = new DosGame(new NonShufflingDealer(TwentyGreenSharps), 2, 3) {CurrentPlayer = 0};
             game.MatchCenterRowCard(0, GreenSharp, GreenSharp);
             game.AddCardToCenterRow(0, GreenSharp);
             game.EndTurn(0);

@@ -6,9 +6,9 @@ namespace Dos.Game.State.Base
 {
     public abstract class GameState : IGame
     {
-        protected readonly Game Game;
+        protected readonly DosGame Game;
 
-        protected GameState(Game game)
+        protected GameState(DosGame game)
         {
             Game = game;
         }

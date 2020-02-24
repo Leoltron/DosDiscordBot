@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using Dos.Game;
 using Dos.Game.Deck;
 using Dos.Game.Extensions;
 using Dos.Game.Model;
@@ -12,7 +13,7 @@ namespace Dos.ConsoleClient
     {
         private static void Main()
         {
-            var game = new Game.Game(new ShufflingDealer(Decks.Classic), 1, 7);
+            var game = new DosGame(new ShufflingDealer(Decks.Classic), 1, 7);
             while (true)
             {
                 var line = Console.ReadLine();
