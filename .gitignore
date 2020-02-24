@@ -6,3 +6,5 @@ obj/
 
 *.user
 *.pubxml
+
+*.orig
