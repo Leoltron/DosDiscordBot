@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using Dos.DiscordBot.Util;
+using Dos.Game;
 using Dos.Game.Deck;
 using Dos.Game.Extensions;
 using Dos.Game.Model;
@@ -40,7 +41,7 @@ namespace Dos.DiscordBot
         public IUser Owner => PlayerIds.Any() ? Players[PlayerIds[0]] : null;
         public Dictionary<ulong, IUser> Players { get; }
         private List<ulong> PlayerIds { get; }
-        public Game.Game Game { get; private set; }
+        public DosGame Game { get; private set; }
         public bool IsGameStarted => Game != null;
 
         public bool IsFinished => IsGameStarted && Game.CurrentState.IsFinished;
@@ -91,9 +92,9 @@ namespace Dos.DiscordBot
                 if (Owner.Id != player.Id)
                     return Result.Fail($"Only owner of this game (**{Owner?.Username}**) can start it");
 
-                Game = new Game.Game(new ShufflingDealer(Decks.Classic.Times(Config.Decks).ToArray()), 
-                                     Players.Count,
-                                     Config)
+                Game = new DosGame(new ShufflingDealer(Decks.Classic.Times(Config.Decks).ToArray()), 
+                                   Players.Count,
+                                   Config)
                 {
                     PlayerNames = PlayerIds.Select((id, i) => (i, Players[id].Username)).ToDictionary()
                 };

@@ -7,7 +7,7 @@ namespace Dos.Game.State.Base
     {
         private static readonly Result NonCurrentPlayerFail = Result.Fail("It's not your turn right now.");
 
-        protected CurrentPlayerOnlyState(Game game) : base(game)
+        protected CurrentPlayerOnlyState(DosGame game) : base(game)
         {
         }
 

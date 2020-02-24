@@ -4,7 +4,7 @@ namespace Dos.Game.State.Base
 {
     public abstract class CalloutsAllowedState : GameState
     {
-        protected CalloutsAllowedState(Game game) : base(game)
+        protected CalloutsAllowedState(DosGame game) : base(game)
         {
         }
 

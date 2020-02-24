@@ -10,7 +10,7 @@ using Dos.Utils;
 
 namespace Dos.Game
 {
-    public class Game : IGame
+    public class DosGame : IGame
     {
         public delegate void OnPlayerSwitched(int nextPlayer, int unmatchedCardsCount);
 
@@ -22,12 +22,12 @@ namespace Dos.Game
         public int? PlayerWhoDidNotCallDos;
         public readonly Dealer Dealer;
 
-        public Game(Dealer dealer, int playersCount, ushort initialHandSize) : this(
+        public DosGame(Dealer dealer, int playersCount, ushort initialHandSize) : this(
             dealer, playersCount, new GameConfig {InitialHandSize = initialHandSize})
         {
         }
 
-        public Game(Dealer dealer, int playersCount, GameConfig config)
+        public DosGame(Dealer dealer, int playersCount, GameConfig config)
         {
             this.Dealer = dealer;
             Config = config;

@@ -6,7 +6,7 @@ namespace Dos.Game.State
 {
     public class TurnStartState : BaseCurrentPlayerState
     {
-        public TurnStartState(Game game) : base(game)
+        public TurnStartState(DosGame game) : base(game)
         {
         }
 

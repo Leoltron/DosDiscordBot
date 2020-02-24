@@ -9,7 +9,7 @@ namespace Dos.Game.State.Base
 {
     public class BaseCurrentPlayerState : CurrentPlayerOnlyState
     {
-        public BaseCurrentPlayerState(Game game) : base(game)
+        public BaseCurrentPlayerState(DosGame game) : base(game)
         {
         }
 
