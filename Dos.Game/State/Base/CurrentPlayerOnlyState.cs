@@ -1,4 +1,5 @@
 using Dos.Game.Model;
+using Dos.Game.Players;
 using Dos.Utils;
 
 namespace Dos.Game.State.Base
@@ -15,29 +16,29 @@ namespace Dos.Game.State.Base
         {
         }
 
-        public sealed override Result MatchCenterRowCard(int player, Card target, params Card[] cardsToPlay) =>
-            player == Game.CurrentPlayer
+        public sealed override Result MatchCenterRowCard(Player player, Card target, params Card[] cardsToPlay) =>
+            player.State == PlayerState.Playing
                 ? CurrentPlayerMatchCenterRowCard(target, cardsToPlay)
                 : NonCurrentPlayerFail;
 
         protected abstract Result CurrentPlayerMatchCenterRowCard(Card target, Card[] cardsToPlay);
 
-        public sealed override Result Draw(int player) =>
-            player == Game.CurrentPlayer
+        public sealed override Result Draw(Player player) =>
+            player.State == PlayerState.Playing
                 ? CurrentPlayerDraw()
                 : NonCurrentPlayerFail;
 
         protected abstract Result CurrentPlayerDraw();
 
-        public sealed override Result EndTurn(int player) =>
-            player == Game.CurrentPlayer
+        public sealed override Result EndTurn(Player player) =>
+            player.State == PlayerState.Playing
                 ? CurrentPlayerEndTurn()
                 : NonCurrentPlayerFail;
 
         protected abstract Result CurrentPlayerEndTurn();
 
-        public sealed override Result AddCardToCenterRow(int player, Card card) =>
-            player == Game.CurrentPlayer
+        public sealed override Result AddCardToCenterRow(Player player, Card card) =>
+            player.State == PlayerState.Playing
                 ? CurrentPlayerAddCardToCenterRow(card)
                 : NonCurrentPlayerFail;
 

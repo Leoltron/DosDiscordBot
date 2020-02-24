@@ -4,6 +4,7 @@ using System.Linq;
 using Dos.Game.Deck;
 using Dos.Game.Extensions;
 using Dos.Game.Model;
+using Dos.Game.Players;
 using Dos.Game.State;
 using Dos.Game.State.Base;
 using Dos.Utils;
@@ -12,35 +13,44 @@ namespace Dos.Game
 {
     public class DosGame : IGame
     {
-        public delegate void OnPlayerSwitched(int nextPlayer, int unmatchedCardsCount);
+        public delegate void OnPlayerSwitched(Player nextPlayer, int unmatchedCardsCount);
+
+        public readonly Dealer Dealer;
 
         public List<Card> CenterRow = new List<Card>(8);
         public List<List<Card>> CenterRowAdditional = new List<List<Card>>(8);
         public int CurrentPlayerPenalty;
 
-        public List<Card>[] PlayerHands;
-        public int? PlayerWhoDidNotCallDos;
-        public readonly Dealer Dealer;
+        public Player[] Players;
 
-        public DosGame(Dealer dealer, int playersCount, ushort initialHandSize) : this(
-            dealer, playersCount, new GameConfig {InitialHandSize = initialHandSize})
+        public DosGame(Dealer dealer, int players, ushort initialHandSize) : this(
+            dealer,
+            Enumerable.Range(0, players)
+                      .Select(i => new HumanPlayer(i, string.Empty))
+                      .Cast<Player>()
+                      .ToArray(),
+            new GameConfig {InitialHandSize = initialHandSize, StartingPlayer = 0})
         {
         }
 
-        public DosGame(Dealer dealer, int playersCount, GameConfig config)
+        public DosGame(Dealer dealer, Player[] players, GameConfig config)
         {
-            this.Dealer = dealer;
+            Dealer = dealer;
             Config = config;
+            Players = players;
 
-            PlayerHands = new List<Card>[playersCount];
-            for (var i = 0; i < playersCount; i++)
+            for (var i = 0; i < players.Length; i++)
             {
-                PlayerHands[i] = new List<Card>(10);
-                DealCards(i, config.InitialHandSize, false);
+                Players[i].OrderId = i;
+                Players[i].State = PlayerState.WaitingForTurn;
+                DealCards(Players[i], config.InitialHandSize, false);
             }
 
             RefillCenterRow();
-            CurrentPlayer = new Random().Next(playersCount);
+            CurrentPlayer = config.StartingPlayer != null && config.StartingPlayer < Players.Length
+                ? Players[config.StartingPlayer.Value]
+                : Players.RandomElement();
+            CurrentPlayer.State = PlayerState.Playing;
             CurrentState = new TurnStartState(this);
             CenterRowSizeAtTurnStart = CenterRow.Count;
         }
@@ -51,73 +61,60 @@ namespace Dos.Game
 
         public bool AllowCallouts { get; set; } = true;
 
-        public int CurrentPlayer { get; set; }
-        public Dictionary<int, string> PlayerNames { get; set; } = new Dictionary<int, string>();
-        public int PlayersCount => PlayerHands.Length;
+        public Player CurrentPlayer { get; set; }
+        public IList<Card> CurrentPlayerHand => CurrentPlayer.Hand;
+        public string CurrentPlayerName => CurrentPlayer.Name;
 
-        public List<Card> CurrentPlayerHand => PlayerHands[CurrentPlayer];
-        public string CurrentPlayerName => GetPlayerName(CurrentPlayer);
-
-        public int TotalScore => PlayerHands.SelectMany(h => h).Sum(c => c.Points);
+        public int TotalScore => Players.Sum(p => p.HandScore);
 
 
-        public List<(string name, int score)> ScoreTable =>
-            Enumerable.Range(0, PlayersCount)
-                      .Select(i => (GetPlayerName(i), PlayerHands[i].Sum(c => c.Points)))
-                      .ToList();
-
-        public List<(string name, int cardsCount)> HandsTable =>
-            Enumerable.Range(0, PlayersCount)
-                      .Select(i => (GetPlayerName(i), PlayerHands[i].Count))
-                      .ToList();
+        public List<(string name, int cardsCount)> HandsTable => Players.Select(p => (p.Name, p.Hand.Count)).ToList();
 
         private int CenterRowSizeAtTurnStart { get; set; }
         public int MatchCount { get; set; }
 
-        public Result MatchCenterRowCard(int player, Card target, params Card[] cardsToPlay) =>
+        public Result MatchCenterRowCard(Player player, Card target, params Card[] cardsToPlay) =>
             CurrentState.MatchCenterRowCard(player, target, cardsToPlay)
                         .DoIfSuccess(_ => PlayerMatchedCard?.Invoke(player, cardsToPlay, target));
 
-        public Result EndTurn(int player) => CurrentState.EndTurn(player);
+        public Result EndTurn(Player player) => CurrentState.EndTurn(player);
 
-        public Result Draw(int player) => CurrentState.Draw(player);
+        public Result Draw(Player player) => CurrentState.Draw(player);
 
-        public Result AddCardToCenterRow(int player, Card card) =>
+        public Result AddCardToCenterRow(Player player, Card card) =>
             CurrentState.AddCardToCenterRow(player, card)
                         .DoIfSuccess(_ => PlayerAddedCard?.Invoke(player, card));
 
-        public Result Callout(int caller)
+        public Result Callout(Player caller, Player target)
         {
-            var playerWhoDidNotCallDos = PlayerWhoDidNotCallDos;
-            if (!AllowCallouts || caller == playerWhoDidNotCallDos)
+            var calloutTarget = Players.FirstOrDefault(p => p.CanBeCalledOut);
+            if (!AllowCallouts || caller == calloutTarget)
                 return Result.Fail();
 
-            return CurrentState.Callout(caller)
-                               .DoIfSuccess(_ => CalledOut?.Invoke(caller, playerWhoDidNotCallDos ?? -1))
+            return CurrentState.Callout(caller, calloutTarget)
+                               .DoIfSuccess(_ => CalledOut?.Invoke(caller, calloutTarget))
                                .DoIfFail(_ => FalseCallout?.Invoke(caller));
         }
 
-        public Result CallDos(int caller) => AllowCallouts
+        public Result CallDos(Player caller) => AllowCallouts
             ? CurrentState.CallDos(caller).DoIfSuccess(_ => DosCall?.Invoke(caller))
             : Result.Fail();
 
         public event OnPlayerSwitched PlayerSwitched;
-        public event Action<int, Card[]> PlayerReceivedCards;
-        public event Action<int, Card[], Card> PlayerMatchedCard;
-        public event Action<int, Card> PlayerAddedCard;
-        public event Action<int> DosCall;
-        public event Action<int> FalseCallout;
-        public event Action<int, int> CalledOut;
+        public event Action<Player, Card[]> PlayerReceivedCards;
+        public event Action<Player, Card[], Card> PlayerMatchedCard;
+        public event Action<Player, Card> PlayerAddedCard;
+        public event Action<Player> DosCall;
+        public event Action<Player> FalseCallout;
+        public event Action<Player, Player> CalledOut;
         public event Action Finished;
 
-        public string GetPlayerName(int id) => PlayerNames.TryGetValue(id, out var name) ? name : "Player " + id;
-
-        public void DealCard(int player, bool checkForDos = true)
+        public void DealCard(Player player, bool checkForDos = true)
         {
             DealCards(player, 1, checkForDos);
         }
 
-        public void DealCards(int player, int amount, bool checkForDos = true)
+        public void DealCards(Player player, int amount, bool checkForDos = true)
         {
             if (amount <= 0)
                 return;
@@ -130,26 +127,21 @@ namespace Dos.Game
             PlayerReceivedCards?.Invoke(player, cardsDealt);
         }
 
-        private Card? DealCardInternal(int player, bool checkForDos) =>
+        private Card? DealCardInternal(Player player, bool checkForDos) =>
             DrawCard().DoIfHasValue(card =>
             {
-                PlayerHands[player].Add(card);
+                player.Hand.Add(card);
                 if (checkForDos && player == CurrentPlayer)
                     CheckCurrentPlayerForDos();
             });
 
         public void CheckCurrentPlayerForDos()
         {
-            if (PlayerHands[CurrentPlayer].Count == 2)
-                PlayerWhoDidNotCallDos = CurrentPlayer;
+            if (CurrentPlayer.Hand.Count == 2)
+                CurrentPlayer.CanBeCalledOut = true;
         }
 
-        private Card? DrawCard()
-        {
-            if (Dealer.CanDealCards)
-                return Dealer.DealCard();
-            return null;
-        }
+        private Card? DrawCard() => Dealer.CanDealCards ? (Card?) Dealer.DealCard() : null;
 
         public bool RefillCenterRow()
         {
@@ -174,13 +166,15 @@ namespace Dos.Game
                 CurrentPlayerPenalty += unmatchedCardsCount;
             DealCards(CurrentPlayer, CurrentPlayerPenalty);
             CurrentPlayerPenalty = 0;
-            CurrentPlayer = (CurrentPlayer + 1) % PlayersCount;
+            CurrentPlayer.State = PlayerState.WaitingForTurn;
+            CurrentPlayer = Players[(CurrentPlayer.OrderId + 1) % Players.Length];
+            CurrentPlayer.State = PlayerState.Playing;
             CenterRowSizeAtTurnStart = CenterRow.Count;
             MatchCount = 0;
             PlayerSwitched?.Invoke(CurrentPlayer, unmatchedCardsCount);
         }
 
-        public IEnumerable<string> PersonalGameTableLines(int player)
+        public IEnumerable<string> PersonalGameTableLines(Player player)
         {
             foreach (var p in GameTableLines())
                 yield return p;
@@ -189,9 +183,9 @@ namespace Dos.Game
                 yield return p;
         }
 
-        public IEnumerable<string> GetPlayerHandLines(int player)
+        public IEnumerable<string> GetPlayerHandLines(Player player)
         {
-            var hand = PlayerHands[player];
+            var hand = player.Hand;
             yield return $"Your current hand ({hand.Count} {(hand.Count == 1 ? "card" : "cards")}):";
             yield return "\u200b";
             yield return hand.ToDiscordString();

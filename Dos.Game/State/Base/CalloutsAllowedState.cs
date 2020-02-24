@@ -1,3 +1,4 @@
+using Dos.Game.Players;
 using Dos.Utils;
 
 namespace Dos.Game.State.Base
@@ -12,38 +13,35 @@ namespace Dos.Game.State.Base
         {
         }
 
-        public override Result Callout(int caller)
+        public override Result Callout(Player caller, Player target)
         {
-            if (Game.PlayerWhoDidNotCallDos == null)
+            if (target == null)
             {
                 Punish(caller, Config.FalseCalloutPenalty);
                 return Config.FalseCalloutPenalty > 0
                     ? Result.Fail(
-                        $"False callout! {Game.GetPlayerName(caller)}, draw {Config.FalseCalloutPenalty} more" +
+                        $"False callout! {caller.Name}, draw {Config.FalseCalloutPenalty} more" +
                         (caller == Game.CurrentPlayer ? " after you turn ends." : "."))
                     : Result.Fail("False callout!");
             }
 
-            var victimIndex = Game.PlayerWhoDidNotCallDos.Value;
-            var victimName = Game.GetPlayerName(victimIndex);
-
-            Game.PlayerWhoDidNotCallDos = null;
+            target.CanBeCalledOut = false;
 
             if (Config.CalloutPenalty <= 0)
-                return Result.Success($"You are right, {victimName} did not call DOS but there is no penalty");
+                return Result.Success($"You are right, {target.Name} did not call DOS but there is no penalty");
 
 
-            Punish(victimIndex, Config.CalloutPenalty);
+            Punish(target, Config.CalloutPenalty);
 
-            if (victimIndex == CurrentPlayer)
-                return Result.Success($"{victimName}, you have been caught not calling DOS with two cards " +
+            if (target == CurrentPlayer)
+                return Result.Success($"{target.Name}, you have been caught not calling DOS with two cards " +
                                       $"in hand! Draw {Game.CurrentPlayerPenalty} when your turn ends.");
 
-            return Result.Success($"{victimName}, you have been caught not calling DOS with two cards " +
+            return Result.Success($"{target.Name}, you have been caught not calling DOS with two cards " +
                                   $"in hand! Draw {Config.CalloutPenalty}.");
         }
 
-        private void Punish(int player, int amount)
+        private void Punish(Player player, int amount)
         {
             if (amount <= 0)
                 return;
@@ -53,13 +51,13 @@ namespace Dos.Game.State.Base
                 Game.DealCards(player, amount);
         }
 
-        public override Result CallDos(int caller)
+        public override Result CallDos(Player caller)
         {
-            if (Game.PlayerWhoDidNotCallDos != caller)
+            if (!caller.CanBeCalledOut)
                 return Result.Fail();
 
-            Game.PlayerWhoDidNotCallDos = null;
-            return Result.Success($"**DOS! {Game.GetPlayerName(caller)} has only 2 cards!**");
+            caller.CanBeCalledOut = false;
+            return Result.Success($"**DOS! {caller.Name} has only 2 cards!**");
         }
     }
 }

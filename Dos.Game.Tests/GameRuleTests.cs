@@ -2,6 +2,7 @@ using System.Linq;
 using Dos.Game.Deck;
 using Dos.Game.Extensions;
 using Dos.Game.Model;
+using Dos.Game.Players;
 using Dos.Game.Tests.Util;
 using Dos.Utils;
 using NUnit.Framework;
@@ -13,6 +14,8 @@ namespace Dos.Game.Tests
         private static readonly Card GreenSharp = CardValue.Sharp.Of(CardColor.Green);
         private static readonly Card[] TwentyGreenSharps = GreenSharp.Repeat(20).ToArray();
         private DosGame game;
+        private Player Player0 => game.Players[0];
+        private Player Player1 => game.Players[1];
 
         [SetUp]
         public void SetUp()
@@ -23,71 +26,71 @@ namespace Dos.Game.Tests
         [Test]
         public void CanDraw_AtTurnStart()
         {
-            game.Draw(0).ShouldBeSuccess();
+            game.Draw(Player0).ShouldBeSuccess();
         }
 
         [Test]
         public void CanMatch_AtTurnStart()
         {
-            game.MatchCenterRowCard(0, GreenSharp, GreenSharp).ShouldBeSuccess();
+            game.MatchCenterRowCard(Player0, GreenSharp, GreenSharp).ShouldBeSuccess();
         }
 
         [Test]
         public void CannotEndTurn_AtTurnStart()
         {
-            game.EndTurn(0).ShouldBeFail();
+            game.EndTurn(Player0).ShouldBeFail();
         }
 
         [Test]
         public void CanCallDos_AfterHavingTwoCards()
         {
             game = new DosGame(new NonShufflingDealer(TwentyGreenSharps), 1, 3);
-            game.MatchCenterRowCard(0, GreenSharp, GreenSharp);
+            game.MatchCenterRowCard(Player0, GreenSharp, GreenSharp);
 
-            game.CallDos(0).ShouldBeSuccess();
+            game.CallDos(Player0).ShouldBeSuccess();
         }
 
         [Test]
         public void ShouldNotCallDos_AfterMatchingTwoCardsWhileHavingThree()
         {
             game = new DosGame(new NonShufflingDealer(TwentyGreenSharps), 1, 3);
-            game.MatchCenterRowCard(0, GreenSharp, GreenSharp, GreenSharp);
+            game.MatchCenterRowCard(Player0, GreenSharp, GreenSharp, GreenSharp);
 
-            game.CallDos(0).ShouldBeFail();
+            game.CallDos(Player0).ShouldBeFail();
         }
 
         [Test]
         public void ShouldCallDos_AfterTurnEnd()
         {
-            game = new DosGame(new NonShufflingDealer(TwentyGreenSharps), 2, 3) {CurrentPlayer = 0};
-            game.MatchCenterRowCard(0, GreenSharp, GreenSharp);
-            game.AddCardToCenterRow(0, GreenSharp);
-            game.EndTurn(0);
+            game = new DosGame(new NonShufflingDealer(TwentyGreenSharps), 2, 3);
+            game.MatchCenterRowCard(Player0, GreenSharp, GreenSharp);
+            game.AddCardToCenterRow(Player0, GreenSharp);
+            game.EndTurn(Player0);
 
-            game.CallDos(0).ShouldBeSuccess();
+            game.CallDos(Player0).ShouldBeSuccess();
         }
 
         [Test]
         public void ShouldCallout_AfterTurnEnd()
         {
-            game = new DosGame(new NonShufflingDealer(TwentyGreenSharps), 2, 3) {CurrentPlayer = 0};
-            game.MatchCenterRowCard(0, GreenSharp, GreenSharp);
-            game.AddCardToCenterRow(0, GreenSharp);
-            game.EndTurn(0);
+            game = new DosGame(new NonShufflingDealer(TwentyGreenSharps), 2, 3);
+            game.MatchCenterRowCard(Player0, GreenSharp, GreenSharp);
+            game.AddCardToCenterRow(Player0, GreenSharp);
+            game.EndTurn(Player0);
 
-            game.Callout(1).ShouldBeSuccess();
+            game.Callout(Player1, Player0).ShouldBeSuccess();
         }
 
         [Test]
         public void ShouldNotCallDos_AfterNextPlayerMadeAMove()
         {
-            game = new DosGame(new NonShufflingDealer(TwentyGreenSharps), 2, 3) {CurrentPlayer = 0};
-            game.MatchCenterRowCard(0, GreenSharp, GreenSharp);
-            game.AddCardToCenterRow(0, GreenSharp);
-            game.EndTurn(0);
+            game = new DosGame(new NonShufflingDealer(TwentyGreenSharps), 2, 3);
+            game.MatchCenterRowCard(Player0, GreenSharp, GreenSharp);
+            game.AddCardToCenterRow(Player0, GreenSharp);
+            game.EndTurn(Player0);
 
-            game.Draw(1);
-            game.CallDos(1).ShouldBeFail();
+            game.Draw(Player1);
+            game.CallDos(Player1).ShouldBeFail();
         }
 
         [Test]

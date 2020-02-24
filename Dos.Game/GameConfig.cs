@@ -8,6 +8,7 @@ namespace Dos.Game
             InitialHandSize = 7;
             FalseCalloutPenalty = 2;
             CalloutPenalty = 2;
+            StartingPlayer = null;
         }
 
         public ushort CalloutPenalty { get; set; }
@@ -16,5 +17,6 @@ namespace Dos.Game
         public ushort MinCenterRowSize { get; set; }
         public bool CenterRowPenalty { get; set; }
         public bool DrawEndsTurn { get; set; }
+        public uint? StartingPlayer { get; set; }
     }
 }

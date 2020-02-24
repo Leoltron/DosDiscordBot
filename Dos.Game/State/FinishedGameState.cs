@@ -1,4 +1,5 @@
 using Dos.Game.Model;
+using Dos.Game.Players;
 using Dos.Game.State.Base;
 using Dos.Utils;
 
@@ -14,17 +15,17 @@ namespace Dos.Game.State
 
         public override bool IsFinished => true;
 
-        public override Result MatchCenterRowCard(int player, Card target, params Card[] cardsToPlay) =>
+        public override Result MatchCenterRowCard(Player player, Card target, params Card[] cardsToPlay) =>
             GameFinishedResult;
 
-        public override Result EndTurn(int player) => GameFinishedResult;
+        public override Result EndTurn(Player player) => GameFinishedResult;
 
-        public override Result Draw(int player) => GameFinishedResult;
+        public override Result Draw(Player player) => GameFinishedResult;
 
-        public override Result AddCardToCenterRow(int player, Card card) => GameFinishedResult;
+        public override Result AddCardToCenterRow(Player player, Card card) => GameFinishedResult;
 
-        public override Result Callout(int caller) => GameFinishedResult;
+        public override Result Callout(Player caller, Player target) => GameFinishedResult;
 
-        public override Result CallDos(int caller) => GameFinishedResult;
+        public override Result CallDos(Player caller) => GameFinishedResult;
     }
 }

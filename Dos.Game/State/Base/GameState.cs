@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Dos.Game.Model;
+using Dos.Game.Players;
 using Dos.Utils;
 
 namespace Dos.Game.State.Base
@@ -19,19 +20,19 @@ namespace Dos.Game.State.Base
 
         protected GameConfig Config => Game.Config;
 
-        protected int CurrentPlayer => Game.CurrentPlayer;
-        protected List<Card> CurrentPlayerHand => Game.CurrentPlayerHand;
-        protected string CurrentPlayerName => Game.GetPlayerName(CurrentPlayer);
+        protected Player CurrentPlayer => Game.CurrentPlayer;
+        protected IList<Card> CurrentPlayerHand => Game.CurrentPlayerHand;
+        protected string CurrentPlayerName => Game.CurrentPlayerName;
 
         public virtual bool IsFinished => false;
 
-        public abstract Result MatchCenterRowCard(int player, Card target, params Card[] cardsToPlay);
-        public abstract Result EndTurn(int player);
-        public abstract Result Draw(int player);
+        public abstract Result MatchCenterRowCard(Player player, Card target, params Card[] cardsToPlay);
+        public abstract Result EndTurn(Player player);
+        public abstract Result Draw(Player player);
 
-        public abstract Result AddCardToCenterRow(int player, Card card);
+        public abstract Result AddCardToCenterRow(Player player, Card card);
 
-        public abstract Result Callout(int caller);
-        public abstract Result CallDos(int caller);
+        public abstract Result Callout(Player caller, Player target);
+        public abstract Result CallDos(Player caller);
     }
 }

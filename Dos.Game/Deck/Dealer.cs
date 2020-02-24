@@ -6,6 +6,7 @@ namespace Dos.Game.Deck
 {
     public abstract class Dealer
     {
+        public abstract bool CanDealCards { get; }
         public abstract Card DealCard();
         public abstract void DiscardCards(IEnumerable<Card> cards);
 
@@ -18,7 +19,5 @@ namespace Dos.Game.Deck
         {
             DiscardCards(cards.AsEnumerable());
         }
-
-        public abstract bool CanDealCards { get; }
     }
 }

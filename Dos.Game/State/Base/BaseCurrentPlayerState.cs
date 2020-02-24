@@ -62,9 +62,9 @@ namespace Dos.Game.State.Base
                 CardsToAdd += discardCount;
 
             if (drawCount != 0)
-                for (var i = 0; i < Game.PlayersCount; i++)
-                    if (i != CurrentPlayer)
-                        Game.DealCards(i, drawCount, false);
+                Game.Players
+                    .Where(p => p != CurrentPlayer)
+                    .ForEach(p => Game.DealCards(p, drawCount, false));
 
             Game.MatchCount++;
 
