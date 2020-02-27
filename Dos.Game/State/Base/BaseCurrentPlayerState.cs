@@ -68,18 +68,9 @@ namespace Dos.Game.State.Base
 
             Game.MatchCount++;
 
-            if (CurrentPlayerHand.IsEmpty())
-            {
-                Game.SetFinished();
-                return Result.Success(matchType.DefaultResult()
-                                               .AddText(
-                                                    $"**{CurrentPlayerName}** won! Total score: **{Game.TotalScore}**")
-                                               .Message);
-            }
-
             Game.CurrentState = new BaseCurrentPlayerState(this);
 
-            return Game.CenterRowAdditional.All(c => c.Any()) && CardsToAdd == 0
+            return CurrentPlayerHand.IsEmpty() || Game.CenterRowAdditional.All(c => c.Any()) && CardsToAdd == 0
                 ? Result.Success(matchType.DefaultResult().AddText(CurrentPlayerEndTurn().Message).Message)
                 : Result.Success(matchType.DefaultResult().Message);
         }
@@ -104,10 +95,14 @@ namespace Dos.Game.State.Base
                 return refilled ? Result.Success(message) : Result.Fail(message);
             }
 
+            var currentPlayer = CurrentPlayer;
             Game.MoveTurnToNextPlayer();
-            Game.CurrentState = new TurnStartState(this);
+            if (!(Game.CurrentState is FinishedGameState))
+                Game.CurrentState = new TurnStartState(this);
 
-            return Result.Success();
+            return Result.Success(currentPlayer.ScoreBoardPosition
+                                               .IfHasValue(i => $"{currentPlayer.Name} has no more cards! " +
+                                                                $"They finished in Rank #{i}! :tada:"));
         }
 
         private void ClearMatchedCardsFromCenterRow()
@@ -138,12 +133,6 @@ namespace Dos.Game.State.Base
             CurrentPlayerHand.Remove(card);
             Game.CenterRow.Add(card);
             Game.CenterRowAdditional.Add(new List<Card>());
-
-            if (CurrentPlayerHand.IsEmpty())
-            {
-                Game.SetFinished();
-                return Result.Success($"**{CurrentPlayerName}** won! Total score: **{Game.TotalScore}**");
-            }
 
             Game.CheckCurrentPlayerForDos();
 

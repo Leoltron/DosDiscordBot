@@ -106,9 +106,9 @@ namespace Dos.DiscordBot
                 Game.PlayerReceivedCards += OnPlayerReceivedCards;
 
                 Game.CalledOut += (caller, target) =>
-                    LogInfo($"{caller.Name} called out {target.Name}");
-                Game.DosCall += caller => LogInfo($"{caller.Name} called DOS!");
-                Game.FalseCallout += caller => LogInfo($"{caller.Name} made a false callout");
+                    LogInfo($"{caller} called out {target}");
+                Game.DosCall += caller => LogInfo($"{caller} called DOS!");
+                Game.FalseCallout += caller => LogInfo($"{caller} made a false callout");
                 Game.PlayerAddedCard += (p, card) => LogInfo($"{p} added {card} to the Center Row");
                 Game.PlayerMatchedCard += (p, cards, target) =>
                     LogInfo($"{p} put {string.Join(" and ", cards)} to {target}");

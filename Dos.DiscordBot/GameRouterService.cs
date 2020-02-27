@@ -91,11 +91,23 @@ namespace Dos.DiscordBot
             if (game == null)
                 return Result.Fail();
 
-            if (!game.IdToUserPlayers.ContainsKey(user.Id))
+            if (!game.IdToUserPlayers.TryGetValue(user.Id, out var player))
                 return Result.Fail();
 
-            TryDeleteGame(channel);
-            return Result.Success("Game has been ended.");
+            if (game.IsGameStarted)
+            {
+                game.Game.Quit(player);
+            }
+            else if (game.Players.Count < 3 || user.Id == game.Owner.Id)
+            {
+                TryDeleteGame(channel);
+                return Result.Success("Game has been cancelled.");
+            }
+
+            game.Players.Remove(player);
+            game.IdToUserPlayers.Remove(user.Id);
+
+            return Result.Success($"{player.Name} left the game");
         }
 
         public void NoNewGames()

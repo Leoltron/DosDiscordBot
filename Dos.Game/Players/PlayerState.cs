@@ -5,6 +5,7 @@ namespace Dos.Game.Players
         WaitingForGameToStart,
         WaitingForTurn,
         Playing,
-        Out
+        Out,
+        Quit
     }
 }
