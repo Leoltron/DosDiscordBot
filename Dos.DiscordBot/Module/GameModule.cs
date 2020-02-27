@@ -9,6 +9,7 @@ namespace Dos.DiscordBot.Module
 {
     [SuppressMessage("ReSharper", "UnusedMember.Global")]
     [SuppressMessage("ReSharper", "UnusedType.Global")]
+    [NoDm]
     public class GameModule : ExtendedModule
     {
         private readonly GameRouterService gameRouterService;
