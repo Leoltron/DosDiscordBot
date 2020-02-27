@@ -14,7 +14,7 @@ namespace Dos.Game.Players
         }
 
         public int OrderId { get; set; }
-        public virtual string Name { get; }
+        public string Name { get; }
         public bool IsAi { get; }
 
         public IList<Card> Hand { get; } = new List<Card>();
@@ -22,6 +22,9 @@ namespace Dos.Game.Players
         public int HandScore => Hand.Sum(c => c.Points);
 
         public PlayerState State { get; set; } = PlayerState.WaitingForGameToStart;
+        public int? ScoreBoardPosition;
         public bool CanBeCalledOut { get; set; } = false;
+
+        public override string ToString() => Name;
     }
 }

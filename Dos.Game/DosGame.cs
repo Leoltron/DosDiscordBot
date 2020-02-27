@@ -21,7 +21,7 @@ namespace Dos.Game
         public List<List<Card>> CenterRowAdditional = new List<List<Card>>(8);
         public int CurrentPlayerPenalty;
 
-        public Player[] Players;
+        public readonly Player[] Players;
 
         public DosGame(Dealer dealer, int players, ushort initialHandSize) : this(
             dealer,
@@ -46,13 +46,18 @@ namespace Dos.Game
                 DealCards(Players[i], config.InitialHandSize, false);
             }
 
-            RefillCenterRow();
+            ResetCurrentState();
             CurrentPlayer = config.StartingPlayer != null && config.StartingPlayer < Players.Length
                 ? Players[config.StartingPlayer.Value]
                 : Players.RandomElement();
             CurrentPlayer.State = PlayerState.Playing;
-            CurrentState = new TurnStartState(this);
             CenterRowSizeAtTurnStart = CenterRow.Count;
+        }
+
+        private void ResetCurrentState()
+        {
+            CurrentState = new TurnStartState(this);
+            RefillCenterRow();
         }
 
         public GameConfig Config { get; }
@@ -72,6 +77,8 @@ namespace Dos.Game
 
         private int CenterRowSizeAtTurnStart { get; set; }
         public int MatchCount { get; set; }
+
+        public int ActivePlayersCount => Players.Count(p => p.IsActive());
 
         public Result MatchCenterRowCard(Player player, Card target, params Card[] cardsToPlay) =>
             CurrentState.MatchCenterRowCard(player, target, cardsToPlay)
@@ -162,15 +169,35 @@ namespace Dos.Game
         public void MoveTurnToNextPlayer()
         {
             var unmatchedCardsCount = CenterRowSizeAtTurnStart - MatchCount;
-            if (Config.CenterRowPenalty)
-                CurrentPlayerPenalty += unmatchedCardsCount;
-            DealCards(CurrentPlayer, CurrentPlayerPenalty);
-            CurrentPlayerPenalty = 0;
-            CurrentPlayer.State = PlayerState.WaitingForTurn;
-            CurrentPlayer = Players[(CurrentPlayer.OrderId + 1) % Players.Length];
+
+            if (CurrentPlayer.Hand.IsEmpty())
+            {
+                PlayerWentOut(CurrentPlayer);
+                if (ActivePlayersCount <= 1)
+                {
+                    if (ActivePlayersCount == 1)
+                        PlayerWentOut(Players.First(p => p.State == PlayerState.WaitingForTurn));
+                    SetFinished();
+                }
+            }
+            else
+            {
+                if (Config.CenterRowPenalty)
+                    CurrentPlayerPenalty += unmatchedCardsCount;
+                DealCards(CurrentPlayer, CurrentPlayerPenalty);
+                CurrentPlayerPenalty = 0;
+                CurrentPlayer.State = PlayerState.WaitingForTurn;
+            }
+
+            do
+            {
+                CurrentPlayer = Players[(CurrentPlayer.OrderId + 1) % Players.Length];
+            } while (CurrentPlayer.State != PlayerState.WaitingForTurn);
+
             CurrentPlayer.State = PlayerState.Playing;
             CenterRowSizeAtTurnStart = CenterRow.Count;
             MatchCount = 0;
+
             PlayerSwitched?.Invoke(CurrentPlayer, unmatchedCardsCount);
         }
 
@@ -183,7 +210,7 @@ namespace Dos.Game
                 yield return p;
         }
 
-        public IEnumerable<string> GetPlayerHandLines(Player player)
+        public static IEnumerable<string> GetPlayerHandLines(Player player)
         {
             var hand = player.Hand;
             yield return $"Your current hand ({hand.Count} {(hand.Count == 1 ? "card" : "cards")}):";
@@ -198,10 +225,46 @@ namespace Dos.Game
                                            ? $" with {string.Join(" and ", CenterRowAdditional[i])} on top"
                                            : string.Empty));
 
+        public void PlayerWentOut(Player player)
+        {
+            player.State = PlayerState.Out;
+            player.ScoreBoardPosition = Players.Where(p => p.ScoreBoardPosition != null)
+                                               .Select(p => p.ScoreBoardPosition)
+                                               .OrderByDescending(p => p.Value)
+                                               .FirstOrDefault() + 1;
+        }
+
         public void SetFinished()
         {
             CurrentState = new FinishedGameState(this);
             Finished?.Invoke();
+        }
+
+        public void Quit(Player player)
+        {
+            switch (ActivePlayersCount)
+            {
+                case 1:
+                    SetFinished();
+                    break;
+                case 2:
+                    PlayerWentOut(Players.First(p => p.IsActive() && p != CurrentPlayer));
+                    SetFinished();
+                    break;
+                default:
+                    if (CurrentPlayer == player)
+                    {
+                        MoveTurnToNextPlayer();
+                    }
+
+                    Dealer.DiscardCards(player.Hand);
+                    player.CanBeCalledOut = false;
+                    player.State = PlayerState.Quit;
+                    player.Hand.Clear();
+
+                    ResetCurrentState();
+                    break;
+            }
         }
     }
 }
