@@ -62,7 +62,7 @@ namespace Dos.DiscordBot.Util
         {
             var prefix = newDealtCards
                 ? "You were dealt"
-                : $"Your current hand ({cards.Count} {(cards.Count == 1 ? "card" : "cards")}):";
+                : $"Your current hand ({cards.Count.Pluralize("card", "cards")}):";
             var message = cards.ToDiscordString();
 
             return user.SendMessageAsync($"{prefix}\n​\n{message}");
@@ -84,7 +84,7 @@ namespace Dos.DiscordBot.Util
 
             if (!addPlus)
                 await user.SendMessageAsync(
-                    $"Your current hand ({cards.Count} {(cards.Count == 1 ? "card" : "cards")}):");
+                    $"Your current hand ({cards.Count.Pluralize("card", "cards")}):");
 
             foreach (var pathsChunk in paths.ToChunks(chunkSize))
                 await user.SendFileAsync(pathsChunk.JoinImages(), name);

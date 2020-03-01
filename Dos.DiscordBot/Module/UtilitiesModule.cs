@@ -42,5 +42,17 @@ namespace Dos.DiscordBot.Module
 
         [Command("help")]
         public Task Help() => Context.Channel.SendMessageAsync(HelpMessage);
+
+        private const string ComingSoon = "I'm not ready for the big world yet, but I will soon...";
+
+        [Command("support")]
+        public Task Support() => Context.Channel.SendMessageAsync(ComingSoon);
+
+        [Command("invite")]
+        public Task Invite() => Context.Channel.SendMessageAsync(ComingSoon);
+
+        [Command("source")]
+        [Alias("github")]
+        public Task Source() => Context.Channel.SendMessageAsync(ComingSoon);
     }
 }

@@ -5,7 +5,7 @@ using Dos.Utils;
 
 namespace Dos.Game.State.Base
 {
-    public abstract class GameState : IGame
+    public abstract class GameState : IDosGame
     {
         protected readonly DosGame Game;
 
@@ -21,8 +21,7 @@ namespace Dos.Game.State.Base
         protected GameConfig Config => Game.Config;
 
         protected Player CurrentPlayer => Game.CurrentPlayer;
-        protected IList<Card> CurrentPlayerHand => Game.CurrentPlayerHand;
-        protected string CurrentPlayerName => Game.CurrentPlayerName;
+        protected IList<Card> CurrentPlayerHand => Game.CurrentPlayer.Hand;
 
         public virtual bool IsFinished => false;
 

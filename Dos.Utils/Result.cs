@@ -4,7 +4,10 @@ namespace Dos.Utils
 {
     public class Result
     {
-        protected Result(bool isSuccess, string message = null)
+        private static readonly Result DefaultSuccess = new Result(true);
+        private static readonly Result DefaultFail = new Result(false);
+
+        public Result(bool isSuccess, string message = null)
         {
             IsSuccess = isSuccess;
             Message = message;
@@ -15,9 +18,11 @@ namespace Dos.Utils
         public string Message { get; }
 
         public bool HasMessage => !string.IsNullOrEmpty(Message);
-
-        public static Result Fail(string message = null) => new Result(false, message);
-        public static Result Success(string message = null) => new Result(true, message);
+        
+        public static Result Fail() => DefaultFail;
+        public static Result Fail(string message) => new Result(false, message);
+        public static Result Success() => DefaultSuccess;
+        public static Result Success(string message) => new Result(true, message);
 
         public Result IfSuccess(Func<Result, Result> successAction) => IsSuccess ? successAction(this) : this;
 

@@ -80,5 +80,33 @@ namespace Dos.Utils
             foreach (var element in enumerable)
                 action(element);
         }
+
+        public static TValue MaxOrDefault<TSource, TValue>(this IEnumerable<TSource> source,
+                                                           Func<TSource, TValue> selector,
+                                                           TValue defaultValue = default)
+            where TValue : IComparable<TValue> =>
+            source.Select(selector).MaxOrDefault(defaultValue);
+
+        public static T MaxOrDefault<T>(this IEnumerable<T> source, T defaultValue = default)
+            where T : IComparable<T>
+        {
+            var isEmpty = true;
+            var max = defaultValue;
+            foreach (var element in source)
+                if (isEmpty)
+                {
+                    isEmpty = false;
+                    max = defaultValue;
+                }
+                else if (max.CompareTo(element) < 0)
+                {
+                    max = defaultValue;
+                }
+
+            return max;
+        }
+
+        public static IEnumerable<T> WhereHasValue<T>(this IEnumerable<T?> source) where T : struct => 
+            from element in source where element.HasValue select element.Value;
     }
 }

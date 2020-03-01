@@ -6,7 +6,7 @@ namespace Dos.Game.State
 {
     public class AddingToCenterRowState : BaseCurrentPlayerState
     {
-        private static readonly Result MatchingFail = Result.Fail("You are already finished matching cards");
+        private static readonly Result MatchingFail = Result.Fail("You have already finished matching cards");
 
         public AddingToCenterRowState(GameState gameState, int cardsToAdd) : base(gameState)
         {
