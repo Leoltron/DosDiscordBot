@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -9,6 +10,7 @@ using Discord.WebSocket;
 using Dos.DiscordBot.Util;
 using Dos.Game;
 using Dos.Game.Deck;
+using Dos.Game.Events;
 using Dos.Game.Extensions;
 using Dos.Game.Model;
 using Dos.Game.Players;
@@ -20,17 +22,23 @@ namespace Dos.DiscordBot
 {
     public class DiscordDosGame
     {
-        private readonly ILogger logger;
+        private readonly ILogger gameLogger;
+        private readonly ILogger mainLogger;
         private readonly SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
 
-        public IUser Owner;
-        public List<Player> Players = new List<Player>();
+        public readonly IUser Owner;
+        public readonly List<Player> Players = new List<Player>();
 
         private Card? selectedCenterRowCard;
 
-        public DiscordDosGame(ISocketMessageChannel channel, IUser owner, ILogger logger, string serverName)
+        public DiscordDosGame(ISocketMessageChannel channel, IUser owner, ILogger mainLogger, string serverName)
         {
-            this.logger = logger;
+            this.mainLogger = mainLogger;
+            var logFileName = $"{DateTime.Now:yyyy-MM-dd_HHmmssZ}__{serverName}#{channel.Name}"
+               .Replace(Path.GetInvalidFileNameChars());
+            gameLogger = new LoggerConfiguration()
+                        .WriteTo.File($"logs/games/{logFileName}.log")
+                        .CreateLogger();
             Info = new DiscordDosGameInfo(serverName, CreateDate, channel, owner);
             AddUserPlayer(owner);
             Owner = owner;
@@ -41,7 +49,10 @@ namespace Dos.DiscordBot
         public DiscordDosGameInfo Info { get; }
 
         public DateTime CreateDate { get; } = DateTime.UtcNow;
-        public Dictionary<ulong, DiscordUserPlayer> IdToUserPlayers { get; } = new Dictionary<ulong, DiscordUserPlayer>();
+
+        public Dictionary<ulong, DiscordUserPlayer> IdToUserPlayers { get; } =
+            new Dictionary<ulong, DiscordUserPlayer>();
+
         public DosGame Game { get; private set; }
         public bool IsGameStarted => Game != null;
 
@@ -60,7 +71,7 @@ namespace Dos.DiscordBot
 
         private void LogInfo(string message)
         {
-            logger.Information($"[{Info.ServerName} - #{Info.Channel.Name}] [game] {message}");
+            mainLogger.Information($"[{Info.ServerName} - #{Info.Channel.Name}] [game] {message}");
         }
 
         public async Task<Result> JoinAsync(IUser user)
@@ -98,23 +109,13 @@ namespace Dos.DiscordBot
                 Game = new DosGame(new ShufflingDealer(Decks.Classic.Times(Config.Decks).ToArray()),
                                    Players.ToArray(),
                                    Config);
-                Game.Finished += Finished;
+
+                BindGameEvents();
+                Game.Start();
+                Game.Events.PlayerReceivedCards += OnPlayerReceivedCards;
 
                 await Task.WhenAll(Players.Select(SendHandTo));
                 await SendTableToChannel(false);
-                Game.PlayerSwitched += OnPlayerSwitched;
-                Game.PlayerReceivedCards += OnPlayerReceivedCards;
-
-                Game.CalledOut += (caller, target) =>
-                    LogInfo($"{caller} called out {target}");
-                Game.DosCall += caller => LogInfo($"{caller} called DOS!");
-                Game.FalseCallout += caller => LogInfo($"{caller} made a false callout");
-                Game.PlayerAddedCard += (p, card) => LogInfo($"{p} added {card} to the Center Row");
-                Game.PlayerMatchedCard += (p, cards, target) =>
-                    LogInfo($"{p} put {string.Join(" and ", cards)} to {target}");
-
-                LogInfo($"Game started, Center Row: {string.Join(", ", Game.CenterRow)}");
-                Players.ForEach(p => LogInfo($"{p}'s hand: {p.Hand.ToLogString()}"));
 
                 return Result.Success();
             }
@@ -124,24 +125,50 @@ namespace Dos.DiscordBot
             }
         }
 
-        private void OnPlayerReceivedCards(Player player, Card[] cards)
+        private void BindGameEvents()
         {
-            LogInfo($"{player.Name} received [{cards.ToLogString()}]");
+            Game.Events.PrivateLog += e =>
+            {
+                LogInfo(e.Message);
+                gameLogger.Information(e.Message);
+            };
+            Game.Events.PublicLog += e => Info.Channel.SendMessageAsync(e.Message).Wait();
+            Game.Events.Finished += OnFinished;
+            Game.Events.PlayerSwitched += OnPlayerSwitched;
 
-            if (player is DiscordUserPlayer dPlayer && cards.Any())
-                dPlayer.User.SendCardsAsync(cards, Config.UseImages, true).Wait();
+            Game.Events.WentOut += e => SendToChannel(
+                $"{e.Player.Name} has no more cards! They finished in Rank #{e.Player.ScoreBoardPosition}! :tada:");
         }
 
-        private async void OnPlayerSwitched(Player nextPlayer, int unmatchedCardsCount)
+        private void OnFinished()
+        {
+            if (Players.Any(p => p.State == PlayerState.Out))
+            {
+                var message = "The game has finished with the following results:\n" + string.Join(
+                    "\n", Players.Where(p => p.State == PlayerState.Out)
+                                 .OrderBy(p => p.ScoreBoardPosition)
+                                 .Select(p => $"#{p.ScoreBoardPosition}: {p.Name}"));
+                Info.Channel.SendMessageAsync(message);
+            }
+
+            Finished?.Invoke();
+        }
+
+        public void SendToChannel(string message)
+        {
+            Info.Channel.SendMessageAsync(message).Wait();
+        }
+
+        private void OnPlayerReceivedCards(PlayerReceivedCardsEvent e)
+        {
+            if (e.Player is DiscordUserPlayer dPlayer && e.Cards.Any())
+                dPlayer.User.SendCardsAsync(e.Cards, Config.UseImages, true).Wait();
+        }
+
+        private async void OnPlayerSwitched(PlayerSwitchedEvent @event)
         {
             selectedCenterRowCard = null;
-            await SendHandTo(nextPlayer);
-            LogInfo($"{nextPlayer.Name}'s turn, hand: {Game.CurrentPlayerHand.ToLogString()}");
-            if (Config.CenterRowPenalty && unmatchedCardsCount > 0)
-                await Info.Channel.SendMessageAsync(
-                    $"There are {unmatchedCardsCount} unmatched card(s). Draw the same amount.");
-
-            await SendTableToChannel(false);
+            await Task.WhenAll(SendHandTo(@event.NextPlayer), SendTableToChannel(false));
         }
 
         public Task SendTableToChannel(bool addPlayersStats) => SendTableToChannel(addPlayersStats, Config.UseImages);
@@ -157,8 +184,8 @@ namespace Dos.DiscordBot
                 if (addPlayersStats)
                 {
                     var messageBuilder = new StringBuilder();
-                    foreach (var (player, cardsCount) in Game.HandsTable)
-                        messageBuilder.Append($"{player} - {cardsCount} {(cardsCount == 1 ? "card" : "cards")}\n");
+                    foreach (var player in Game.Players.Where(p => p.IsActive()))
+                        messageBuilder.Append($"{player} - {player.Hand.Count.Pluralize("card", "cards")}\n");
 
                     await Info.Channel.SendMessageAsync(messageBuilder.ToString());
                 }
@@ -173,7 +200,7 @@ namespace Dos.DiscordBot
                 if (selectedCenterRowCard != null)
                     await Info.Channel.SendMessageAsync($"Selected **{selectedCenterRowCard.Value}**");
 
-                await Info.Channel.SendMessageAsync($"Now it's **{Game.CurrentPlayerName}**'s turn");
+                await Info.Channel.SendMessageAsync($"Now it's **{Game.CurrentPlayer.Name}**'s turn");
             }
         }
 
@@ -187,7 +214,7 @@ namespace Dos.DiscordBot
             }
             catch (Exception e)
             {
-                logger.Warning(e, $"Failed to send hand to @{dPlayer.Name}");
+                mainLogger.Warning(e, $"Failed to send hand to @{dPlayer.Name}");
                 await Info.Channel.SendMessageAsync($"Failed to send hand to {dPlayer.User.Mention}." +
                                                     "Try check if DM is closed and use `dos hand` to try again.");
             }

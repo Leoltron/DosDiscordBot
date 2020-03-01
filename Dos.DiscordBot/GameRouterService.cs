@@ -107,7 +107,7 @@ namespace Dos.DiscordBot
             game.Players.Remove(player);
             game.IdToUserPlayers.Remove(user.Id);
 
-            return Result.Success($"{player.Name} left the game");
+            return Result.Success();
         }
 
         public void NoNewGames()

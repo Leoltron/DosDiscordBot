@@ -57,6 +57,8 @@ namespace Dos.Game.State.Base
 
             additional.AddRange(cardsToPlay);
 
+            Game.PrivateLog($"{CurrentPlayer} put {string.Join(" and ", cardsToPlay)} to {target}");
+
             var (discardCount, drawCount) = matchType.ToColorMatchBonus();
             if (discardCount != 0)
                 CardsToAdd += discardCount;
@@ -70,9 +72,11 @@ namespace Dos.Game.State.Base
 
             Game.CurrentState = new BaseCurrentPlayerState(this);
 
-            return CurrentPlayerHand.IsEmpty() || Game.CenterRowAdditional.All(c => c.Any()) && CardsToAdd == 0
-                ? Result.Success(matchType.DefaultResult().AddText(CurrentPlayerEndTurn().Message).Message)
-                : Result.Success(matchType.DefaultResult().Message);
+            var result = matchType.ToResult();
+            if (CurrentPlayerHand.IsEmpty() || Game.CenterRowAdditional.All(c => c.Any()) && CardsToAdd == 0)
+                result = result.AddText(Game.CurrentState.EndTurn(CurrentPlayer).Message);
+
+            return Result.Success(result.Message);
         }
 
         protected override Result CurrentPlayerDraw() =>
@@ -80,43 +84,27 @@ namespace Dos.Game.State.Base
 
         protected override Result CurrentPlayerEndTurn()
         {
-            ClearMatchedCardsFromCenterRow();
+            Game.ClearMatchedCardsFromCenterRow();
             var refilled = Game.RefillCenterRow();
 
-            if (CardsToAdd > 0 && Game.CurrentPlayerHand.Any())
+            if (CardsToAdd > 0 && Game.CurrentPlayer.Hand.Any())
             {
-                var message = $"Now add **{CardsToAdd}** more {(CardsToAdd == 1 ? "card" : "cards")}";
                 if (refilled)
                 {
                     Game.CurrentState = new AddingToCenterRowState(this, CardsToAdd);
-                    message = "Refilled Center Row with fresh cards. " + message;
+                    Game.PublicLog("Refilled Center Row with fresh cards.");
                 }
 
-                return refilled ? Result.Success(message) : Result.Fail(message);
+                Game.PublicLog($"Add **{CardsToAdd}** more {CardsToAdd.PluralizedString("card", "cards")}");
+
+                return new Result(refilled);
             }
 
-            var currentPlayer = CurrentPlayer;
             Game.MoveTurnToNextPlayer();
             if (!(Game.CurrentState is FinishedGameState))
                 Game.CurrentState = new TurnStartState(this);
 
-            return Result.Success(currentPlayer.ScoreBoardPosition
-                                               .IfHasValue(i => $"{currentPlayer.Name} has no more cards! " +
-                                                                $"They finished in Rank #{i}! :tada:"));
-        }
-
-        private void ClearMatchedCardsFromCenterRow()
-        {
-            for (var i = 0; i < Game.CenterRow.Count; i++)
-            {
-                if (Game.CenterRowAdditional[i].IsEmpty())
-                    continue;
-                Game.Dealer.DiscardCard(Game.CenterRow[i]);
-                Game.CenterRow.RemoveAt(i);
-                Game.Dealer.DiscardCards(Game.CenterRowAdditional[i]);
-                Game.CenterRowAdditional.RemoveAt(i);
-                i--;
-            }
+            return Result.Success();
         }
 
         protected override Result CurrentPlayerAddCardToCenterRow(Card card)
@@ -124,7 +112,7 @@ namespace Dos.Game.State.Base
             if (CardsToAdd <= 0)
                 return Result.Fail("You can't add cards now.");
 
-            ClearMatchedCardsFromCenterRow();
+            Game.ClearMatchedCardsFromCenterRow();
             Game.RefillCenterRow();
 
             if (!CurrentPlayerHand.Contains(card))
@@ -135,6 +123,8 @@ namespace Dos.Game.State.Base
             Game.CenterRowAdditional.Add(new List<Card>());
 
             Game.CheckCurrentPlayerForDos();
+            Game.PrivateLog($"{CurrentPlayer} added {card} to the Center Row");
+            Game.Events.InvokePlayerAddedCard(CurrentPlayer, card);
 
             CardsToAdd--;
             var state = new AddingToCenterRowState(this, CardsToAdd);

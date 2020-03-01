@@ -4,7 +4,7 @@ using Dos.Utils;
 
 namespace Dos.Game
 {
-    public interface IGame
+    public interface IDosGame
     {
         Result MatchCenterRowCard(Player player, Card target, params Card[] cardsToPlay);
         Result EndTurn(Player player);
