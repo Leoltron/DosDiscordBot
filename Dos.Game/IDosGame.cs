@@ -12,5 +12,6 @@ namespace Dos.Game
         Result AddCardToCenterRow(Player player, Card card);
         Result Callout(Player caller, Player target);
         Result CallDos(Player caller);
+        Result SwapWith(Player caller, Player target);
     }
 }

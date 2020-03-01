@@ -58,7 +58,7 @@ namespace Dos.DiscordBot
 
         public bool IsFinished => IsGameStarted && Game.CurrentState.IsFinished;
 
-        public BotGameConfig Config { get; } = new BotGameConfig();
+        public BotGameConfig Config { get; } = new BotGameConfig{StartingPlayer = 0};
 
         private void AddUserPlayer(IUser user)
         {
@@ -135,6 +135,7 @@ namespace Dos.DiscordBot
             Game.Events.PublicLog += e => Info.Channel.SendMessageAsync(e.Message).Wait();
             Game.Events.Finished += OnFinished;
             Game.Events.PlayerSwitched += OnPlayerSwitched;
+            Game.Events.PlayersSwappedHands += e => Task.WaitAll(SendHandTo(e.Player), SendHandTo(e.Target));
 
             Game.Events.WentOut += e => SendToChannel(
                 $"{e.Player.Name} has no more cards! They finished in Rank #{e.Player.ScoreBoardPosition}! :tada:");
@@ -204,9 +205,9 @@ namespace Dos.DiscordBot
             }
         }
 
-        private async Task SendHandTo(Player playerIndex)
+        private async Task SendHandTo(Player player)
         {
-            if (!(playerIndex is DiscordUserPlayer dPlayer))
+            if (!(player is DiscordUserPlayer dPlayer))
                 return;
             try
             {
@@ -380,6 +381,56 @@ namespace Dos.DiscordBot
             try
             {
                 return Game.Callout(player, Players.FirstOrDefault(p => p.CanBeCalledOut));
+            }
+            finally
+            {
+                semaphoreSlim.Release();
+            }
+        }
+
+        public async Task<Result> SwapAsync(IUser user, IUser target)
+        {
+            if (!IdToUserPlayers.TryGetValue(user.Id, out var player))
+                return Result.Fail();
+
+            if (!IdToUserPlayers.TryGetValue(target.Id, out var targetPlayer))
+                return Result.Fail();
+
+            await semaphoreSlim.WaitAsync();
+            try
+            {
+                return Game.SwapWith(player, targetPlayer);
+            }
+            finally
+            {
+                semaphoreSlim.Release();
+            }
+        }
+
+        public async Task<Result> SwapAsync(IUser user, string targetName)
+        {
+            if (!IdToUserPlayers.TryGetValue(user.Id, out var player))
+                return Result.Fail();
+
+            var possibleTargets =
+                Players
+                   .Where(p => p.State == PlayerState.WaitingForTurn)
+                   .Where(p => p.Name.StartsWith(targetName, StringComparison.InvariantCultureIgnoreCase))
+                   .ToList();
+            if (possibleTargets.IsEmpty())
+                return Result.Fail($"Failed to find player with name starting with {targetName}. " +
+                                   "Try use names from `dos table`");
+
+            if (possibleTargets.Count > 1)
+            {
+                return Result.Fail($"Found more than one possible target with name starting with {targetName}. " +
+                                   "Possible targets:\n" + "\n".Join(possibleTargets.Select(p => p.Name)));
+            }
+
+            await semaphoreSlim.WaitAsync();
+            try
+            {
+                return Game.SwapWith(player, possibleTargets.First());
             }
             finally
             {

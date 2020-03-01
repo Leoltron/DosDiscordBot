@@ -26,6 +26,8 @@ namespace Dos.Game.State
 
         public override Result Callout(Player caller, Player target) => GameFinishedResult;
 
+        public override Result SwapWith(Player caller, Player target) => GameFinishedResult;
+
         public override Result CallDos(Player caller) => GameFinishedResult;
     }
 }

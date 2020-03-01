@@ -19,6 +19,8 @@ namespace Dos.DiscordBot
                     "Enables **Center Row Penalty*** house rule: at the end of your turn, draw as much cards as you left unmatched in the center row",
                 ["DrawEndsTurn"] =
                     "Enables **Draw Ends Turn** house rule: if you draw a card, your turn ends immediately",
+                ["SevenSwap"] =
+                    "Enables **Seven Swap** house rule: Color Match on 7 will force you to switch your hand with somebody else",
                 ["UseImages"] = "If enabled, images will be used instead of text to show cards"
             };
 
@@ -33,10 +35,12 @@ namespace Dos.DiscordBot
                     (c, s) => TryParseUShort(s, 1, 10).DoIfSuccess(v => c.MinCenterRowSize = v.Value),
                 ["CenterRowPenalty"] = (c, s) => TryParseBool(s).DoIfSuccess(v => c.CenterRowPenalty = v.Value),
                 ["DrawEndsTurn"] = (c, s) => TryParseBool(s).DoIfSuccess(v => c.DrawEndsTurn = v.Value),
+                ["SevenSwap"] = (c, s) => TryParseBool(s).DoIfSuccess(v => c.SevenSwap = v.Value),
                 ["AllRules"] = (c, s) => TryParseBool(s).DoIfSuccess(v =>
                 {
                     c.CenterRowPenalty = v.Value;
                     c.DrawEndsTurn = v.Value;
+                    c.SevenSwap = v.Value;
                 }),
                 ["UseImages"] = (c, s) => TryParseBool(s).DoIfSuccess(v => c.UseImages = v.Value)
             };
@@ -54,6 +58,7 @@ namespace Dos.DiscordBot
             "\n" +
             $"CenterRowPenalty     {CenterRowPenalty.ToString().ToLower()}\n" +
             $"DrawEndsTurn         {DrawEndsTurn.ToString().ToLower()}\n" +
+            $"SevenSwap            {SevenSwap.ToString().ToLower()}\n" +
             "\n" +
             $"UseImages            {UseImages.ToString().ToLower()}\n" +
             "```";

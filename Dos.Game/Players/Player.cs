@@ -17,7 +17,7 @@ namespace Dos.Game.Players
         public string Name { get; }
         public bool IsAi { get; }
 
-        public IList<Card> Hand { get; } = new List<Card>();
+        public IList<Card> Hand { get; set; } = new List<Card>();
 
         public int HandScore => Hand.Sum(c => c.Points);
 

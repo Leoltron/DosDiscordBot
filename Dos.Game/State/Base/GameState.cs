@@ -21,7 +21,6 @@ namespace Dos.Game.State.Base
         protected GameConfig Config => Game.Config;
 
         protected Player CurrentPlayer => Game.CurrentPlayer;
-        protected IList<Card> CurrentPlayerHand => Game.CurrentPlayer.Hand;
 
         public virtual bool IsFinished => false;
 
@@ -33,5 +32,6 @@ namespace Dos.Game.State.Base
 
         public abstract Result Callout(Player caller, Player target);
         public abstract Result CallDos(Player caller);
+        public abstract Result SwapWith(Player caller, Player target);
     }
 }
