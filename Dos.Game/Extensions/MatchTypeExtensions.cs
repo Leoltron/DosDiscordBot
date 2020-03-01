@@ -31,5 +31,13 @@ namespace Dos.Game.Extensions
                 MatchType.DoubleColorMatch => (1, 1),
                 _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
             };
+
+        public static bool IsColorMatch(this MatchType type) =>
+            type switch
+            {
+                MatchType.SingleColorMatch => true,
+                MatchType.DoubleColorMatch => true,
+                _ => false
+            };
     }
 }

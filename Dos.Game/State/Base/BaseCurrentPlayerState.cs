@@ -3,6 +3,7 @@ using System.Linq;
 using Dos.Game.Extensions;
 using Dos.Game.Match;
 using Dos.Game.Model;
+using Dos.Game.Players;
 using Dos.Utils;
 
 namespace Dos.Game.State.Base
@@ -46,12 +47,12 @@ namespace Dos.Game.State.Base
             if (additional == null)
                 return Result.Fail($"{target} was already matched");
 
-            var missingCards = cardsToPlay.Where(c => !CurrentPlayerHand.Contains(c)).ToList();
+            var missingCards = cardsToPlay.Where(c => !CurrentPlayer.Hand.Contains(c)).ToList();
             if (missingCards.Any())
                 return Result.Fail($"You don't have {string.Join(" and ", missingCards)}");
 
             foreach (var card in cardsToPlay)
-                CurrentPlayerHand.Remove(card);
+                CurrentPlayer.Hand.Remove(card);
 
             Game.CheckCurrentPlayerForDos();
 
@@ -73,7 +74,16 @@ namespace Dos.Game.State.Base
             Game.CurrentState = new BaseCurrentPlayerState(this);
 
             var result = matchType.ToResult();
-            if (CurrentPlayerHand.IsEmpty() || Game.CenterRowAdditional.All(c => c.Any()) && CardsToAdd == 0)
+
+            if (Game.Config.SevenSwap &&
+                CurrentPlayer.Hand.Any() &&
+                target.Value == CardValue.Seven &&
+                matchType.IsColorMatch())
+            {
+                result = result.AddText("Color match on a 7! Switch your hand with any player.");
+                Game.CurrentState = new TriggeredSwapGameState(this);
+            }
+            else if (CurrentPlayer.Hand.IsEmpty() || Game.CenterRowAdditional.All(c => c.Any()) && CardsToAdd == 0)
                 result = result.AddText(Game.CurrentState.EndTurn(CurrentPlayer).Message);
 
             return Result.Success(result.Message);
@@ -115,10 +125,10 @@ namespace Dos.Game.State.Base
             Game.ClearMatchedCardsFromCenterRow();
             Game.RefillCenterRow();
 
-            if (!CurrentPlayerHand.Contains(card))
+            if (!CurrentPlayer.Hand.Contains(card))
                 return Result.Fail($"You don't have {card}");
 
-            CurrentPlayerHand.Remove(card);
+            CurrentPlayer.Hand.Remove(card);
             Game.CenterRow.Add(card);
             Game.CenterRowAdditional.Add(new List<Card>());
 
@@ -132,5 +142,7 @@ namespace Dos.Game.State.Base
 
             return CardsToAdd == 0 ? state.CurrentPlayerEndTurn() : Result.Success($"**{CardsToAdd}** more");
         }
+
+        public override Result SwapWith(Player caller, Player target) => Result.Fail();
     }
 }

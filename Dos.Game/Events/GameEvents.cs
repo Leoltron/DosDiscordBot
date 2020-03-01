@@ -43,6 +43,7 @@ namespace Dos.Game.Events
             PlayerAddedCard?.Invoke(new CenterRowAddedCardEvent(game, player, card));
 
         public event Action<PlayerEvent> PlayerIsGoingToDraw;
+
         public void InvokePlayerIsGoingToDraw(Player player) =>
             PlayerIsGoingToDraw?.Invoke(new PlayerEvent(game, player));
 
@@ -53,9 +54,12 @@ namespace Dos.Game.Events
         public void InvokeFalseCallout(Player player) => FalseCallout?.Invoke(new PlayerEvent(game, player));
 
         public event Action<CalledOutEvent> CalledOut;
-
         public void InvokeCalledOut(Player caller, Player target) =>
             CalledOut?.Invoke(new CalledOutEvent(game, caller, target));
+
+        public event Action<PlayersSwappedHandsEvent> PlayersSwappedHands;
+        public void InvokePlayersSwappedHands(Player caller, Player target) =>
+            PlayersSwappedHands?.Invoke(new PlayersSwappedHandsEvent(game, caller, target));
 
         public event Action<PlayerEvent> WentOut;
         public void InvokeWentOut(Player player) => WentOut?.Invoke(new PlayerEvent(game, player));

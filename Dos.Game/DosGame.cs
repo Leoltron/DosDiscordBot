@@ -160,7 +160,7 @@ namespace Dos.Game
             {
                 PrivateLog("\n".Join(GameTableLines().Prepend("Center Row refilled:")));
             }
-            
+
             return refillNeeded;
         }
 
@@ -174,13 +174,13 @@ namespace Dos.Game
                 if (ActivePlayersCount <= 1)
                 {
                     if (ActivePlayersCount == 1)
-                        PlayerWentOut(Players.First(p => p.State == PlayerState.WaitingForTurn));
+                        PlayerWentOut(Players.First(p => p.State == PlayerState.WaitingForTurn), true);
                     SetFinished();
                 }
             }
             else
             {
-                if (Config.CenterRowPenalty)
+                if (Config.CenterRowPenalty && unmatchedCardsCount > 0)
                 {
                     CurrentPlayerPenalty += unmatchedCardsCount;
                     PublicLog($"There are {unmatchedCardsCount} unmatched card(s). Draw the same amount.");
@@ -230,13 +230,14 @@ namespace Dos.Game
                                            ? $" with {string.Join(" and ", CenterRowAdditional[i])} on top"
                                            : string.Empty));
 
-        public void PlayerWentOut(Player player)
+        public void PlayerWentOut(Player player, bool suppressEvent = false)
         {
             player.State = PlayerState.Out;
             player.ScoreBoardPosition = Players.Select(p => p.ScoreBoardPosition)
                                                .WhereHasValue()
                                                .MaxOrDefault() + 1;
-            Events.InvokeWentOut(player);
+            if (!suppressEvent)
+                Events.InvokeWentOut(player);
         }
 
         public void SetFinished()
@@ -304,5 +305,10 @@ namespace Dos.Game
         {
             PrivateLog($"Now it's {CurrentPlayer.Name}'s turn, hand: {CurrentPlayer.Hand.ToLogString()}");
         }
+
+        public Result SwapWith(Player caller, Player target) =>
+            target.IsActive()
+                ? CurrentState.SwapWith(caller, target)
+                : Result.Fail("You can't swap with unactive player");
     }
 }

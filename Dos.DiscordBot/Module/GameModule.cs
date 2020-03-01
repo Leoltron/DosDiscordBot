@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
+using Discord;
 using Discord.Commands;
 using Dos.DiscordBot.Attributes;
 using Dos.DiscordBot.Util;
@@ -90,6 +91,22 @@ namespace Dos.DiscordBot.Module
         }
 
         [StartedGameRequired]
+        [Command("swap", true)]
+        [Alias("switch", "trade", "exchange")]
+        public async Task SwapByMention(IUser target)
+        {
+            await ReplyIfHasMessageAsync(await Game.SwapAsync(Context.User, target));
+        }
+
+        [StartedGameRequired]
+        [Command("swap", true)]
+        [Alias("switch", "trade", "exchange")]
+        public async Task SwapByName(string targetName)
+        {
+            await ReplyIfHasMessageAsync(await Game.SwapAsync(Context.User, targetName));
+        }
+
+        [StartedGameRequired]
         [Command("table", true)]
         [Alias("t")]
         public Task Table() => Game.SendTableToChannel(true);
@@ -104,16 +121,11 @@ namespace Dos.DiscordBot.Module
 
         [CreatedGameRequired]
         [Command("config")]
-        public async Task GetConfig()
-        {
-            await Context.Channel.SendMessageAsync(Game.Config.ToDiscordTable());
-        }
+        public async Task GetConfig() => await Context.Channel.SendMessageAsync(Game.Config.ToDiscordTable());
 
         [Command("config")]
-        public async Task GetConfigDescription(string key)
-        {
+        public async Task GetConfigDescription(string key) =>
             await Context.Channel.SendMessageAsync(BotGameConfig.GetDescription(key));
-        }
 
         [NotStartedGameRequired]
         [Command("config")]

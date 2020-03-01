@@ -96,11 +96,11 @@ namespace Dos.Utils
                 if (isEmpty)
                 {
                     isEmpty = false;
-                    max = defaultValue;
+                    max = element;
                 }
                 else if (max.CompareTo(element) < 0)
                 {
-                    max = defaultValue;
+                    max = element;
                 }
 
             return max;

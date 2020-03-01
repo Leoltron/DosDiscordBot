@@ -17,6 +17,7 @@ namespace Dos.Game
         public ushort MinCenterRowSize { get; set; }
         public bool CenterRowPenalty { get; set; }
         public bool DrawEndsTurn { get; set; }
+        public bool SevenSwap { get; set; }
         public uint? StartingPlayer { get; set; }
     }
 }
