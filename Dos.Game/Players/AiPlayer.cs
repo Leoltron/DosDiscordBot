@@ -27,7 +27,7 @@ namespace Dos.Game.Players
 
                 if (moveResult.HasMessage)
                     game.PublicLog(moveResult.Message);
-                game.PublicLog($"Something went wrong, {Name} quits");
+                game.PublicLog($"*Something went wrong, {Name} quits*");
                 game.Quit(this);
                 return;
             }
@@ -46,7 +46,7 @@ namespace Dos.Game.Players
                 if (match != null)
                 {
                     var (matchers, target) = match.Value;
-                    game.PublicLog($"Match {matchers.ToLogString()} on {target.ToString()}");
+                    game.PublicLog($"`Match {matchers.ToLogString()} on {target.ToString()}`");
                     return game.MatchCenterRowCard(this, target, matchers);
                 }
             }
@@ -54,13 +54,13 @@ namespace Dos.Game.Players
             if (game.CurrentState.CanAdd)
             {
                 var card = ChooseCardForAdding(game);
-                game.PublicLog($"Add {card}");
+                game.PublicLog($"`Add {card}`");
                 return game.AddCardToCenterRow(this, card);
             }
 
             if (game.CurrentState.CanDraw)
             {
-                game.PublicLog("Draw");
+                game.PublicLog("`Draw`");
                 return game.Draw(this);
             }
 
@@ -70,11 +70,11 @@ namespace Dos.Game.Players
                                      .Where(p => p != this && p.IsActive())
                                      .OrderBy(p => p.Hand.Count)
                                      .First();
-                game.PublicLog($"Swapping with {swapTarget}");
+                game.PublicLog($"`Swapping with {swapTarget}`");
                 return game.SwapWith(this, swapTarget);
             }
 
-            game.PublicLog("Done");
+            game.PublicLog("`Done`");
             return game.EndTurn(this);
         }
 
