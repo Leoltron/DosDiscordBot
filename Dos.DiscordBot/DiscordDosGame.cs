@@ -105,9 +105,9 @@ namespace Dos.DiscordBot
             if (Owner.Id != user.Id)
                 return Result.Fail($"Only owner of this game (**{Owner?.Username}**) can add bots");
 
-            if (Players.Count(p => p.IsAi) >= 5)
+            if (Players.Count(p => p.IsAi) >= 2)
             {
-                return Result.Fail("Sorry, but I cannot add more than 5 bot players");
+                return Result.Fail("Sorry, but I cannot add more than 2 bot players");
             }
 
             await semaphoreSlim.WaitAsync();

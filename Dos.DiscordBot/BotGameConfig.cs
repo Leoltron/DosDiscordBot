@@ -15,6 +15,7 @@ namespace Dos.DiscordBot
                 ["FalseCalloutPenalty"] = "Penalty for false callout",
                 ["InitialHandSize"] = "Amount of cards given to the players at the start of the game",
                 ["MinCenterRowSize"] = "Minimal amount of cards on the center row.",
+                ["DoubleColorMatchDraw"] = "Amount of cards other players draw when you make a Double Color Match.",
                 ["CenterRowPenalty"] =
                     "Enables **Center Row Penalty*** house rule: at the end of your turn, draw as much cards as you left unmatched in the center row",
                 ["DrawEndsTurn"] =
@@ -33,6 +34,7 @@ namespace Dos.DiscordBot
                 ["InitialHandSize"] = (c, s) => TryParseUShort(s).DoIfSuccess(v => c.InitialHandSize = v.Value),
                 ["MinCenterRowSize"] =
                     (c, s) => TryParseUShort(s, 1, 10).DoIfSuccess(v => c.MinCenterRowSize = v.Value),
+                ["DoubleColorMatchDraw"] = (c, s) => TryParseUShort(s).DoIfSuccess(v => c.DoubleColorMatchDraw = v.Value),
                 ["CenterRowPenalty"] = (c, s) => TryParseBool(s).DoIfSuccess(v => c.CenterRowPenalty = v.Value),
                 ["DrawEndsTurn"] = (c, s) => TryParseBool(s).DoIfSuccess(v => c.DrawEndsTurn = v.Value),
                 ["SevenSwap"] = (c, s) => TryParseBool(s).DoIfSuccess(v => c.SevenSwap = v.Value),
@@ -55,6 +57,7 @@ namespace Dos.DiscordBot
             $"FalseCalloutPenalty  {FalseCalloutPenalty}\n" +
             $"InitialHandSize      {InitialHandSize}\n" +
             $"MinCenterRowSize     {MinCenterRowSize}\n" +
+            $"DoubleColorMatchDraw {DoubleColorMatchDraw}\n" +
             "\n" +
             $"CenterRowPenalty     {CenterRowPenalty.ToString().ToLower()}\n" +
             $"DrawEndsTurn         {DrawEndsTurn.ToString().ToLower()}\n" +

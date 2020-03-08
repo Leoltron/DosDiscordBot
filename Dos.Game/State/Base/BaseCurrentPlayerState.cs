@@ -63,20 +63,20 @@ namespace Dos.Game.State.Base
 
             Game.PrivateLog($"{CurrentPlayer} put {string.Join(" and ", cardsToPlay)} to {target}");
 
-            var (discardCount, drawCount) = matchType.ToColorMatchBonus();
+            var (discardCount, drawCount) = matchType.ToColorMatchBonus(Game.Config);
             if (discardCount != 0)
                 CardsToAdd += discardCount;
 
             if (drawCount != 0)
                 Game.Players
-                    .Where(p => p != CurrentPlayer)
+                    .Where(p => p != CurrentPlayer && p.IsActive())
                     .ForEach(p => Game.DealCards(p, drawCount, false));
 
             Game.MatchCount++;
 
             Game.CurrentState = new BaseCurrentPlayerState(this);
 
-            var result = matchType.ToResult();
+            var result = matchType.ToResult(Config);
 
             if (Game.Config.SevenSwap &&
                 CurrentPlayer.Hand.Any() &&
@@ -86,10 +86,17 @@ namespace Dos.Game.State.Base
                 result = result.AddText("Color match on a 7! Switch your hand with any player.");
                 Game.CurrentState = new TriggeredSwapGameState(this);
             }
-            else if (CurrentPlayer.Hand.IsEmpty() || Game.CenterRowAdditional.All(c => c.Any()) && CardsToAdd == 0)
-                result = result.AddText(Game.CurrentState.EndTurn(CurrentPlayer).Message);
+            
+            if (CurrentPlayer.Hand.IsEmpty() || Game.CenterRowAdditional.All(c => c.Any()) && CardsToAdd == 0)
+            {
+                Game.PublicLog(result.Message);
+                Game.CurrentState.EndTurn(CurrentPlayer);
+            }
+            else
+            {
+                Game.PublicLog(result.Message);
+            }
 
-            Game.PublicLog(result.Message);
             return Result.Success();
         }
 
