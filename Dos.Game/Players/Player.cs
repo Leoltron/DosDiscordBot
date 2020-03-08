@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dos.Game.Model;
@@ -26,5 +27,7 @@ namespace Dos.Game.Players
         public bool CanBeCalledOut { get; set; } = false;
 
         public override string ToString() => Name;
+
+        public virtual void Play(DosGame game) => throw new InvalidOperationException();
     }
 }

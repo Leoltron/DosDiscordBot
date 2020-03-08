@@ -58,13 +58,21 @@ namespace Dos.DiscordBot
 
         public bool IsFinished => IsGameStarted && Game.CurrentState.IsFinished;
 
-        public BotGameConfig Config { get; } = new BotGameConfig{StartingPlayer = 0};
+        public BotGameConfig Config { get; } = new BotGameConfig {StartingPlayer = 0};
 
         private void AddUserPlayer(IUser user)
         {
             var player = new DiscordUserPlayer(Players.Count, user);
             Players.Add(player);
             IdToUserPlayers[user.Id] = player;
+        }
+
+        private AiPlayer AddAiPlayer()
+        {
+            var player = new RandomAiPlayer(Players.Count);
+            Players.Add(player);
+            LogInfo($"Added AI player {player.Name} ({player.GetType().Name})");
+            return player;
         }
 
         public event Action Finished;
@@ -92,6 +100,30 @@ namespace Dos.DiscordBot
             }
         }
 
+        public async Task<Result> AddBotAsync(IUser user)
+        {
+            if (Owner.Id != user.Id)
+                return Result.Fail($"Only owner of this game (**{Owner?.Username}**) can add bots");
+
+            if (Players.Count(p => p.IsAi) >= 5)
+            {
+                return Result.Fail("Sorry, but I cannot add more than 5 bot players");
+            }
+
+            await semaphoreSlim.WaitAsync();
+            try
+            {
+                var player = AddAiPlayer();
+
+                return Result.Success($"**{player.Name}** have joined the game!");
+            }
+            finally
+            {
+                semaphoreSlim.Release();
+            }
+        }
+
+
         public async Task<Result> StartAsync(IUser player)
         {
             if (!IdToUserPlayers.ContainsKey(player.Id))
@@ -105,6 +137,12 @@ namespace Dos.DiscordBot
             {
                 if (Owner.Id != player.Id)
                     return Result.Fail($"Only owner of this game (**{Owner?.Username}**) can start it");
+
+                if (Players.Count == 1)
+                {
+                    var newPlayer = AddAiPlayer();
+                    await Info.Channel.SendMessageAsync($"Not enough players, **{newPlayer.Name}** joins the game!");
+                }
 
                 Game = new DosGame(new ShufflingDealer(Decks.Classic.Times(Config.Decks).ToArray()),
                                    Players.ToArray(),
@@ -166,10 +204,10 @@ namespace Dos.DiscordBot
                 dPlayer.User.SendCardsAsync(e.Cards, Config.UseImages, true).Wait();
         }
 
-        private async void OnPlayerSwitched(PlayerSwitchedEvent @event)
+        private void OnPlayerSwitched(PlayerSwitchedEvent @event)
         {
             selectedCenterRowCard = null;
-            await Task.WhenAll(SendHandTo(@event.NextPlayer), SendTableToChannel(false));
+            Task.WaitAll(SendHandTo(@event.NextPlayer), SendTableToChannel(false));
         }
 
         public Task SendTableToChannel(bool addPlayersStats) => SendTableToChannel(addPlayersStats, Config.UseImages);

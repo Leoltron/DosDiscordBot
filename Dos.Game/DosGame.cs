@@ -63,6 +63,10 @@ namespace Dos.Game
             PrivateLog("Game has been started");
             LogCurrentPlayer();
             Events.InvokeGameStarted();
+            if (CurrentPlayer.IsAi)
+            {
+                CurrentPlayer.Play(this);
+            }
         }
 
         private void ResetCurrentState()
@@ -176,6 +180,7 @@ namespace Dos.Game
                     if (ActivePlayersCount == 1)
                         PlayerWentOut(Players.First(p => p.State == PlayerState.WaitingForTurn), true);
                     SetFinished();
+                    return;
                 }
             }
             else
@@ -197,6 +202,11 @@ namespace Dos.Game
                 CurrentPlayer = Players[(CurrentPlayer.OrderId + 1) % Players.Length];
             } while (CurrentPlayer.State != PlayerState.WaitingForTurn);
 
+
+            if (CurrentState.IsFinished)
+                return;
+            
+            CurrentState = new TurnStartState(this);
             CurrentPlayer.State = PlayerState.Playing;
             CenterRowSizeAtTurnStart = CenterRow.Count;
             MatchCount = 0;
@@ -204,6 +214,11 @@ namespace Dos.Game
             if (CurrentPlayer != prevCurrentPlayer)
                 LogCurrentPlayer();
             Events.InvokePlayerSwitched(prevCurrentPlayer, CurrentPlayer);
+
+            if (CurrentPlayer.IsAi)
+            {
+                CurrentPlayer.Play(this);
+            }
         }
 
         public IEnumerable<string> PersonalGameTableLines(Player player)

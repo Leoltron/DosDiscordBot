@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
@@ -144,5 +145,9 @@ namespace Dos.DiscordBot.Module
             else
                 await GetConfig();
         }
+
+        [NotStartedGameRequired]
+        [Command("add-bot", true)]
+        public async Task AddBot() => await ReplyIfHasMessageAsync(await Game.AddBotAsync(Context.User));
     }
 }

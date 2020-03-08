@@ -11,6 +11,10 @@ namespace Dos.Game.State
             DrewCard = true;
         }
 
+        public override bool CanMatch => true;
+        public override bool CanAdd => true;
+        public override bool CanDraw => false;
+
         protected override Result CurrentPlayerAddCardToCenterRow(Card card)
         {
             CardsToAdd = 1;

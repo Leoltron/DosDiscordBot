@@ -14,6 +14,7 @@ namespace Dos.DiscordBot.Module
             "**dos ping**              - Pong!\n" +
             "\n" +
             "**dos join**              - create a game or join existing\n" +
+            "**dos add-bot**           - add AI player\n" +
             "**dos quit**              - quit a game\n" +
             "**dos start**             - start a game\n" +
             "**dos config**            - get configuration of the current game\n" +

@@ -14,6 +14,10 @@ namespace Dos.Game.State
         {
         }
 
+        public override bool CanMatch => true;
+        public override bool CanAdd => false;
+        public override bool CanDraw => true;
+
         protected override Result CurrentPlayerDraw()
         {
             Game.Events.InvokePlayerIsGoingToDraw(CurrentPlayer);

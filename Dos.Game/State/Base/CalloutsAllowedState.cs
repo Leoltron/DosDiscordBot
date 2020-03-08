@@ -68,7 +68,8 @@ namespace Dos.Game.State.Base
             caller.CanBeCalledOut = false;
             Game.Events.InvokeDosCall(caller);
             Game.PrivateLog($"{caller} called DOS");
-            return Result.Success($"**DOS! {caller.Name} has only 2 cards!**");
+            Game.PublicLog($"**DOS! {caller.Name} has only 2 cards!**");
+            return Result.Success();
         }
     }
 }

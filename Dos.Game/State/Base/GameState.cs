@@ -23,6 +23,9 @@ namespace Dos.Game.State.Base
         protected Player CurrentPlayer => Game.CurrentPlayer;
 
         public virtual bool IsFinished => false;
+        public virtual bool CanMatch => false;
+        public virtual bool CanAdd => false;
+        public virtual bool CanDraw => false;
 
         public abstract Result MatchCenterRowCard(Player player, Card target, params Card[] cardsToPlay);
         public abstract Result EndTurn(Player player);
