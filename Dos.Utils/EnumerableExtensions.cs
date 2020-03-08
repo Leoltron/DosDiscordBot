@@ -23,10 +23,18 @@ namespace Dos.Utils
 
 
         public static T RandomElement<T>(this IList<T> list) =>
-            list.Count == 0
+            list.IsEmpty()
                 ? throw new ArgumentException($"{nameof(list)} cannot be empty!")
                 : list[Rand.Next(list.Count)];
 
+        public static T RandomElementOrDefault<T>(this IList<T> list, T defaultValue = null) where T : class =>
+            list.IsEmpty() ? defaultValue : list.RandomElement();
+
+        public static T? RandomElementOrDefault<T>(this IList<T> list) where T : struct =>
+            list.IsEmpty() ? (T?) null : list.RandomElement();
+
+        public static IEnumerable<T?> AsNullable<T>(this IEnumerable<T> source) where T : struct =>
+            source.Cast<T?>();
 
         public static Dictionary<TKey, TValue> ToDictionary<TKey, TValue>(
             this IEnumerable<Tuple<TKey, TValue>> enumerable) =>
@@ -106,7 +114,7 @@ namespace Dos.Utils
             return max;
         }
 
-        public static IEnumerable<T> WhereHasValue<T>(this IEnumerable<T?> source) where T : struct => 
+        public static IEnumerable<T> WhereHasValue<T>(this IEnumerable<T?> source) where T : struct =>
             from element in source where element.HasValue select element.Value;
     }
 }

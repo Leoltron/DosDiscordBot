@@ -14,6 +14,10 @@ namespace Dos.Game.State
         {
         }
 
+        public override bool CanMatch => false;
+        public override bool CanAdd => false;
+        public override bool CanDraw => false;
+
         public override Result SwapWith(Player caller, Player target)
         {
             if (caller != CurrentPlayer || caller == target)

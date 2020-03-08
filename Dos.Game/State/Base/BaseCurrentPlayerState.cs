@@ -27,6 +27,9 @@ namespace Dos.Game.State.Base
         public bool DrewCard { get; set; }
         public int CardsToAdd { get; set; }
 
+        public override bool CanMatch => true;
+        public override bool CanAdd => CardsToAdd > 0;
+
         protected override Result CurrentPlayerMatchCenterRowCard(Card target, Card[] cardsToPlay)
         {
             if (!(cardsToPlay.Length == 1 || cardsToPlay.Length == 2))
@@ -86,7 +89,8 @@ namespace Dos.Game.State.Base
             else if (CurrentPlayer.Hand.IsEmpty() || Game.CenterRowAdditional.All(c => c.Any()) && CardsToAdd == 0)
                 result = result.AddText(Game.CurrentState.EndTurn(CurrentPlayer).Message);
 
-            return Result.Success(result.Message);
+            Game.PublicLog(result.Message);
+            return Result.Success();
         }
 
         protected override Result CurrentPlayerDraw() =>
@@ -111,9 +115,6 @@ namespace Dos.Game.State.Base
             }
 
             Game.MoveTurnToNextPlayer();
-            if (!(Game.CurrentState is FinishedGameState))
-                Game.CurrentState = new TurnStartState(this);
-
             return Result.Success();
         }
 
@@ -140,7 +141,14 @@ namespace Dos.Game.State.Base
             var state = new AddingToCenterRowState(this, CardsToAdd);
             Game.CurrentState = state;
 
-            return CardsToAdd == 0 ? state.CurrentPlayerEndTurn() : Result.Success($"**{CardsToAdd}** more");
+            if (CardsToAdd > 0 && Game.CurrentPlayer.Hand.Any())
+            {
+                Game.PublicLog($"**{CardsToAdd}** more");
+            }
+
+            return CardsToAdd == 0 || Game.CurrentPlayer.Hand.IsEmpty()
+                ? state.CurrentPlayerEndTurn()
+                : Result.Success();
         }
 
         public override Result SwapWith(Player caller, Player target) => Result.Fail();

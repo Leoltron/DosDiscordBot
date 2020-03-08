@@ -72,6 +72,9 @@ namespace Dos.Game.Extensions
             return MatchType.NoMatch;
         }
 
+        public static bool Matches(this Card target, params Card[] matchers) =>
+            target.MatchWith(matchers) != MatchType.NoMatch;
+
         public static bool Contains<T>(this IEnumerable<T> source, IEnumerable<T> sublist) where T : IEquatable<T>
         {
             var elementsCount = source

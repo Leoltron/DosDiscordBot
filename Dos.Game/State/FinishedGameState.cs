@@ -14,6 +14,9 @@ namespace Dos.Game.State
         }
 
         public override bool IsFinished => true;
+        public override bool CanMatch => false;
+        public override bool CanAdd => false;
+        public override bool CanDraw => false;
 
         public override Result MatchCenterRowCard(Player player, Card target, params Card[] cardsToPlay) =>
             GameFinishedResult;

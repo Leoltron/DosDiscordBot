@@ -13,6 +13,10 @@ namespace Dos.Game.State
             CardsToAdd = cardsToAdd;
         }
 
+        public override bool CanMatch => false;
+        public override bool CanAdd => true;
+        public override bool CanDraw => false;
+
         protected override Result CurrentPlayerMatchCenterRowCard(Card target, Card[] cardsToPlay) =>
             MatchingFail;
     }
