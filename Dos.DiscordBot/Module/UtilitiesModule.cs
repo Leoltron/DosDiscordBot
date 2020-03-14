@@ -1,5 +1,7 @@
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
+using Discord;
 using Discord.Commands;
 using Dos.Utils;
 
@@ -12,6 +14,8 @@ namespace Dos.DiscordBot.Module
         private const string HelpMessage =
             "**dos help**              - print this message\n" +
             "**dos ping**              - Pong!\n" +
+            "**dos invite**            - invite this bot to your server\n" +
+            "**dos support**           - get link to a server where you ask about this bot, report bugs, etc.\n" +
             "\n" +
             "**dos join**              - create a game or join existing\n" +
             "**dos add-bot**           - add AI player\n" +
@@ -47,13 +51,34 @@ namespace Dos.DiscordBot.Module
         private const string ComingSoon = "I'm not ready for the big world yet, but I will soon...";
 
         [Command("support")]
-        public Task Support() => Context.Channel.SendMessageAsync(ComingSoon);
+        [Alias("server")]
+        public Task Support() => SendToUserAndNotifyChannel(DosBot.SupportLink, "DM'd you link to a support server");
 
         [Command("invite")]
-        public Task Invite() => Context.Channel.SendMessageAsync(ComingSoon);
+        public Task Invite() => SendToUserAndNotifyChannel(DosBot.InviteLink, "DM'd you my invite link");
+
 
         [Command("source")]
-        [Alias("github")]
-        public Task Source() => Context.Channel.SendMessageAsync(ComingSoon);
+        [Alias("github", "repo", "git")]
+        public Task Source() => SendToUserAndNotifyChannel(DosBot.RepoLink, "DM'd you my source link");
+
+        private async Task SendToUserAndNotifyChannel(string message, string channelMessage)
+        {
+            var channelIsPrivate = Context.Channel is IPrivateChannel;
+            try
+            {
+                await Context.User.SendMessageAsync(message);
+            }
+            catch (Exception)
+            {
+                if (!channelIsPrivate)
+                    await Context.Channel.SendMessageAsync(
+                        "Failed to DM you. Please check if your DM is open and try again.");
+                return;
+            }
+
+            if (!channelIsPrivate)
+                await Context.Channel.SendMessageAsync(channelMessage);
+        }
     }
 }

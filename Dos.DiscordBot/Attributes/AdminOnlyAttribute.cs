@@ -1,7 +1,6 @@
 using System;
 using System.Threading.Tasks;
 using Discord.Commands;
-using Dos.DiscordBot.Util;
 
 namespace Dos.DiscordBot.Attributes
 {
@@ -9,7 +8,7 @@ namespace Dos.DiscordBot.Attributes
     {
         public override Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo command,
                                                                        IServiceProvider services)
-            => Task.FromResult(context.User.DiscordTag() == DosBot.AdminDiscordTag
+            => Task.FromResult(context.User.Id == DosBot.AdminId
                                    ? PreconditionResult.FromSuccess()
                                    : PreconditionResult.FromError(string.Empty));
     }

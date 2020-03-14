@@ -11,7 +11,10 @@ namespace Dos.DiscordBot
 {
     public class DosBot
     {
-        public const string AdminDiscordTag = "Leoltron#9479";
+        public const ulong AdminId = 217276381778804736;
+        public const string SupportLink = "https://discord.gg/mPujFFV";
+        public const string InviteLink = "https://discordapp.com/api/oauth2/authorize?client_id=660931324642590720&permissions=52224&scope=bot";
+        public const string RepoLink = "https://github.com/Leoltron/DosDiscordBot";
 
         private const string VersionStatus = "v1.2.0 (08.03.2020)";
 
