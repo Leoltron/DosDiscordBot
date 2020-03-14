@@ -168,32 +168,35 @@ namespace Dos.Game
             return refillNeeded;
         }
 
-        public void MoveTurnToNextPlayer()
+        public void MoveTurnToNextPlayer(bool currentPlayerQuit = false)
         {
             var unmatchedCardsCount = CenterRowSizeAtTurnStart - MatchCount;
 
-            if (CurrentPlayer.Hand.IsEmpty())
+            if (!currentPlayerQuit)
             {
-                PlayerWentOut(CurrentPlayer);
-                if (ActivePlayersCount <= 1)
+                if (CurrentPlayer.Hand.IsEmpty())
                 {
-                    if (ActivePlayersCount == 1)
-                        PlayerWentOut(Players.First(p => p.State == PlayerState.WaitingForTurn), true);
-                    SetFinished();
-                    return;
+                    PlayerWentOut(CurrentPlayer);
+                    if (ActivePlayersCount <= 1)
+                    {
+                        if (ActivePlayersCount == 1)
+                            PlayerWentOut(Players.First(p => p.State == PlayerState.WaitingForTurn), true);
+                        SetFinished();
+                        return;
+                    }
                 }
-            }
-            else
-            {
-                if (Config.CenterRowPenalty && unmatchedCardsCount > 0)
+                else
                 {
-                    CurrentPlayerPenalty += unmatchedCardsCount;
-                    PublicLog($"There are {unmatchedCardsCount} unmatched card(s). Draw the same amount.");
-                }
+                    if (Config.CenterRowPenalty && unmatchedCardsCount > 0)
+                    {
+                        CurrentPlayerPenalty += unmatchedCardsCount;
+                        PublicLog($"There are {unmatchedCardsCount} unmatched card(s). Draw the same amount.");
+                    }
 
-                DealCards(CurrentPlayer, CurrentPlayerPenalty);
-                CurrentPlayerPenalty = 0;
-                CurrentPlayer.State = PlayerState.WaitingForTurn;
+                    DealCards(CurrentPlayer, CurrentPlayerPenalty);
+                    CurrentPlayerPenalty = 0;
+                    CurrentPlayer.State = PlayerState.WaitingForTurn;
+                }
             }
 
             var prevCurrentPlayer = CurrentPlayer;
@@ -212,8 +215,10 @@ namespace Dos.Game
             MatchCount = 0;
 
             if (CurrentPlayer != prevCurrentPlayer)
+            {
                 LogCurrentPlayer();
-            Events.InvokePlayerSwitched(prevCurrentPlayer, CurrentPlayer);
+                Events.InvokePlayerSwitched(prevCurrentPlayer, CurrentPlayer);
+            }
 
             if (CurrentPlayer.IsAi)
             {
@@ -263,8 +268,7 @@ namespace Dos.Game
 
         public void Quit(Player player)
         {
-            PublicLog($"{player.Name} left the game");
-            PrivateLog($"{player.Name} left the game");
+            Log($"{player.Name} left the game");
             switch (ActivePlayersCount)
             {
                 case 1:
@@ -279,15 +283,14 @@ namespace Dos.Game
                     {
                         ClearMatchedCardsFromCenterRow();
                         RefillCenterRow();
-                        MoveTurnToNextPlayer();
+                        MoveTurnToNextPlayer(true);
                     }
 
                     Dealer.DiscardCards(player.Hand);
                     player.CanBeCalledOut = false;
                     player.State = PlayerState.Quit;
                     player.Hand.Clear();
-
-                    ResetCurrentState();
+ 
                     break;
             }
         }
@@ -315,6 +318,11 @@ namespace Dos.Game
 
         public void PublicLog(string message) => Events.InvokePublicLog(message);
         public void PrivateLog(string message) => Events.InvokePrivateLog(message);
+        public void Log(string message)
+        {
+            PrivateLog(message);
+            PublicLog(message);
+        }
 
         private void LogCurrentPlayer()
         {

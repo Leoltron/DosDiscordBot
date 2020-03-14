@@ -99,15 +99,17 @@ namespace Dos.DiscordBot
                 semaphoreSlim.Release();
             }
         }
+        
+        private const int MaxBotPlayers = 1;
 
         public async Task<Result> AddBotAsync(IUser user)
         {
             if (Owner.Id != user.Id)
                 return Result.Fail($"Only owner of this game (**{Owner?.Username}**) can add bots");
 
-            if (Players.Count(p => p.IsAi) >= 2)
+            if (Players.Count(p => p.IsAi) >= MaxBotPlayers)
             {
-                return Result.Fail("Sorry, but I cannot add more than 2 bot players");
+                return Result.Fail($"Sorry, but I cannot add more than {MaxBotPlayers} bot players");
             }
 
             await semaphoreSlim.WaitAsync();
