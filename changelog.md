@@ -11,9 +11,13 @@
  #### v1.1.2 (25.01.2020)
  - Added some clarifications in help command
 
- #### v1.2.0 (08.03.2020)
+ ### v1.2.0 (08.03.2020)
  - Now quitting does not stop the game as long as there's more that 1 player
  - Improved game logging
  - Added **Seven Swap** house rule: Color Match on 7 will force you to switch your hand  with somebody else
  - Added config option to change amount of cards players have to draw when somebody else made a Double Color Match 
  - Added bot players: right now they make random moves
+
+ ### v1.2.1 (14.03.2020)
+  - From this version, bot on Discord and repository is public
+  - Added commands for inviting bot, support and source links
