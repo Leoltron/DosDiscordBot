@@ -36,7 +36,7 @@ namespace Dos.DiscordBot.Module
             foreach (var gameInfo in runningGames)
             {
                 var time = now - gameInfo.CreateDate;
-                var timeString = time > TimeSpan.FromDays(1) ? "**More than day**" : $"{time:hh\\:mm\\:ss}";
+                var timeString = time > TimeSpan.FromDays(1) ? "**More than a day**" : $"{time:hh\\:mm\\:ss}";
 
                 message.Append(
                     $"\n\t[{timeString}] {gameInfo.ServerName}, #{gameInfo.Channel.Name}, owner: {gameInfo.Owner.DiscordTag()}");

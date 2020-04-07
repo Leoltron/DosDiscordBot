@@ -21,3 +21,7 @@
  ### v1.2.1 (14.03.2020)
   - From this version, bot on Discord and repository is public
   - Added commands for inviting bot, support and source links
+  
+ ### v1.2.2 (07.04.2020)
+  - Added game time to post game and table report 
+  

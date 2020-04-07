@@ -30,6 +30,7 @@ namespace Dos.DiscordBot
         public readonly List<Player> Players = new List<Player>();
 
         private Card? selectedCenterRowCard;
+        private DateTime startTime;
 
         public DiscordDosGame(ISocketMessageChannel channel, IUser owner, ILogger mainLogger, string serverName)
         {
@@ -99,7 +100,7 @@ namespace Dos.DiscordBot
                 semaphoreSlim.Release();
             }
         }
-        
+
         private const int MaxBotPlayers = 1;
 
         public async Task<Result> AddBotAsync(IUser user)
@@ -156,6 +157,7 @@ namespace Dos.DiscordBot
 
                 await Task.WhenAll(Players.Select(SendHandTo));
                 await SendTableToChannel(false);
+                startTime = DateTime.Now;
 
                 return Result.Success();
             }
@@ -185,12 +187,17 @@ namespace Dos.DiscordBot
         {
             if (Players.Any(p => p.State == PlayerState.Out))
             {
-                var message = "The game has finished with the following results:\n" + string.Join(
-                    "\n", Players.Where(p => p.State == PlayerState.Out)
-                                 .OrderBy(p => p.ScoreBoardPosition)
-                                 .Select(p => $"#{p.ScoreBoardPosition}: {p.Name}"));
-                Info.Channel.SendMessageAsync(message);
+                var playerStatsLines = Players.Where(p => p.State == PlayerState.Out)
+                                              .OrderBy(p => p.ScoreBoardPosition)
+                                              .Select(p => $"#{p.ScoreBoardPosition}: {p.Name}");
+                var message = "The game has finished with the following results:\n" +
+                              string.Join("\n", playerStatsLines);
+                SendToChannel(message);
             }
+
+            var time = DateTime.Now - startTime;
+            var timeString = time > TimeSpan.FromDays(1) ? "**More than a day**" : $"{time:hh\\:mm\\:ss}";
+            SendToChannel($"The game lasted {timeString}");
 
             Finished?.Invoke();
         }
