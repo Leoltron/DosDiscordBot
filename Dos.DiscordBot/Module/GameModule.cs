@@ -149,5 +149,15 @@ namespace Dos.DiscordBot.Module
         [NotStartedGameRequired]
         [Command("add-bot", true)]
         public async Task AddBot() => await ReplyIfHasMessageAsync(await Game.AddBotAsync(Context.User));
+        
+        
+
+        [StartedGameRequired]
+        [Command("stop", true)]
+        [Alias("end", "endgame", "stopgame")]
+        public async Task StopGame()
+        {
+            await ReplyIfHasMessageAsync(await Game.StopAsync(Context.User));
+        }
     }
 }

@@ -21,6 +21,7 @@ namespace Dos.DiscordBot.Module
             "**dos add-bot**           - add AI player\n" +
             "**dos quit**              - quit a game\n" +
             "**dos start**             - start a game\n" +
+            "**dos stop**              - stop the game, if allowed by config\n" +
             "**dos config**            - get configuration of the current game\n" +
             "**dos config <key>**      - get configuration description\n" +
             "**dos config <key> <val>**- set configuration value\n" +
@@ -47,8 +48,6 @@ namespace Dos.DiscordBot.Module
 
         [Command("help")]
         public Task Help() => Context.Channel.SendMessageAsync(HelpMessage);
-
-        private const string ComingSoon = "I'm not ready for the big world yet, but I will soon...";
 
         [Command("support")]
         [Alias("server")]

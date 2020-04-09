@@ -24,4 +24,6 @@
   
  ### v1.2.2 (07.04.2020)
   - Added game time to post game and table report 
-  
+ 
+ ### v1.2.3 (10.04.2020)
+  - Now game can be stopped, rest of the players will be ranked by either hand score or hand size (depends on CardCountRanking config)

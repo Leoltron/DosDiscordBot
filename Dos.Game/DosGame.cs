@@ -208,7 +208,7 @@ namespace Dos.Game
 
             if (CurrentState.IsFinished)
                 return;
-            
+
             CurrentState = new TurnStartState(this);
             CurrentPlayer.State = PlayerState.Playing;
             CenterRowSizeAtTurnStart = CenterRow.Count;
@@ -253,18 +253,34 @@ namespace Dos.Game
         public void PlayerWentOut(Player player, bool suppressEvent = false)
         {
             player.State = PlayerState.Out;
-            player.ScoreBoardPosition = Players.Select(p => p.ScoreBoardPosition)
-                                               .WhereHasValue()
-                                               .MaxOrDefault() + 1;
+            player.ScoreBoardPosition = NextScoreboardPosition;
             if (!suppressEvent)
                 Events.InvokeWentOut(player);
         }
 
+        private int NextScoreboardPosition =>
+            Players.Select(p => p.ScoreBoardPosition)
+                   .WhereHasValue()
+                   .MaxOrDefault() + 1;
+
         public void SetFinished()
         {
             CurrentState = new FinishedGameState(this);
+            SetActivePlayersScoreboard();
             Events.InvokeFinished();
         }
+
+        private void SetActivePlayersScoreboard()
+        {
+            Players.Where(p => p.IsActive())
+                   .OrderBy(PlayerScore)
+                   .ThenBy(p => (p.OrderId - CurrentPlayer.OrderId + Players.Length) % Players.Length)
+                   .ForEach(p => p.ScoreBoardPosition = NextScoreboardPosition);
+        }
+
+        private int PlayerScore(Player player) => Config.CardCountRanking
+            ? player.Hand.Count
+            : player.Hand.Sum(c => c.Points);
 
         public void Quit(Player player)
         {
@@ -272,10 +288,7 @@ namespace Dos.Game
             switch (ActivePlayersCount)
             {
                 case 1:
-                    SetFinished();
-                    break;
                 case 2:
-                    PlayerWentOut(Players.First(p => p.IsActive() && p != CurrentPlayer));
                     SetFinished();
                     break;
                 default:
@@ -290,7 +303,7 @@ namespace Dos.Game
                     player.CanBeCalledOut = false;
                     player.State = PlayerState.Quit;
                     player.Hand.Clear();
- 
+
                     break;
             }
         }
@@ -318,6 +331,7 @@ namespace Dos.Game
 
         public void PublicLog(string message) => Events.InvokePublicLog(message);
         public void PrivateLog(string message) => Events.InvokePrivateLog(message);
+
         public void Log(string message)
         {
             PrivateLog(message);

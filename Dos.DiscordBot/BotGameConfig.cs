@@ -22,7 +22,9 @@ namespace Dos.DiscordBot
                     "Enables **Draw Ends Turn** house rule: if you draw a card, your turn ends immediately",
                 ["SevenSwap"] =
                     "Enables **Seven Swap** house rule: Color Match on 7 will force you to switch your hand with somebody else",
-                ["UseImages"] = "If enabled, images will be used instead of text to show cards"
+                ["UseImages"] = "If enabled, images will be used instead of text to show cards",
+                ["AllowGameStop"] = "Allows game owner to use `dos stop` to forcefully end the game",
+                ["CardCountRanking"] = "If enabled, card count will be used to rank players in stopped game instead of card score"
             };
 
         private static readonly Dictionary<string, Func<BotGameConfig, string, Result>> Setters =
@@ -34,7 +36,8 @@ namespace Dos.DiscordBot
                 ["InitialHandSize"] = (c, s) => TryParseUShort(s).DoIfSuccess(v => c.InitialHandSize = v.Value),
                 ["MinCenterRowSize"] =
                     (c, s) => TryParseUShort(s, 1, 10).DoIfSuccess(v => c.MinCenterRowSize = v.Value),
-                ["DoubleColorMatchDraw"] = (c, s) => TryParseUShort(s).DoIfSuccess(v => c.DoubleColorMatchDraw = v.Value),
+                ["DoubleColorMatchDraw"] =
+                    (c, s) => TryParseUShort(s).DoIfSuccess(v => c.DoubleColorMatchDraw = v.Value),
                 ["CenterRowPenalty"] = (c, s) => TryParseBool(s).DoIfSuccess(v => c.CenterRowPenalty = v.Value),
                 ["DrawEndsTurn"] = (c, s) => TryParseBool(s).DoIfSuccess(v => c.DrawEndsTurn = v.Value),
                 ["SevenSwap"] = (c, s) => TryParseBool(s).DoIfSuccess(v => c.SevenSwap = v.Value),
@@ -44,27 +47,33 @@ namespace Dos.DiscordBot
                     c.DrawEndsTurn = v.Value;
                     c.SevenSwap = v.Value;
                 }),
-                ["UseImages"] = (c, s) => TryParseBool(s).DoIfSuccess(v => c.UseImages = v.Value)
+                ["UseImages"] = (c, s) => TryParseBool(s).DoIfSuccess(v => c.UseImages = v.Value),
+                ["AllowGameStop"] = (c, s) => TryParseBool(s).DoIfSuccess(v => c.AllowGameStop = v.Value),
+                ["CardCountRanking"] = (c, s) => TryParseBool(s).DoIfSuccess(v => c.CardCountRanking = v.Value)
             };
 
         public ushort Decks { get; private set; } = 1;
         public bool UseImages { get; private set; } = true;
+        public bool AllowGameStop { get; private set; } = true;
 
         public string ToDiscordTable() =>
-            "```cs\n" +
-            $"Decks                {Decks}\n" +
-            $"CalloutPenalty       {CalloutPenalty}\n" +
-            $"FalseCalloutPenalty  {FalseCalloutPenalty}\n" +
-            $"InitialHandSize      {InitialHandSize}\n" +
-            $"MinCenterRowSize     {MinCenterRowSize}\n" +
-            $"DoubleColorMatchDraw {DoubleColorMatchDraw}\n" +
-            "\n" +
-            $"CenterRowPenalty     {CenterRowPenalty.ToString().ToLower()}\n" +
-            $"DrawEndsTurn         {DrawEndsTurn.ToString().ToLower()}\n" +
-            $"SevenSwap            {SevenSwap.ToString().ToLower()}\n" +
-            "\n" +
-            $"UseImages            {UseImages.ToString().ToLower()}\n" +
-            "```";
+            string.Join("\n",
+                        "```cs",
+                        $"Decks                {Decks}",
+                        $"CalloutPenalty       {CalloutPenalty}",
+                        $"FalseCalloutPenalty  {FalseCalloutPenalty}",
+                        $"InitialHandSize      {InitialHandSize}",
+                        $"MinCenterRowSize     {MinCenterRowSize}",
+                        $"DoubleColorMatchDraw {DoubleColorMatchDraw}",
+                        "",
+                        $"CenterRowPenalty     {CenterRowPenalty.ToString().ToLower()}",
+                        $"DrawEndsTurn         {DrawEndsTurn.ToString().ToLower()}",
+                        $"SevenSwap            {SevenSwap.ToString().ToLower()}",
+                        "",
+                        $"UseImages            {UseImages.ToString().ToLower()}",
+                        $"AllowGameStop        {AllowGameStop.ToString().ToLower()}",
+                        $"CardCountRanking     {CardCountRanking.ToString().ToLower()}",
+                        "```");
 
         public static string GetDescription(string config) =>
             Descriptions.GetValueOrDefault(config, $"Sorry, I don't know configuration \"{config}\".");

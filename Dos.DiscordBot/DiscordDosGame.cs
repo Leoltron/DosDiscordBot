@@ -183,21 +183,40 @@ namespace Dos.DiscordBot
                 $"{e.Player.Name} has no more cards! They finished in Rank #{e.Player.ScoreBoardPosition}! :tada:");
         }
 
+        private IEnumerable<string> GetScoreboardLines()
+        {
+            var linesForPlayersWhoWentOut =
+                Players.Where(p => p.State == PlayerState.Out)
+                       .OrderBy(p => p.ScoreBoardPosition)
+                       .Select(p => $"#{p.ScoreBoardPosition}: {p.Name}");
+
+            var linesForActivePlayers =
+                Players.Where(p => p.IsActive())
+                       .OrderBy(p => p.ScoreBoardPosition)
+                       .Select(p => $"#{p.ScoreBoardPosition}: {p.Name} - {PlayerScoreString(p)}");
+
+
+            return linesForPlayersWhoWentOut.Concat(linesForActivePlayers);
+        }
+
+        private string PlayerScoreString(Player player)
+        {
+            return Config.CardCountRanking
+                ? player.Hand.Count.Pluralize("card", "cards")
+                : player.Hand.Sum(c => c.Points).Pluralize("point", "points");
+        }
+
         private void OnFinished()
         {
-            if (Players.Any(p => p.State == PlayerState.Out))
+            if (Players.Any(p => p.State == PlayerState.Out || p.IsActive()))
             {
-                var playerStatsLines = Players.Where(p => p.State == PlayerState.Out)
-                                              .OrderBy(p => p.ScoreBoardPosition)
-                                              .Select(p => $"#{p.ScoreBoardPosition}: {p.Name}");
-                var message = "The game has finished with the following results:\n" +
-                              string.Join("\n", playerStatsLines);
-                SendToChannel(message);
+                SendToChannel("The game has finished with the following results:\n" +
+                              string.Join("\n", GetScoreboardLines()));
             }
 
             var time = DateTime.Now - startTime;
             var timeString = time > TimeSpan.FromDays(1) ? "**More than a day**" : $"{time:hh\\:mm\\:ss}";
-            SendToChannel($"The game lasted {timeString}");
+            SendToChannel($"`The game lasted {timeString}`");
 
             Finished?.Invoke();
         }
@@ -478,6 +497,27 @@ namespace Dos.DiscordBot
             try
             {
                 return Game.SwapWith(player, possibleTargets.First());
+            }
+            finally
+            {
+                semaphoreSlim.Release();
+            }
+        }
+
+        public async Task<Result> StopAsync(IUser user)
+        {
+            if (!Config.AllowGameStop)
+                return Result.Fail("Game stop is disabled for this game");
+
+
+            if (Owner.Id != user.Id)
+                return Result.Fail($"Only owner of this game (**{Owner?.Username}**) can stop it");
+
+            await semaphoreSlim.WaitAsync();
+            try
+            {
+                Game.SetFinished();
+                return Result.Success();
             }
             finally
             {

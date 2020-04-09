@@ -45,7 +45,7 @@ namespace Dos.DiscordBot.Module
             return Context.Channel.SendMessageAsync(message.ToString());
         }
 
-        [Command("stop")]
+        [Command("stop-bot")]
         public async Task StopStartingGames()
         {
             if (!gameRouterService.PreventStartNewGames)
