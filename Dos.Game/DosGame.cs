@@ -288,7 +288,10 @@ namespace Dos.Game
             switch (ActivePlayersCount)
             {
                 case 1:
+                    SetFinished();
+                    break;
                 case 2:
+                    PlayerWentOut(Players.First(p => p.IsActive() && p != CurrentPlayer));
                     SetFinished();
                     break;
                 default:
