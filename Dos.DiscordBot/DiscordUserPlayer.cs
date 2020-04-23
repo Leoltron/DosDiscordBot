@@ -6,7 +6,7 @@ namespace Dos.DiscordBot
 {
     public class DiscordUserPlayer : HumanPlayer
     {
-        public DiscordUserPlayer(int orderId, IUser user) : base(orderId, user.DiscordTag())
+        public DiscordUserPlayer(int orderId, IUser user) : base(orderId, user.GuildDiscordTag())
         {
             User = user;
         }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
 using Dos.DiscordBot.Commands;
 using Dos.Game.Extensions;
 using Dos.Game.Model;
@@ -109,5 +110,14 @@ namespace Dos.DiscordBot.Util
         }
 
         public static string DiscordTag(this IUser user) => $"{user.Username}#{user.Discriminator}";
+        public static string GuildDiscordTag(this IUser user)
+        {
+            if (user is SocketGuildUser sgu)
+            {
+                return $"{sgu.Nickname}";
+            }
+            
+            return user.DiscordTag();
+        }
     }
 }

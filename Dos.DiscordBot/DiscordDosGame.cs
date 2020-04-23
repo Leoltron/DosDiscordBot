@@ -101,7 +101,7 @@ namespace Dos.DiscordBot
             }
         }
 
-        private const int MaxBotPlayers = 1;
+        private const int MaxBotPlayers = 2;
 
         public async Task<Result> AddBotAsync(IUser user)
         {

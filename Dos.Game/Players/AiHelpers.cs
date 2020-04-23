@@ -28,7 +28,7 @@ namespace Dos.Game.Players
             "User", "Vessel", "Ware", "Watcher", "Whole", "Wish", "Witness", "Wonder", "Zen", "Zero"
         };
 
-        public static string GenerateBotName(int order) => $"{BotNames.RandomElement()} AI №{order}";
+        public static string GenerateBotName(int order) => $"{BotNames.RandomElement()} AI";
 
         public static IEnumerable<(Card[] matchers, Card target)> GetAvailableMatches(
             IList<Card> possibleMatchers, IList<Card> possibleTargets)
