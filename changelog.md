@@ -31,4 +31,4 @@
  ### v1.2.4 (23.01.2020)
   - Increased max amount of bot players to 2
   - Now bot uses players' nicknames instead of usernames
-  - AI players have no more numbers added to their name
+  - AI players don't have numbers added to their name anymore

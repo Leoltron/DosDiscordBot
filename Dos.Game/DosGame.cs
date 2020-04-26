@@ -291,7 +291,7 @@ namespace Dos.Game
                     SetFinished();
                     break;
                 case 2:
-                    PlayerWentOut(Players.First(p => p.IsActive() && p != CurrentPlayer));
+                    PlayerWentOut(Players.First(p => p.IsActive() && p != player));
                     SetFinished();
                     break;
                 default:
