@@ -28,7 +28,11 @@
  ### v1.2.3 (10.04.2020)
   - Now game can be stopped, rest of the players will be ranked by either hand score or hand size (depends on CardCountRanking config)
   
- ### v1.2.4 (23.01.2020)
+ ### v1.2.4 (23.04.2020)
   - Increased max amount of bot players to 2
   - Now bot uses players' nicknames instead of usernames
   - AI players don't have numbers added to their name anymore
+  
+ ### v1.2.5 (02.05.2020)
+  - Elapsed time now has milliseconds
+  - Fixed quitting messages

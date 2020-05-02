@@ -215,7 +215,7 @@ namespace Dos.DiscordBot
             }
 
             var time = DateTime.Now - startTime;
-            var timeString = time > TimeSpan.FromDays(1) ? "**More than a day**" : $"{time:hh\\:mm\\:ss}";
+            var timeString = time > TimeSpan.FromDays(1) ? "**More than a day**" : $"{time:hh:mm:ss.fff}";
             SendToChannel($"`The game lasted {timeString}`");
 
             Finished?.Invoke();
