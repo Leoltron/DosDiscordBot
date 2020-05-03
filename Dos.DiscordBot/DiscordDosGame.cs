@@ -93,7 +93,7 @@ namespace Dos.DiscordBot
 
                 AddUserPlayer(user);
 
-                return Result.Success($"{user.Username} have joined the game!");
+                return Result.Success($"{user.Username} has joined the game!");
             }
             finally
             {
@@ -118,7 +118,7 @@ namespace Dos.DiscordBot
             {
                 var player = AddAiPlayer();
 
-                return Result.Success($"**{player.Name}** have joined the game!");
+                return Result.Success($"**{player.Name}** has joined the game!");
             }
             finally
             {
