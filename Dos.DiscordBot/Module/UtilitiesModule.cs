@@ -29,6 +29,7 @@ namespace Dos.DiscordBot.Module
             "**dos draw**              - draw card\n" +
             "**dos select <card>**     - select card from Center Row to match with\n" +
             "**dos match <card(s)>**   - match cards with selected one\n" +
+            "**dos match <card 1> [card 2] on <card 3> **   - match card 1 (and 2, if specified) with card 3\n" +
             "**dos add card**          - add a card to the Center Row\n" +
             "**dos done**              - finish your turn. You can also use this to explicitly finish matching and refill Center Row before adding cards to it. \n" +
             "\n" +
