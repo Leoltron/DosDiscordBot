@@ -31,7 +31,8 @@ namespace Dos.DiscordBot
             client = new DiscordSocketClient(new DiscordSocketConfig
             {
                 LogLevel = LogSeverity.Verbose,
-                MessageCacheSize = 1000
+                MessageCacheSize = 1000,
+                ExclusiveBulkDelete = true
             });
             await client.SetGameAsync(VersionStatus);
 
