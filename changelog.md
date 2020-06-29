@@ -36,3 +36,6 @@
  ### v1.2.5 (02.05.2020)
   - Elapsed time now has milliseconds
   - Fixed quitting messages
+  
+ ### v1.3.0 (29.06.2020)
+  - Added **server default config**: when you use `dos config` in channel where is no game created, it prints or updates server default config. Values in it will be copied to every new game on that server. You need «Manage Roles» permission to edit server configuration.

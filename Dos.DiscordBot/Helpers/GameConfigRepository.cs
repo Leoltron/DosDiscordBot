@@ -23,6 +23,14 @@ namespace Dos.DiscordBot.Helpers
         {
             await using var dbContext = new BotDbContext();
             var guildConfig = await GetGuildConfigAsync(dbContext, serverId);
+            if (guildConfig == null)
+            {
+                guildConfig = new GuildConfig
+                {
+                    GuildId = serverId
+                };
+                await dbContext.AddAsync(guildConfig);
+            }
             guildConfig.Config = config;
             await dbContext.SaveChangesAsync();
         }
