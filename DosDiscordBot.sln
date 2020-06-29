@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dos.ConsoleClient", "Dos.Co
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dos.Utils", "Dos.Utils\Dos.Utils.csproj", "{FFB27365-AB2A-4260-8E55-9C164781FDE8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dos.Database", "Dos.Database\Dos.Database.csproj", "{231A02CB-DACA-4A5B-99F5-61C92A0261F9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +38,9 @@ Global
 		{FFB27365-AB2A-4260-8E55-9C164781FDE8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FFB27365-AB2A-4260-8E55-9C164781FDE8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FFB27365-AB2A-4260-8E55-9C164781FDE8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{231A02CB-DACA-4A5B-99F5-61C92A0261F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{231A02CB-DACA-4A5B-99F5-61C92A0261F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{231A02CB-DACA-4A5B-99F5-61C92A0261F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{231A02CB-DACA-4A5B-99F5-61C92A0261F9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

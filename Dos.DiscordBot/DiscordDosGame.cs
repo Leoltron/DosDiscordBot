@@ -7,6 +7,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
+using Dos.Database;
+using Dos.Database.Models;
 using Dos.DiscordBot.Util;
 using Dos.Game;
 using Dos.Game.Deck;
@@ -32,7 +34,7 @@ namespace Dos.DiscordBot
         private Card? selectedCenterRowCard;
         private DateTime startTime;
 
-        public DiscordDosGame(ISocketMessageChannel channel, IUser owner, ILogger mainLogger, string serverName)
+        public DiscordDosGame(ISocketMessageChannel channel, IUser owner, ILogger mainLogger, BotGameConfig config, string serverName)
         {
             this.mainLogger = mainLogger;
             var logFileName = $"{DateTime.Now:yyyy-MM-dd_HHmmssZ}__{serverName}#{channel.Name}"
@@ -40,6 +42,8 @@ namespace Dos.DiscordBot
             gameLogger = new LoggerConfiguration()
                         .WriteTo.File($"logs/games/{logFileName}.log")
                         .CreateLogger();
+            config.StartingPlayer = 0;
+            Config = config;
             Info = new DiscordDosGameInfo(serverName, CreateDate, channel, owner);
             AddUserPlayer(owner);
             Owner = owner;
@@ -59,7 +63,7 @@ namespace Dos.DiscordBot
 
         public bool IsFinished => IsGameStarted && Game.CurrentState.IsFinished;
 
-        public BotGameConfig Config { get; } = new BotGameConfig {StartingPlayer = 0};
+        public BotGameConfig Config { get; }
 
         private void AddUserPlayer(IUser user)
         {

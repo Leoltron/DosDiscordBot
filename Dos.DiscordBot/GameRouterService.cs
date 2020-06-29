@@ -5,6 +5,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
+using Dos.Database.Models;
+using Dos.DiscordBot.Helpers;
 using Dos.Utils;
 using Serilog;
 
@@ -18,10 +20,12 @@ namespace Dos.DiscordBot
             new ConcurrentDictionary<ulong, DiscordDosGame>();
 
         private readonly ILogger logger;
+        private readonly IGameConfigRepository configRepository;
 
-        public GameRouterService(ILogger logger)
+        public GameRouterService(ILogger logger, IGameConfigRepository configRepository)
         {
             this.logger = logger;
+            this.configRepository = configRepository;
         }
 
         public bool PreventStartNewGames { get; private set; }
@@ -38,7 +42,7 @@ namespace Dos.DiscordBot
             if (PreventStartNewGames)
                 return Result.Fail("Bot is waiting for all active games to end to restart.");
 
-            var createdGame = gamesByChannel[channel.Id] = CreateNewGame(guild, channel, player);
+            var createdGame = gamesByChannel[channel.Id] = await CreateNewGameAsync(guild, channel, player);
             DeleteIfNoActivity(channel, InactiveGameTimeout);
             return Result.Success(
                 "You have created a game with following configuration (change with `dos config <key> <value>`): \n" +
@@ -46,9 +50,10 @@ namespace Dos.DiscordBot
                 "\n Wait for others to join or start with `dos start`");
         }
 
-        private DiscordDosGame CreateNewGame(IGuild guild, ISocketMessageChannel channel, IUser player)
+        private async Task<DiscordDosGame> CreateNewGameAsync(IGuild guild, ISocketMessageChannel channel, IUser player)
         {
-            var game = new DiscordDosGame(channel, player, logger, guild?.Name ?? "DM");
+            var config = guild == null? new BotGameConfig() : await configRepository.GetConfigOrDefaultAsync(guild.Id);
+            var game = new DiscordDosGame(channel, player, logger, config, guild?.Name ?? "DM");
             game.Finished += () => TryDeleteGame(channel);
             return game;
         }

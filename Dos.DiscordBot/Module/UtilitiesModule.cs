@@ -22,7 +22,7 @@ namespace Dos.DiscordBot.Module
             "**dos quit**              - quit a game\n" +
             "**dos start**             - start a game\n" +
             "**dos stop**              - stop the game, if allowed by config\n" +
-            "**dos config**            - get configuration of the current game\n" +
+            "**dos config**            - get configuration of the current game or global config, if there's no game in channel\n" +
             "**dos config <key>**      - get configuration description\n" +
             "**dos config <key> <val>**- set configuration value\n" +
             "\n" +

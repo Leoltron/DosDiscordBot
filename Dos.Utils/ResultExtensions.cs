@@ -1,3 +1,5 @@
+using System.Threading.Tasks;
+
 namespace Dos.Utils
 {
     public static class ResultExtensions
@@ -8,5 +10,8 @@ namespace Dos.Utils
         public static Result<T> ToSuccess<T>(this T value, string message = null) => value.ToResult(true, message);
 
         public static Result<T> ToFail<T>(this T value, string message = null) => value.ToResult(false, message);
+
+        public static Result<T> ToResult<T>(this Task<T> task) =>
+            task.IsCompletedSuccessfully ? task.Result.ToSuccess() : Result<T>.Fail();
     }
 }

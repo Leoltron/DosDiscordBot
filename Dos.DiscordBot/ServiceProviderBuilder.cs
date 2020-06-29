@@ -1,4 +1,6 @@
 using System;
+using Dos.Database;
+using Dos.DiscordBot.Helpers;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
@@ -10,6 +12,9 @@ namespace Dos.DiscordBot
             new ServiceCollection()
                .AddSingleton<GameRouterService>()
                .AddSingleton(loggerInstance)
+               .AddTransient<IGameConfigHelper, GameConfigHelper>()
+               .AddTransient<IGameConfigRepository, GameConfigRepository>()
+               .AddDbContext<BotDbContext>()
                .BuildServiceProvider();
     }
 }

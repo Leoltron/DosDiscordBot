@@ -21,6 +21,6 @@ namespace Dos.Game
         public bool DrawEndsTurn { get; set; }
         public bool SevenSwap { get; set; }
         public uint? StartingPlayer { get; set; }
-        public bool CardCountRanking { get;  set; } = false;
+        public bool CardCountRanking { get; set; } = false;
     }
 }

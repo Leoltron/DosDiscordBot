@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Dos.DiscordBot.Attributes;
+using Dos.DiscordBot.Helpers;
 using Dos.DiscordBot.Util;
 
 namespace Dos.DiscordBot.Module
@@ -15,10 +16,12 @@ namespace Dos.DiscordBot.Module
     public class GameModule : ExtendedModule
     {
         private readonly GameRouterService gameRouterService;
+        private readonly IGameConfigHelper gameConfigHelper;
 
-        public GameModule(GameRouterService gameRouterService)
+        public GameModule(GameRouterService gameRouterService, IGameConfigHelper gameConfigHelper)
         {
             this.gameRouterService = gameRouterService;
+            this.gameConfigHelper = gameConfigHelper;
         }
 
         private DiscordDosGame Game => Context.GetGame();
@@ -122,35 +125,29 @@ namespace Dos.DiscordBot.Module
 
         [CreatedGameRequired]
         [Command("config")]
-        public async Task GetConfig() => await Context.Channel.SendMessageAsync(Game.Config.ToDiscordTable());
+        public async Task GetConfig() => await gameConfigHelper.SendGameConfigAsync(Game);
+
+        [NoGameRequired]
+        [Command("config")]
+        public async Task GetServerConfig() => await gameConfigHelper.SendServerDefaultGameConfigAsync(Context);
 
         [Command("config")]
         public async Task GetConfigDescription(string key) =>
-            await Context.Channel.SendMessageAsync(BotGameConfig.GetDescription(key));
+            await Context.Channel.SendMessageAsync(BotGameConfigExtensions.GetDescription(key));
 
         [NotStartedGameRequired]
         [Command("config")]
-        public async Task SetConfig(string key, string value)
-        {
-            if (Game.Owner.Id != Context.User.Id)
-            {
-                await Context.Channel.SendMessageAsync(
-                    $"Sorry, but only game's owner **{Game.Owner.Username}** can change config");
-                return;
-            }
+        public async Task SetConfig(string key, string value) =>
+            await gameConfigHelper.SetGameConfigAsync(Context, key, value);
 
-            var result = Game.Config.Set(key, value);
-            if (result.IsFail)
-                await Context.Channel.SendMessageAsync(result.Message);
-            else
-                await GetConfig();
-        }
+        [NoGameRequired]
+        [Command("config")]
+        public async Task SetServerConfig(string key, string value) =>
+            await gameConfigHelper.SetServerDefaultGameConfigAsync(Context, key, value);
 
         [NotStartedGameRequired]
         [Command("add-bot", true)]
         public async Task AddBot() => await ReplyIfHasMessageAsync(await Game.AddBotAsync(Context.User));
-        
-        
 
         [StartedGameRequired]
         [Command("stop", true)]

@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using Dos.Database;
+using Dos.Database.Models;
 using Dos.DiscordBot.Attributes;
 using Dos.DiscordBot.Util;
 using Dos.Utils;
@@ -17,10 +19,34 @@ namespace Dos.DiscordBot.Module
     public class AdminModule : ExtendedModule
     {
         private readonly GameRouterService gameRouterService;
+        private readonly BotDbContext botDbContext;
 
-        public AdminModule(GameRouterService gameRouterService)
+        public AdminModule(GameRouterService gameRouterService, BotDbContext botDbContext)
         {
             this.gameRouterService = gameRouterService;
+            this.botDbContext = botDbContext;
+        }
+
+        [NoDm]
+        [Command("addgame")]
+        public async Task AddGame()
+        {
+            if (Context.Guild == null)
+                return;
+
+            var guildId = Context.Guild.Id;
+            if (botDbContext.GuildConfig.Any(c => c.GuildId == guildId))
+            {
+                await Context.Channel.SendMessageAsync("Already found something for this server");
+                return;
+            }
+            await botDbContext.GuildConfig.AddAsync(new GuildConfig
+            {
+                Config = new BotGameConfig(),
+                GuildId = guildId
+            });
+            await botDbContext.SaveChangesAsync();
+            await Context.Channel.SendMessageAsync("Done.");
         }
 
         [Command("games")]

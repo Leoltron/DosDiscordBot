@@ -1,12 +1,24 @@
 using System;
 using System.Collections.Generic;
-using Dos.Game;
+using Dos.Database;
+using Dos.Database.Models;
 using Dos.Utils;
 
-namespace Dos.DiscordBot
+namespace Dos.DiscordBot.Util
 {
-    public class BotGameConfig : GameConfig
+    public static class BotGameConfigExtensions
     {
+        public static Result Set(this BotGameConfig config, string key, string value)
+        {
+            var action = Setters.GetValueOrDefault(key);
+            return action == null
+                ? Result.Fail($"Sorry, I don't know configuration key \"{key}\".")
+                : action(config, value);
+        }
+
+        public static string GetDescription(string config) =>
+            Descriptions.GetValueOrDefault(config, $"Sorry, I don't know configuration \"{config}\".");
+
         private static readonly Dictionary<string, string> Descriptions =
             new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
@@ -51,40 +63,6 @@ namespace Dos.DiscordBot
                 ["AllowGameStop"] = (c, s) => TryParseBool(s).DoIfSuccess(v => c.AllowGameStop = v.Value),
                 ["CardCountRanking"] = (c, s) => TryParseBool(s).DoIfSuccess(v => c.CardCountRanking = v.Value)
             };
-
-        public ushort Decks { get; private set; } = 1;
-        public bool UseImages { get; private set; } = true;
-        public bool AllowGameStop { get; private set; } = true;
-
-        public string ToDiscordTable() =>
-            string.Join("\n",
-                        "```cs",
-                        $"Decks                {Decks}",
-                        $"CalloutPenalty       {CalloutPenalty}",
-                        $"FalseCalloutPenalty  {FalseCalloutPenalty}",
-                        $"InitialHandSize      {InitialHandSize}",
-                        $"MinCenterRowSize     {MinCenterRowSize}",
-                        $"DoubleColorMatchDraw {DoubleColorMatchDraw}",
-                        "",
-                        $"CenterRowPenalty     {CenterRowPenalty.ToString().ToLower()}",
-                        $"DrawEndsTurn         {DrawEndsTurn.ToString().ToLower()}",
-                        $"SevenSwap            {SevenSwap.ToString().ToLower()}",
-                        "",
-                        $"UseImages            {UseImages.ToString().ToLower()}",
-                        $"AllowGameStop        {AllowGameStop.ToString().ToLower()}",
-                        $"CardCountRanking     {CardCountRanking.ToString().ToLower()}",
-                        "```");
-
-        public static string GetDescription(string config) =>
-            Descriptions.GetValueOrDefault(config, $"Sorry, I don't know configuration \"{config}\".");
-
-        public Result Set(string key, string value)
-        {
-            var action = Setters.GetValueOrDefault(key);
-            return action == null
-                ? Result.Fail($"Sorry, I don't know configuration key \"{key}\".")
-                : action(this, value);
-        }
 
         private static Result<ushort> TryParseUShort(string s,
                                                      ushort min = ushort.MinValue,
