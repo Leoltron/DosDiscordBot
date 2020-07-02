@@ -116,5 +116,42 @@ namespace Dos.Utils
 
         public static IEnumerable<T> WhereHasValue<T>(this IEnumerable<T?> source) where T : struct =>
             from element in source where element.HasValue select element.Value;
+
+        public static TSource WithMax<TSource, TComparable>(this IEnumerable<TSource> source,
+                                                            Func<TSource, TComparable> selector,
+                                                            TSource defaultValue = default)
+            where TComparable : IComparable<TComparable>
+        {
+            var firstPassed = false;
+            var maxElement = defaultValue;
+            var maxValue = default(TComparable);
+
+            foreach (var element in source)
+            {
+                var value = selector(element);
+                if (!firstPassed)
+                {
+                    firstPassed = true;
+                    maxElement = element;
+                    maxValue = value;
+                    continue;
+                }
+
+                if (maxValue.CompareTo(value) < 0)
+                {
+                    maxElement = element;
+                    maxValue = value;
+                }
+            }
+
+            return maxElement;
+        }
+
+        public static List<(T, int)> AddShiftIndices<T>(this IList<T> list, int startIndex)
+        {
+            if(startIndex < 0 || startIndex >= list.Count)
+                throw new IndexOutOfRangeException();
+            return list.Select((element, i) => (element, (i - startIndex + list.Count) % list.Count)).ToList();
+        }
     }
 }
