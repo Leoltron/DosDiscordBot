@@ -21,6 +21,7 @@ namespace Dos.Game.Tests
         public void SetUp()
         {
             game = new DosGame(new NonShufflingDealer(TwentyGreenSharps), 1, 7);
+            game.Start();
         }
 
         [Test]
@@ -45,6 +46,7 @@ namespace Dos.Game.Tests
         public void CanCallDos_AfterHavingTwoCards()
         {
             game = new DosGame(new NonShufflingDealer(TwentyGreenSharps), 1, 3);
+            game.Start();
             game.MatchCenterRowCard(Player0, GreenSharp, GreenSharp);
 
             game.CallDos(Player0).ShouldBeSuccess();
@@ -54,6 +56,7 @@ namespace Dos.Game.Tests
         public void ShouldNotCallDos_AfterMatchingTwoCardsWhileHavingThree()
         {
             game = new DosGame(new NonShufflingDealer(TwentyGreenSharps), 1, 3);
+            game.Start();
             game.MatchCenterRowCard(Player0, GreenSharp, GreenSharp, GreenSharp);
 
             game.CallDos(Player0).ShouldBeFail();
@@ -63,6 +66,7 @@ namespace Dos.Game.Tests
         public void ShouldCallDos_AfterTurnEnd()
         {
             game = new DosGame(new NonShufflingDealer(TwentyGreenSharps), 2, 3);
+            game.Start();
             game.MatchCenterRowCard(Player0, GreenSharp, GreenSharp);
             game.AddCardToCenterRow(Player0, GreenSharp);
             game.EndTurn(Player0);
@@ -74,6 +78,7 @@ namespace Dos.Game.Tests
         public void ShouldCallout_AfterTurnEnd()
         {
             game = new DosGame(new NonShufflingDealer(TwentyGreenSharps), 2, 3);
+            game.Start();
             game.MatchCenterRowCard(Player0, GreenSharp, GreenSharp);
             game.AddCardToCenterRow(Player0, GreenSharp);
             game.EndTurn(Player0);
@@ -85,6 +90,7 @@ namespace Dos.Game.Tests
         public void ShouldNotCallDos_AfterNextPlayerMadeAMove()
         {
             game = new DosGame(new NonShufflingDealer(TwentyGreenSharps), 2, 3);
+            game.Start();
             game.MatchCenterRowCard(Player0, GreenSharp, GreenSharp);
             game.AddCardToCenterRow(Player0, GreenSharp);
             game.EndTurn(Player0);
