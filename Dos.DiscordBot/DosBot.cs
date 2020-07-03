@@ -18,7 +18,7 @@ namespace Dos.DiscordBot
         public const string InviteLink = "https://discordapp.com/api/oauth2/authorize?client_id=660931324642590720&permissions=52224&scope=bot";
         public const string RepoLink = "https://github.com/Leoltron/DosDiscordBot";
 
-        private const string VersionStatus = "v1.3.0 (29.06.2020)";
+        private const string VersionStatus = "v1.4.0 (03.07.2020)";
 
         private readonly ILogger logger = new LoggerConfiguration()
                                          .WriteTo.Console(LogEventLevel.Information)

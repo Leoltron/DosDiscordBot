@@ -39,3 +39,6 @@
   
  ### v1.3.0 (29.06.2020)
   - Added **server default config**: when you use `dos config` in channel where is no game created, it prints or updates server default config. Values in it will be copied to every new game on that server. You need «Manage Roles» permission to edit server configuration.
+  
+ ### v1.4.0 (03.07.2020)
+  - Switched to embeds for displaying center row
