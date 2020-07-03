@@ -147,7 +147,7 @@ namespace Dos.Utils
             return maxElement;
         }
 
-        public static List<(T, int)> AddShiftIndices<T>(this IList<T> list, int startIndex)
+        public static List<(T element, int index)> AddShiftIndices<T>(this IList<T> list, int startIndex)
         {
             if(startIndex < 0 || startIndex >= list.Count)
                 throw new IndexOutOfRangeException();

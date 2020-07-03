@@ -34,6 +34,6 @@ namespace Dos.Game.Model
 
         public override string ToString() => this == WildDos ? "Wild Dos" : $"{Color} {Value.Name()}";
 
-        public string ToShortString() => Color.ShortName() + Value.Name();
+        public string ToShortString() => Color.ShortName() + Value.UrlName();
     }
 }

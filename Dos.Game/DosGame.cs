@@ -23,6 +23,9 @@ namespace Dos.Game
 
         public readonly GameEvents Events;
 
+        public int CardsDealtCount { get; private set; }
+        public int CurrentTurnIndex { get; private set; }
+
         public DosGame(Dealer dealer, int players, ushort initialHandSize) : this(
             dealer,
             Enumerable.Range(0, players)
@@ -45,6 +48,9 @@ namespace Dos.Game
         {
             if (CurrentState != null)
                 return;
+
+            CurrentTurnIndex = 0;
+            CardsDealtCount = 0;
 
             for (var i = 0; i < Players.Length; i++)
             {
@@ -88,6 +94,12 @@ namespace Dos.Game
 
         public int ActivePlayersCount => Players.Count(p => p.IsActive());
 
+        public Player LeaderByCardCount => Players.AddShiftIndices(CurrentPlayer.OrderId)
+                                                  .Where(p => p.element.IsActive())
+                                                  .OrderBy(c => c.element.Hand.Count)
+                                                  .ThenBy(c => c.index)
+                                                  .FirstOrDefault().element;
+
         public Result MatchCenterRowCard(Player player, Card target, params Card[] cardsToPlay) =>
             CurrentState.MatchCenterRowCard(player, target, cardsToPlay)
                         .DoIfSuccess(_ => Events.InvokePlayerMatchedCard(player, target, cardsToPlay));
@@ -126,6 +138,8 @@ namespace Dos.Game
                                        .TakeWhileNotNull()
                                        .ToArray();
 
+            CardsDealtCount += cardsDealt.Length;
+
             PrivateLog($"{player.Name} received [{cardsDealt.ToLogString()}]");
             Events.InvokePlayerReceivedCards(player, cardsDealt);
         }
@@ -155,6 +169,8 @@ namespace Dos.Game
                 if (card == null)
                     break;
                 CenterRow.Add(card.Value);
+
+                CardsDealtCount++;
             }
 
             while (CenterRowAdditional.Count < CenterRow.Count)
@@ -209,6 +225,7 @@ namespace Dos.Game
             if (CurrentState.IsFinished)
                 return;
 
+            CurrentTurnIndex++;
             CurrentState = new TurnStartState(this);
             CurrentPlayer.State = PlayerState.Playing;
             CenterRowSizeAtTurnStart = CenterRow.Count;
@@ -223,6 +240,20 @@ namespace Dos.Game
             if (CurrentPlayer.IsAi)
             {
                 CurrentPlayer.Play(this);
+            }
+        }
+
+        public Player NextPlayer
+        {
+            get
+            {
+                var player = CurrentPlayer;
+                do
+                {
+                    player = Players[(player.OrderId + 1) % Players.Length];
+                } while (CurrentPlayer != player && player.State != PlayerState.WaitingForTurn);
+
+                return player;
             }
         }
 

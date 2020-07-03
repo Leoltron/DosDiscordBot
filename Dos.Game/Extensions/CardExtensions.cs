@@ -103,5 +103,16 @@ namespace Dos.Game.Extensions
             $"{string.Join(", ", cards.OrderByColorAndValue())}";
 
         public static string Join(this IEnumerable<Card> cards) => $"{string.Join(",", cards.OrderByColorAndValue())}";
+        
+        private const string BaseUrl = "https://cards-images.herokuapp.com";
+
+        public static string ToImageUrl(this Card card) => $"{BaseUrl}/card/{card.ToShortString()}";
+
+        public static string ToImageUrl(this IEnumerable<Card> cards, bool addPlus = false) =>
+            $"{BaseUrl}/cards/{string.Join("_", cards.Select(c => c.ToShortString()))}?addPlus={addPlus}";
+
+        public static string ToImageUrl(this IEnumerable<List<Card>> cards, bool addPlus = false) =>
+            $"{BaseUrl}/cards/{string.Join("_", cards.Select(cardStack => string.Join("+", cardStack.Select(c => c.ToShortString()))))}?addPlus={addPlus}";
+
     }
 }

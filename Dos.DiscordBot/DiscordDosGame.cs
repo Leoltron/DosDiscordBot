@@ -34,7 +34,8 @@ namespace Dos.DiscordBot
         private Card? selectedCenterRowCard;
         private DateTime startTime;
 
-        public DiscordDosGame(ISocketMessageChannel channel, IUser owner, ILogger mainLogger, BotGameConfig config, string serverName)
+        public DiscordDosGame(ISocketMessageChannel channel, IUser owner, ILogger mainLogger, BotGameConfig config,
+                              string serverName)
         {
             this.mainLogger = mainLogger;
             var logFileName = $"{DateTime.Now:yyyy-MM-dd_HHmmssZ}__{serverName}#{channel.Name}"
@@ -158,10 +159,10 @@ namespace Dos.DiscordBot
                 BindGameEvents();
                 Game.Start();
                 Game.Events.PlayerReceivedCards += OnPlayerReceivedCards;
+                startTime = DateTime.Now;
 
                 await Task.WhenAll(Players.Select(SendHandTo));
                 await SendTableToChannel(false);
-                startTime = DateTime.Now;
 
                 return Result.Success();
             }
@@ -218,11 +219,15 @@ namespace Dos.DiscordBot
                               string.Join("\n", GetScoreboardLines()));
             }
 
-            var time = DateTime.Now - startTime;
-            var timeString = time > TimeSpan.FromDays(1) ? "**More than a day**" : $@"{time:hh\:mm\:ss\.fff}";
-            SendToChannel($"`The game lasted {timeString}`");
+            SendToChannel($"`The game lasted {GetTimeString()}`");
 
             Finished?.Invoke();
+        }
+
+        private string GetTimeString()
+        {
+            var time = DateTime.Now - startTime;
+            return time > TimeSpan.FromDays(1) ? "**More than a day**" : $@"{time:hh\:mm\:ss\.fff}";
         }
 
         public void SendToChannel(string message)
@@ -239,12 +244,14 @@ namespace Dos.DiscordBot
         private void OnPlayerSwitched(PlayerSwitchedEvent @event)
         {
             selectedCenterRowCard = null;
-            Task.WaitAll(SendHandTo(@event.NextPlayer), SendTableToChannel(false));
+            Task.WaitAll(SendHandTo(@event.NextPlayer),
+                         SendTableToChannel(false, $"Now it's {@event.NextPlayer}'s turn"));
         }
 
-        public Task SendTableToChannel(bool addPlayersStats) => SendTableToChannel(addPlayersStats, Config.UseImages);
+        public Task SendTableToChannel(bool addPlayersStats, string title = null) =>
+            SendTableToChannel(addPlayersStats, Config.UseImages, title);
 
-        private async Task SendTableToChannel(bool addPlayersStats, bool useImages)
+        private async Task SendTableToChannel(bool addPlayersStats, bool useImages, string title)
         {
             if (!IsGameStarted)
             {
@@ -252,26 +259,21 @@ namespace Dos.DiscordBot
             }
             else
             {
+                var eb = new EmbedBuilder
+                {
+                    Title = title
+                };
+
                 if (addPlayersStats)
                 {
                     var messageBuilder = new StringBuilder();
                     foreach (var player in Game.Players.Where(p => p.IsActive()))
                         messageBuilder.Append($"{player} - {player.Hand.Count.Pluralize("card", "cards")}\n");
-
-                    await Info.Channel.SendMessageAsync(messageBuilder.ToString());
+                    eb.AddField(fb => fb.WithName("Players:").WithValue(messageBuilder.ToString()));
                 }
 
-                await Info.Channel.SendMessageAsync("**Center Row:**");
-                if (useImages)
-                    await Info.Channel.SendCardsAsync(
-                        Game.CenterRow.Select((c, i) => Game.CenterRowAdditional[i].Prepend(c).ToList()));
-                else
-                    await Info.Channel.SendMessageAsync(string.Join("\n", Game.GameTableLines()));
-
-                if (selectedCenterRowCard != null)
-                    await Info.Channel.SendMessageAsync($"Selected **{selectedCenterRowCard.Value}**");
-
-                await Info.Channel.SendMessageAsync($"Now it's **{Game.CurrentPlayer.Name}**'s turn");
+                DecorateEmbed(eb, useImages);
+                await Info.Channel.SendMessageAsync(embed: eb.Build());
             }
         }
 
@@ -299,21 +301,21 @@ namespace Dos.DiscordBot
             await semaphoreSlim.WaitAsync();
             try
             {
-                if (selectedCenterRowCard == null || args.Contains(" on ", StringComparison.InvariantCultureIgnoreCase))
-                    return CardParser.ParseMatchCards(args)
-                                     .IfSuccess(result => Game.MatchCenterRowCard(player,
-                                                                                  result.Value.target,
-                                                                                  result.Value.matchers));
-                else
-                    return CardParser.ParseCards(args)
-                                     .IfSuccess(r => Game.MatchCenterRowCard(
-                                                    player, selectedCenterRowCard.Value,
-                                                    r.Value.ToArray()))
-                                     .IfSuccess(r =>
-                                      {
-                                          selectedCenterRowCard = null;
-                                          return r;
-                                      });
+                var turnIndex = Game.CurrentTurnIndex;
+
+                var result = selectedCenterRowCard == null ||
+                             args.Contains(" on ", StringComparison.InvariantCultureIgnoreCase)
+                    ? CardParser.ParseMatchCards(args)
+                                .IfSuccess(r => Game.MatchCenterRowCard(player,
+                                                                        r.Value.target,
+                                                                        r.Value.matchers))
+                    : CardParser.ParseCards(args)
+                                .IfSuccess(r => Game.MatchCenterRowCard(
+                                               player, selectedCenterRowCard.Value,
+                                               r.Value.ToArray()))
+                                .DoIfSuccess(r => { selectedCenterRowCard = null; });
+
+                return await MoveResultMessageToEmbedIfNeedAsync(result, turnIndex);
             }
             finally
             {
@@ -347,7 +349,9 @@ namespace Dos.DiscordBot
                     return Result.Fail($"There's no **{card}** in the Center Row");
 
                 selectedCenterRowCard = card;
-                return Result.Success($"Selected **{card}**. Now use `dos match <card(s)>` to match it with something");
+                await SendTableToChannel(
+                    false, $"Selected **{card}**. Now use `dos match <card(s)>` to match it with something");
+                return Result.Success();
             }
             finally
             {
@@ -368,8 +372,10 @@ namespace Dos.DiscordBot
                     return matchResult;
                 else if (matchResult.Value.IsEmpty())
                     return Result.Fail("You have to put something there");
-                else
-                    return Game.AddCardToCenterRow(player, matchResult.Value.First());
+
+                var turnIndex = Game.CurrentTurnIndex;
+                return await MoveResultMessageToEmbedIfNeedAsync(
+                    Game.AddCardToCenterRow(player, matchResult.Value.First()), turnIndex);
             }
             finally
             {
@@ -402,7 +408,8 @@ namespace Dos.DiscordBot
             await semaphoreSlim.WaitAsync();
             try
             {
-                return Game.EndTurn(player);
+                var turnIndex = Game.CurrentTurnIndex;
+                return await MoveResultMessageToEmbedIfNeedAsync(Game.EndTurn(player), turnIndex);
             }
             finally
             {
@@ -527,6 +534,52 @@ namespace Dos.DiscordBot
             {
                 semaphoreSlim.Release();
             }
+        }
+
+        public void DecorateEmbed(EmbedBuilder builder, bool addImages = true)
+        {
+            if (selectedCenterRowCard != null)
+            {
+                builder.AddField(fb => fb.WithName("Selected card:").WithValue(selectedCenterRowCard.Value));
+                if (addImages)
+                    builder.ThumbnailUrl = selectedCenterRowCard.Value.ToImageUrl();
+            }
+
+            const string iconUrl =
+                "https://cdn.discordapp.com/app-icons/660931324642590720/9ddff8a1683b190b04e846130ce997c9.png";
+
+            builder.WithAuthor($"{Info.ServerName} #{Info.Channel.Name} — Turn №{Game.CurrentTurnIndex + 1}", iconUrl);
+
+            var leader = Game.LeaderByCardCount;
+            builder
+               .WithFields(
+                    new EmbedFieldBuilder()
+                       .WithName("Current player:")
+                       .WithValue(Game.CurrentPlayer.Name)
+                       .WithIsInline(true),
+                    new EmbedFieldBuilder()
+                       .WithName("Next player:")
+                       .WithValue(Game.NextPlayer.Name)
+                       .WithIsInline(true))
+               .WithFooter(fb => fb.WithText($"Game time - {GetTimeString()} | Cards dealt: {Game.CardsDealtCount}"));
+
+            if (addImages)
+                builder.WithCardsImage(
+                    Game.CenterRow.Zip(Game.CenterRowAdditional, (c, cl) => cl.Prepend(c).ToList()).ToList(),
+                    false);
+            else
+                builder.AddField(fb => fb.WithName("Center row").WithValue(string.Join("\n", Game.GameTableLines())));
+
+            builder.WithCurrentTimestamp();
+        }
+
+        private async Task<Result> MoveResultMessageToEmbedIfNeedAsync(Result result, int currentTurnBeforeAction)
+        {
+            if (result.IsFail || !result.HasMessage || currentTurnBeforeAction != Game.CurrentTurnIndex)
+                return result;
+
+            await SendTableToChannel(false, result.Message);
+            return Result.Success();
         }
     }
 }

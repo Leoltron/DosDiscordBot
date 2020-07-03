@@ -26,5 +26,8 @@ namespace Dos.Game.Extensions
         }
 
         public static string Name(this CardValue value) => value == CardValue.Sharp ? "#" : ((byte) value).ToString();
+
+        public static string UrlName(this CardValue value) =>
+            value == CardValue.Sharp ? "S" : ((byte) value).ToString();
     }
 }

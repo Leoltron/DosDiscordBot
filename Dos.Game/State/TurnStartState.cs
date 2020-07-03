@@ -24,19 +24,20 @@ namespace Dos.Game.State
             if (Game.Config.DrawEndsTurn)
             {
                 Game.CurrentState = new AddingToCenterRowState(this, 0);
+                string message;
                 if (!Game.Config.CenterRowPenalty)
                 {
                     Game.CurrentPlayerPenalty += 1;
-                    Game.PublicLog("Here's your card. Also, skip a turn.");
+                    message = "Here's your card. Also, skip a turn.";
                 }
                 else
                 {
-                    Game.PublicLog("Skip a turn.");
+                    message = "Skip a turn.";
                 }
 
                 Game.CurrentState.EndTurn(CurrentPlayer);
 
-                return Result.Success();
+                return Result.Success(message);
             }
 
             Game.DealCard(CurrentPlayer);

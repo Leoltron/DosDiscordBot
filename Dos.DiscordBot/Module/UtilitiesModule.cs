@@ -62,6 +62,15 @@ namespace Dos.DiscordBot.Module
         [Alias("github", "repo", "git")]
         public Task Source() => SendToUserAndNotifyChannel(DosBot.RepoLink, "DM'd you my source link");
 
+        [Command("test")]
+        public async Task Test()
+        {
+            var eb = new EmbedBuilder();
+            eb.Color = Color.Gold;
+            eb.Description = "Description";
+            await Context.Channel.SendMessageAsync(embed: eb.Build());
+        }
+
         private async Task SendToUserAndNotifyChannel(string message, string channelMessage)
         {
             var channelIsPrivate = Context.Channel is IPrivateChannel;

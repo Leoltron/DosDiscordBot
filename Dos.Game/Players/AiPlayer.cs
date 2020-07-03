@@ -46,7 +46,7 @@ namespace Dos.Game.Players
                 if (match != null)
                 {
                     var (matchers, target) = match.Value;
-                    game.PublicLog($"`Match {matchers.ToLogString()} on {target.ToString()}`");
+                    game.PublicLog($"`Match {matchers.ToLogString()} on {target.ToString()}` ({target.MatchWith(matchers).Message()})");
                     return game.MatchCenterRowCard(this, target, matchers);
                 }
             }

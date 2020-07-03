@@ -36,7 +36,7 @@ namespace Dos.DiscordBot.Util
         {
             var cardList = cards.OrderByColorAndValue().ToList();
             if (images)
-                await user.SendCardsImages(cardList, newDealtCards, chunkSize);
+                await user.SendCardsImages(cardList, newDealtCards);
             else
                 await user.SendCardsNames(cardList, newDealtCards);
         }
@@ -69,26 +69,18 @@ namespace Dos.DiscordBot.Util
             return user.SendMessageAsync($"{prefix}\n​\n{message}");
         }
 
-        private static async Task SendCardsImages(this IUser user, IList<Card> cards, bool addPlus = false,
-                                                  int chunkSize = 7)
+        private static async Task SendCardsImages(this IUser user, IList<Card> cards, bool addPlus = false)
         {
             if (cards.IsEmpty())
                 return;
+            var eb = new EmbedBuilder().WithCardsImage(cards, addPlus);
+            
+            eb.WithDescription(
+                addPlus
+                    ? $"You received {cards.Count.Pluralize("card", "cards")}:"
+                    : $"Your current hand ({cards.Count.Pluralize("card", "cards")}):");
 
-            var name = string.Join("_", cards.Select(c => c.ToShortString())) + ".png";
-            if (addPlus)
-                name = "Plus_" + name;
-
-            var paths = cards.Select(c => c.ToImagePath());
-            if (addPlus)
-                paths = paths.Prepend(CardToImageHelper.PlusPath);
-
-            if (!addPlus)
-                await user.SendMessageAsync(
-                    $"Your current hand ({cards.Count.Pluralize("card", "cards")}):");
-
-            foreach (var pathsChunk in paths.ToChunks(chunkSize))
-                await user.SendFileAsync(pathsChunk.JoinImages(), name);
+            await user.SendMessageAsync(embed: eb.Build());
         }
 
         public static void DisposeAll(this IEnumerable<IDisposable> disposables)
@@ -110,13 +102,14 @@ namespace Dos.DiscordBot.Util
         }
 
         public static string DiscordTag(this IUser user) => $"{user.Username}#{user.Discriminator}";
+
         public static string GuildDiscordTag(this IUser user)
         {
             if (user is SocketGuildUser sgu)
             {
                 return $"{sgu.Nickname}";
             }
-            
+
             return user.DiscordTag();
         }
     }

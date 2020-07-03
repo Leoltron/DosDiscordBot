@@ -86,18 +86,13 @@ namespace Dos.Game.State.Base
                 result = result.AddText("Color match on a 7! Switch your hand with any player.");
                 Game.CurrentState = new TriggeredSwapGameState(this);
             }
-            
+
             if (CurrentPlayer.Hand.IsEmpty() || Game.CenterRowAdditional.All(c => c.Any()) && CardsToAdd == 0)
             {
-                Game.PublicLog(result.Message);
                 Game.CurrentState.EndTurn(CurrentPlayer);
             }
-            else
-            {
-                Game.PublicLog(result.Message);
-            }
 
-            return Result.Success();
+            return Result.Success(result.Message);
         }
 
         protected override Result CurrentPlayerDraw() =>
@@ -110,15 +105,16 @@ namespace Dos.Game.State.Base
 
             if (CardsToAdd > 0 && Game.CurrentPlayer.Hand.Any())
             {
+                var messages = new List<string>();
                 if (refilled)
                 {
                     Game.CurrentState = new AddingToCenterRowState(this, CardsToAdd);
-                    Game.PublicLog("Refilled Center Row with fresh cards.");
+                    messages.Add("Refilled Center Row with fresh cards.");
                 }
 
-                Game.PublicLog($"Add **{CardsToAdd}** more {CardsToAdd.PluralizedString("card", "cards")}");
+                messages.Add($"Add **{CardsToAdd}** more {CardsToAdd.PluralizedString("card", "cards")}");
 
-                return new Result(refilled);
+                return new Result(refilled, string.Join("\n", messages));
             }
 
             Game.MoveTurnToNextPlayer();
