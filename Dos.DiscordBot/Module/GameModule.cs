@@ -152,9 +152,13 @@ namespace Dos.DiscordBot.Module
         [StartedGameRequired]
         [Command("stop", true)]
         [Alias("end", "endgame", "stopgame")]
-        public async Task StopGame()
-        {
+        public async Task StopGame() => 
             await ReplyIfHasMessageAsync(await Game.StopAsync(Context.User));
-        }
+
+        [StartedGameRequired]
+        [Command("to-text", true)]
+        [Alias("backup", "hybrid", "to-images")]
+        public async Task SwitchToHybridCardDisplayStyle() => 
+            await ReplyIfHasMessageAsync(Game.SwitchToHybridCardDisplayStyle(Context.User));
     }
 }

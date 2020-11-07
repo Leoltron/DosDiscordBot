@@ -66,9 +66,9 @@ namespace Dos.DiscordBot
 
         public BotGameConfig Config { get; }
 
-        public bool HybridSet { get; set; } = false;
+        public bool UseHybridCardDisplayStyle { get; set; } = false;
 
-        public CardDisplayStyle CardDisplayStyle => HybridSet ? CardDisplayStyle.Hybrid :
+        public CardDisplayStyle CardDisplayStyle => UseHybridCardDisplayStyle ? CardDisplayStyle.Hybrid :
             Config.UseImages ? CardDisplayStyle.Image : CardDisplayStyle.Text;
 
         private void AddUserPlayer(IUser user)
@@ -539,6 +539,19 @@ namespace Dos.DiscordBot
             {
                 semaphoreSlim.Release();
             }
+        }
+
+        public Result SwitchToHybridCardDisplayStyle(IUser user)
+        {
+            if (UseHybridCardDisplayStyle)
+                return Result.Fail("Already showing both card names and images");
+
+            if (Owner.Id != user.Id)
+                return Result.Fail(
+                    $"Only owner of this game (**{Owner?.Username}**) can switch to hybrid display style");
+
+            UseHybridCardDisplayStyle = true;
+            return Result.Success("Now printing names of cards with their images");
         }
 
         public void DecorateEmbed(EmbedBuilder builder, CardDisplayStyle displayStyle)

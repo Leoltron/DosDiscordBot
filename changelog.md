@@ -42,3 +42,6 @@
   
  ### v1.4.0 (03.07.2020)
   - Switched to embeds for displaying center row
+  
+ ### v1.5.0 (07.11.2020)
+  - Added command for hybrid card displaying: both text and images
