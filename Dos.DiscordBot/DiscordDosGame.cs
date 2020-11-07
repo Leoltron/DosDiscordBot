@@ -66,6 +66,11 @@ namespace Dos.DiscordBot
 
         public BotGameConfig Config { get; }
 
+        public bool HybridSet { get; set; } = false;
+
+        public CardDisplayStyle CardDisplayStyle => HybridSet ? CardDisplayStyle.Hybrid :
+            Config.UseImages ? CardDisplayStyle.Image : CardDisplayStyle.Text;
+
         private void AddUserPlayer(IUser user)
         {
             var player = new DiscordUserPlayer(Players.Count, user);
@@ -238,7 +243,7 @@ namespace Dos.DiscordBot
         private void OnPlayerReceivedCards(PlayerReceivedCardsEvent e)
         {
             if (e.Player is DiscordUserPlayer dPlayer && e.Cards.Any())
-                dPlayer.User.SendCardsAsync(e.Cards, Config.UseImages, true).Wait();
+                dPlayer.User.SendCardsAsync(e.Cards, CardDisplayStyle, true).Wait();
         }
 
         private void OnPlayerSwitched(PlayerSwitchedEvent @event)
@@ -249,9 +254,9 @@ namespace Dos.DiscordBot
         }
 
         public Task SendTableToChannel(bool addPlayersStats, string title = null) =>
-            SendTableToChannel(addPlayersStats, Config.UseImages, title);
+            SendTableToChannel(addPlayersStats, CardDisplayStyle, title);
 
-        private async Task SendTableToChannel(bool addPlayersStats, bool useImages, string title)
+        private async Task SendTableToChannel(bool addPlayersStats, CardDisplayStyle displayStyle, string title)
         {
             if (!IsGameStarted)
             {
@@ -272,7 +277,7 @@ namespace Dos.DiscordBot
                     eb.AddField(fb => fb.WithName("Players:").WithValue(messageBuilder.ToString()));
                 }
 
-                DecorateEmbed(eb, useImages);
+                DecorateEmbed(eb, displayStyle);
                 await Info.Channel.SendMessageAsync(embed: eb.Build());
             }
         }
@@ -283,7 +288,7 @@ namespace Dos.DiscordBot
                 return;
             try
             {
-                await dPlayer.User.SendCardsAsync(dPlayer.Hand, Config.UseImages);
+                await dPlayer.User.SendCardsAsync(dPlayer.Hand, CardDisplayStyle);
             }
             catch (Exception e)
             {
@@ -536,12 +541,12 @@ namespace Dos.DiscordBot
             }
         }
 
-        public void DecorateEmbed(EmbedBuilder builder, bool addImages = true)
+        public void DecorateEmbed(EmbedBuilder builder, CardDisplayStyle displayStyle)
         {
             if (selectedCenterRowCard != null)
             {
                 builder.AddField(fb => fb.WithName("Selected card:").WithValue(selectedCenterRowCard.Value));
-                if (addImages)
+                if (displayStyle.IsImage())
                     builder.ThumbnailUrl = selectedCenterRowCard.Value.ToImageUrl();
             }
 
@@ -563,11 +568,12 @@ namespace Dos.DiscordBot
                        .WithIsInline(true))
                .WithFooter(fb => fb.WithText($"Game time - {GetTimeString()} | Cards dealt: {Game.CardsDealtCount}"));
 
-            if (addImages)
+            if (displayStyle.IsImage())
                 builder.WithCardsImage(
                     Game.CenterRow.Zip(Game.CenterRowAdditional, (c, cl) => cl.Prepend(c).ToList()).ToList(),
                     false);
-            else
+            
+            if (displayStyle.IsText())
                 builder.AddField(fb => fb.WithName("Center row").WithValue(string.Join("\n", Game.GameTableLines())));
 
             builder.WithCurrentTimestamp();

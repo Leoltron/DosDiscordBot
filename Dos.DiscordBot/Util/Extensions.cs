@@ -31,13 +31,14 @@ namespace Dos.DiscordBot.Util
             };
         }
 
-        public static async Task SendCardsAsync(this IUser user, IEnumerable<Card> cards, bool images,
+        public static async Task SendCardsAsync(this IUser user, IEnumerable<Card> cards, CardDisplayStyle displayStyle,
                                                 bool newDealtCards = false, int chunkSize = 7)
         {
             var cardList = cards.OrderByColorAndValue().ToList();
-            if (images)
+            if(displayStyle.IsImage())
                 await user.SendCardsImages(cardList, newDealtCards);
-            else
+            
+            if(displayStyle.IsText())
                 await user.SendCardsNames(cardList, newDealtCards);
         }
 

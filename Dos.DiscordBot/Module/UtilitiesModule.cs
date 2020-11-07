@@ -25,6 +25,7 @@ namespace Dos.DiscordBot.Module
             "**dos config**            - get configuration of the current game or global config, if there's no game in channel\n" +
             "**dos config <key>**      - get configuration description\n" +
             "**dos config <key> <val>**- set configuration value\n" +
+            "**dos to-text**           - my card image server sucks, so you may want to switch mid-game to text using this\n" +
             "\n" +
             "**dos draw**              - draw card\n" +
             "**dos select <card>**     - select card from Center Row to match with\n" +
