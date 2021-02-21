@@ -11,10 +11,10 @@ RUN dotnet restore Dos.ReplayService/Dos.ReplayService.csproj
 # Copy everything else and build
 COPY . ./
 RUN dotnet publish -c Release -o out ./Dos.ReplayService/Dos.ReplayService.csproj
-COPY Dos.ReplayService/front ./app/out/front/
 
 # Build runtime image
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.1
 WORKDIR /app
 COPY --from=build-env /app/out .
+COPY --from=build-env /Dos.ReplayService/front ./front/
 ENTRYPOINT ["dotnet", "Dos.ReplayService.dll"]
