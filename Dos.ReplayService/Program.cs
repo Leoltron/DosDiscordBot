@@ -18,7 +18,7 @@ namespace Dos.ReplayService
                      webBuilder
                         .UseStartup<Startup>()
                         .UseWebRoot("front")
-                        .UseUrls("https://*:" + GetPort());
+                        .UseUrls("http://*:" + GetPort());
                  });
 
         private static string GetPort()
