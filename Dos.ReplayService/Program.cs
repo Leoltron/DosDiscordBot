@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
@@ -13,8 +14,18 @@ namespace Dos.ReplayService
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>().UseWebRoot("front");
-                });
+                 {
+                     webBuilder
+                        .UseStartup<Startup>()
+                        .UseWebRoot("front")
+                        .UseUrls("https://*:" + GetPort());
+                 });
+
+        private static string GetPort()
+        {
+            var port = Environment.GetEnvironmentVariable("PORT");
+
+            return string.IsNullOrEmpty(port) ? "5423" : port;
+        }
     }
 }
