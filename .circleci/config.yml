@@ -8,6 +8,7 @@
        - checkout
        - run: npm --prefix ./Dos.ReplayService install ./Dos.ReplayService
        - run: npm run build-prod --prefix ./Dos.ReplayService
+       - setup_remote_docker
        - run: docker build --rm=false -t registry.heroku.com/dos-replays/web .
        - run: docker login -u $HEROKU_LOGIN -p $HEROKU_TOKEN registry.heroku.com
        - run: docker push registry.heroku.com/dos-replays/web:latest
