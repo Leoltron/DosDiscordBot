@@ -3,6 +3,9 @@ WORKDIR /app
 
 # Copy csproj and restore as distinct layers
 COPY Dos.ReplayService/Dos.ReplayService.csproj Dos.ReplayService/
+COPY Dos.Game/Dos.Game.csproj Dos.Game/
+COPY Dos.Database/Dos.Database.csproj Dos.Database/
+COPY Dos.Utils/Dos.Utils.csproj Dos.Utils/
 RUN dotnet restore Dos.ReplayService/Dos.ReplayService.csproj
 
 # Copy everything else and build
