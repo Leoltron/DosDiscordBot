@@ -15,8 +15,8 @@ namespace Dos.Game
     {
         public readonly Player[] Players;
 
-        public readonly List<Card> CenterRow = new List<Card>(8);
-        public readonly List<List<Card>> CenterRowAdditional = new List<List<Card>>(8);
+        public readonly List<Card> CenterRow = new(8);
+        public readonly List<List<Card>> CenterRowAdditional = new(8);
         public int CurrentPlayerPenalty;
 
         public readonly Dealer Dealer;
@@ -44,9 +44,11 @@ namespace Dos.Game
             Events = new GameEvents(this);
         }
 
+        public bool HasStarted => CurrentState != null;
+
         public void Start()
         {
-            if (CurrentState != null)
+            if (HasStarted)
                 return;
 
             CurrentTurnIndex = 0;
@@ -69,6 +71,7 @@ namespace Dos.Game
             PrivateLog("Game has been started");
             LogCurrentPlayer();
             Events.InvokeGameStarted();
+            Events.InvokePlayerSwitched(null, CurrentPlayer);
             if (CurrentPlayer.IsAi)
             {
                 CurrentPlayer.Play(this);
@@ -101,16 +104,14 @@ namespace Dos.Game
                                                   .FirstOrDefault().element;
 
         public Result MatchCenterRowCard(Player player, Card target, params Card[] cardsToPlay) =>
-            CurrentState.MatchCenterRowCard(player, target, cardsToPlay)
-                        .DoIfSuccess(_ => Events.InvokePlayerMatchedCard(player, target, cardsToPlay));
+            CurrentState.MatchCenterRowCard(player, target, cardsToPlay);
 
         public Result EndTurn(Player player) => CurrentState.EndTurn(player);
 
         public Result Draw(Player player) => CurrentState.Draw(player);
 
         public Result AddCardToCenterRow(Player player, Card card) =>
-            CurrentState.AddCardToCenterRow(player, card)
-                        .DoIfSuccess(_ => Events.InvokePlayerAddedCard(player, card));
+            CurrentState.AddCardToCenterRow(player, card);
 
         public Result Callout(Player caller, Player target)
         {
@@ -163,12 +164,15 @@ namespace Dos.Game
         public bool RefillCenterRow()
         {
             var refillNeeded = CenterRow.Count < Config.MinCenterRowSize;
+
+            var cardsAdded = new List<Card>();
             while (CenterRow.Count < Config.MinCenterRowSize)
             {
                 var card = DrawCard();
                 if (card == null)
                     break;
                 CenterRow.Add(card.Value);
+                cardsAdded.Add(card.Value);
 
                 CardsDealtCount++;
             }
@@ -178,6 +182,7 @@ namespace Dos.Game
 
             if (refillNeeded)
             {
+                Events.InvokeCenterRowRefilled(cardsAdded.ToArray());
                 PrivateLog("\n".Join(GameTableLines().Prepend("Center Row refilled:")));
             }
 
@@ -359,6 +364,7 @@ namespace Dos.Game
 
             if (clearedAnything)
             {
+                Events.InvokeClearCenterRow();
                 PrivateLog("Cleared Center Row");
             }
         }

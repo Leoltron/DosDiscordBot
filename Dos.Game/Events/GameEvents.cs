@@ -37,10 +37,10 @@ namespace Dos.Game.Events
         public void InvokePlayerMatchedCard(Player player, Card target, Card[] matchingCards) =>
             PlayerMatchedCard?.Invoke(new CardMatchedEvent(game, player, target, matchingCards));
 
-        public event Action<CenterRowAddedCardEvent> PlayerAddedCard;
+        public event Action<CenterRowPlayerAddedCardEvent> PlayerAddedCard;
 
         public void InvokePlayerAddedCard(Player player, Card card) =>
-            PlayerAddedCard?.Invoke(new CenterRowAddedCardEvent(game, player, card));
+            PlayerAddedCard?.Invoke(new CenterRowPlayerAddedCardEvent(game, player, card));
 
         public event Action<PlayerEvent> PlayerIsGoingToDraw;
 
@@ -66,5 +66,11 @@ namespace Dos.Game.Events
 
         public event Action Finished;
         public void InvokeFinished() => Finished?.Invoke();
+
+        public event Action ClearCenterRow;
+        public void InvokeClearCenterRow() => ClearCenterRow?.Invoke();
+
+        public event Action<CenterRowRefilledEvent> CenterRowRefilled;
+        public void InvokeCenterRowRefilled(Card[] cards) => CenterRowRefilled?.Invoke(new CenterRowRefilledEvent(game, cards));
     }
 }

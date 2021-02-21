@@ -16,7 +16,5 @@ namespace Dos.Game.Match
             var newMessage = string.IsNullOrEmpty(Message) ? text : $"{Message}\n{text}";
             return new MatchResult(Type, newMessage);
         }
-
-        public static MatchResult NoMatch(string message = null) => new MatchResult(MatchType.NoMatch, message);
     }
 }

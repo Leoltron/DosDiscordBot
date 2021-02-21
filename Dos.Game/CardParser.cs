@@ -5,7 +5,7 @@ using Dos.Game.Extensions;
 using Dos.Game.Model;
 using Dos.Utils;
 
-namespace Dos.DiscordBot.Util
+namespace Dos.Game
 {
     public static class CardParser
     {
@@ -143,6 +143,33 @@ namespace Dos.DiscordBot.Util
             }
 
             return cards.ToSuccess();
+        }
+
+        public static Card ParseShortCard(string s)
+        {
+            if (!TryParseShortCard(s, out var card))
+                throw new ArgumentException(s, nameof(s));
+
+            return card;
+        }
+        
+        public static bool TryParseShortCard(string s, out Card card)
+        {
+            card = default;
+
+            s = s.Trim();
+            
+            if (s.Length < 2)
+                return false;
+
+            if (!ShortColors.TryGetValue(s.Substring(0,1), out var color))
+                return false;
+
+            if (!ShortValues.TryGetValue(s.Substring(1), out var value))
+                return false;
+
+            card = new Card(color, value);
+            return true;
         }
     }
 }

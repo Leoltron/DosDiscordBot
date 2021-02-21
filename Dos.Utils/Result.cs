@@ -4,8 +4,8 @@ namespace Dos.Utils
 {
     public class Result
     {
-        private static readonly Result DefaultSuccess = new Result(true);
-        private static readonly Result DefaultFail = new Result(false);
+        private static readonly Result DefaultSuccess = new(true);
+        private static readonly Result DefaultFail = new(false);
 
         public Result(bool isSuccess, string message = null)
         {
@@ -20,9 +20,9 @@ namespace Dos.Utils
         public bool HasMessage => !string.IsNullOrEmpty(Message);
         
         public static Result Fail() => DefaultFail;
-        public static Result Fail(string message) => new Result(false, message);
+        public static Result Fail(string message) => new(false, message);
         public static Result Success() => DefaultSuccess;
-        public static Result Success(string message) => new Result(true, message);
+        public static Result Success(string message) => new(true, message);
 
         public Result IfSuccess(Func<Result, Result> successAction) => IsSuccess ? successAction(this) : this;
 
@@ -68,8 +68,8 @@ namespace Dos.Utils
                                          Func<Result<T>, Result<TNext>> failActon) =>
             IsSuccess ? successAction(this) : failActon(this);
 
-        public new static Result<T> Fail(string message = null) => new Result<T>(false, message: message);
-        public new static Result<T> Success(string message = null) => new Result<T>(true, message: message);
+        public new static Result<T> Fail(string message = null) => new(false, message: message);
+        public new static Result<T> Success(string message = null) => new(true, message: message);
 
         public Result IfSuccess(Func<Result<T>, Result> successAction) => IsSuccess ? successAction(this) : this;
 

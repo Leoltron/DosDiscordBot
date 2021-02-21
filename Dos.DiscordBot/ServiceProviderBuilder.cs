@@ -14,7 +14,7 @@ namespace Dos.DiscordBot
                .AddSingleton(loggerInstance)
                .AddTransient<IGameConfigHelper, GameConfigHelper>()
                .AddTransient<IGameConfigRepository, GameConfigRepository>()
-               .AddDbContext<BotDbContext>()
+               .AddDbContext<DosDbContext>()
                .BuildServiceProvider();
     }
 }

@@ -1,18 +1,23 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dos.DiscordBot", "Dos.DiscordBot\Dos.DiscordBot.csproj", "{539699EF-108F-43DB-BC2B-77807A65872E}"
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30804.86
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dos.DiscordBot", "Dos.DiscordBot\Dos.DiscordBot.csproj", "{539699EF-108F-43DB-BC2B-77807A65872E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dos.Game", "Dos.Game\Dos.Game.csproj", "{7B2B86A9-06B2-4864-9235-A50FA458889B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dos.Game", "Dos.Game\Dos.Game.csproj", "{7B2B86A9-06B2-4864-9235-A50FA458889B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dos.Game.Tests", "Dos.Game.Tests\Dos.Game.Tests.csproj", "{6F091B42-F135-47DA-B6B9-61B79DD8634F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dos.Game.Tests", "Dos.Game.Tests\Dos.Game.Tests.csproj", "{6F091B42-F135-47DA-B6B9-61B79DD8634F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dos.ConsoleClient", "Dos.ConsoleClient\Dos.ConsoleClient.csproj", "{4FEE490D-822A-4B3C-B17F-BF4154A4858E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dos.ConsoleClient", "Dos.ConsoleClient\Dos.ConsoleClient.csproj", "{4FEE490D-822A-4B3C-B17F-BF4154A4858E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dos.Utils", "Dos.Utils\Dos.Utils.csproj", "{FFB27365-AB2A-4260-8E55-9C164781FDE8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dos.Utils", "Dos.Utils\Dos.Utils.csproj", "{FFB27365-AB2A-4260-8E55-9C164781FDE8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dos.Database", "Dos.Database\Dos.Database.csproj", "{231A02CB-DACA-4A5B-99F5-61C92A0261F9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dos.Database", "Dos.Database\Dos.Database.csproj", "{231A02CB-DACA-4A5B-99F5-61C92A0261F9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dos.Utils.Tests", "Dos.Utils.Tests\Dos.Utils.Tests.csproj", "{6881CC0C-5428-42BD-AC04-54058EE5C3DC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dos.Utils.Tests", "Dos.Utils.Tests\Dos.Utils.Tests.csproj", "{6881CC0C-5428-42BD-AC04-54058EE5C3DC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dos.ReplayService", "Dos.ReplayService\Dos.ReplayService.csproj", "{0C20057D-A597-4EB1-BD5F-865ED61C5FC4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -48,5 +53,15 @@ Global
 		{6881CC0C-5428-42BD-AC04-54058EE5C3DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6881CC0C-5428-42BD-AC04-54058EE5C3DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6881CC0C-5428-42BD-AC04-54058EE5C3DC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0C20057D-A597-4EB1-BD5F-865ED61C5FC4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C20057D-A597-4EB1-BD5F-865ED61C5FC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C20057D-A597-4EB1-BD5F-865ED61C5FC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C20057D-A597-4EB1-BD5F-865ED61C5FC4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {352A6A27-6927-403B-A36C-3B752EC92C1F}
 	EndGlobalSection
 EndGlobal

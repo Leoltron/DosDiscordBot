@@ -1,0 +1,41 @@
+.people-icon {
+    width: 24px;
+    height: 24px;
+    background-image: url(../../svg/people.svg);
+    margin: 0 2px;
+}
+
+.calendar-icon {
+     width: 24px;
+     height: 24px;
+     background-image: url(../../svg/calendar.svg);
+     margin: 0 5px;
+ }
+
+.container-wrapper {
+    display: flex;
+    justify-content: center;
+}
+
+.replay-list__container {
+    max-width: 720px;
+    font-size: larger;
+}
+
+.replay-list__item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.replay-list__item__details {
+    display: flex;
+}
+
+.replay-list__item__details__player-count, 
+.replay-list__item__details__date {
+    display: flex;
+    margin-left: 20px;
+    align-items: center;
+}

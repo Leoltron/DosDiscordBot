@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dos.Game.Extensions;
@@ -41,7 +40,7 @@ namespace Dos.Game.Players
                     if (target.Matches(first))
                         yield return (new[] {first}, target);
 
-                    for (var j = i; j < possibleMatchers.Count; j++)
+                    for (var j = i+1; j < possibleMatchers.Count; j++)
                     {
                         var matchers = new[] {first, possibleMatchers[j]};
                         if (target.Matches(matchers))

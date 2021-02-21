@@ -1,0 +1,9 @@
+<svg width="150" height="244" xmlns="http://www.w3.org/2000/svg">
+    <g>
+        <rect fill="#ffffff" width="150" height="244" id="svg_4" rx="35"/>
+        <rect fill="#000000" x="6" y="5" width="138" height="234" id="svg_5" rx="32"/>
+        <ellipse fill="#002e8c" cx="75" cy="122" id="svg_6" rx="75" ry="75"/>
+        <line stroke="#fff" id="svg_7" y2="189" x2="3" y1="67" x1="3" stroke-width="6"/>
+        <line stroke="#fff" id="svg_8" y2="186" x2="147" y1="64" x1="147" stroke-width="6"/>
+    </g>
+</svg>

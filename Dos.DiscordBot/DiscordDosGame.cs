@@ -7,8 +7,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
-using Dos.Database;
 using Dos.Database.Models;
+using Dos.DiscordBot.GameLogging;
 using Dos.DiscordBot.Util;
 using Dos.Game;
 using Dos.Game.Deck;
@@ -26,10 +26,10 @@ namespace Dos.DiscordBot
     {
         private readonly ILogger gameLogger;
         private readonly ILogger mainLogger;
-        private readonly SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
+        private readonly SemaphoreSlim semaphoreSlim = new(1, 1);
 
         public readonly IUser Owner;
-        public readonly List<Player> Players = new List<Player>();
+        public readonly List<Player> Players = new();
 
         private Card? selectedCenterRowCard;
         private DateTime startTime;
@@ -57,7 +57,7 @@ namespace Dos.DiscordBot
         public DateTime CreateDate { get; } = DateTime.UtcNow;
 
         public Dictionary<ulong, DiscordUserPlayer> IdToUserPlayers { get; } =
-            new Dictionary<ulong, DiscordUserPlayer>();
+            new();
 
         public DosGame Game { get; private set; }
         public bool IsGameStarted => Game != null;
@@ -78,9 +78,17 @@ namespace Dos.DiscordBot
             IdToUserPlayers[user.Id] = player;
         }
 
+        private static readonly WeightConfig AiWeightConfig = new()
+        {
+            SingleMatchCoef = 3588,
+            SingleColorMatchCoef = 6126,
+            DoubleMatchCoef = 1418,
+            DoubleColorMatchCoef = 8617,
+        };
+
         private AiPlayer AddAiPlayer()
         {
-            var player = new RandomAiPlayer(Players.Count);
+            var player = new WeightAiPlayer(Players.Count, AiWeightConfig);
             Players.Add(player);
             LogInfo($"Added AI player {player.Name} ({player.GetType().Name})");
             return player;
@@ -90,7 +98,8 @@ namespace Dos.DiscordBot
 
         private void LogInfo(string message)
         {
-            mainLogger.Information($"[{Info.ServerName} - #{Info.Channel.Name}] [game] {message}");
+            mainLogger.Information("[{Server} - #{Channel}] [game] {Message}", Info.ServerName, Info.Channel.Name,
+                                   message);
         }
 
         public async Task<Result> JoinAsync(IUser user)
@@ -161,13 +170,15 @@ namespace Dos.DiscordBot
                                    Players.ToArray(),
                                    Config);
 
+                if (Config.SaveReplays)
+                    DbGameLogger.LogGame(this);
                 BindGameEvents();
                 Game.Start();
                 Game.Events.PlayerReceivedCards += OnPlayerReceivedCards;
                 startTime = DateTime.Now;
-
+/*
                 await Task.WhenAll(Players.Select(SendHandTo));
-                await SendTableToChannel(false);
+                await SendTableToChannel(false);*/
 
                 return Result.Success();
             }
@@ -184,12 +195,12 @@ namespace Dos.DiscordBot
                 LogInfo(e.Message);
                 gameLogger.Information(e.Message);
             };
-            Game.Events.PublicLog += e => Info.Channel.SendMessageAsync(e.Message).Wait();
+            Game.Events.PublicLog += e => Info.Channel.SendMessageAsync(e.Message);
             Game.Events.Finished += OnFinished;
             Game.Events.PlayerSwitched += OnPlayerSwitched;
             Game.Events.PlayersSwappedHands += e => Task.WaitAll(SendHandTo(e.Player), SendHandTo(e.Target));
 
-            Game.Events.WentOut += e => SendToChannel(
+            Game.Events.WentOut += e => SendToChannelAsync(
                 $"{e.Player.Name} has no more cards! They finished in Rank #{e.Player.ScoreBoardPosition}! :tada:");
         }
 
@@ -216,16 +227,18 @@ namespace Dos.DiscordBot
                 : player.Hand.Sum(c => c.Points).Pluralize("point", "points");
         }
 
-        private void OnFinished()
+        private async void OnFinished()
         {
+            var sb = new StringBuilder();
             if (Players.Any(p => p.State == PlayerState.Out || p.IsActive()))
             {
-                SendToChannel("The game has finished with the following results:\n" +
-                              string.Join("\n", GetScoreboardLines()));
+                sb.AppendLine("The game has finished with the following results:");
+                GetScoreboardLines().ForEach(l => sb.AppendLine(l));
             }
 
-            SendToChannel($"`The game lasted {GetTimeString()}`");
+            sb.Append($"`The game lasted {GetTimeString()}`");
 
+            await SendToChannelAsync(sb.ToString());
             Finished?.Invoke();
         }
 
@@ -235,15 +248,12 @@ namespace Dos.DiscordBot
             return time > TimeSpan.FromDays(1) ? "**More than a day**" : $@"{time:hh\:mm\:ss\.fff}";
         }
 
-        public void SendToChannel(string message)
-        {
-            Info.Channel.SendMessageAsync(message).Wait();
-        }
+        public Task SendToChannelAsync(string message) => Info.Channel.SendMessageAsync(message);
 
-        private void OnPlayerReceivedCards(PlayerReceivedCardsEvent e)
+        private async void OnPlayerReceivedCards(PlayerReceivedCardsEvent e)
         {
             if (e.Player is DiscordUserPlayer dPlayer && e.Cards.Any())
-                dPlayer.User.SendCardsAsync(e.Cards, CardDisplayStyle, true).Wait();
+                await dPlayer.User.SendCardsAsync(e.Cards, CardDisplayStyle, true);
         }
 
         private void OnPlayerSwitched(PlayerSwitchedEvent @event)
@@ -320,7 +330,7 @@ namespace Dos.DiscordBot
                                                r.Value.ToArray()))
                                 .DoIfSuccess(r => { selectedCenterRowCard = null; });
 
-                return await MoveResultMessageToEmbedIfNeedAsync(result, turnIndex);
+                return await ProcessResultMessage(result, turnIndex);
             }
             finally
             {
@@ -379,7 +389,8 @@ namespace Dos.DiscordBot
                     return Result.Fail("You have to put something there");
 
                 var turnIndex = Game.CurrentTurnIndex;
-                return await MoveResultMessageToEmbedIfNeedAsync(
+                
+                return await ProcessResultMessage(
                     Game.AddCardToCenterRow(player, matchResult.Value.First()), turnIndex);
             }
             finally
@@ -414,7 +425,7 @@ namespace Dos.DiscordBot
             try
             {
                 var turnIndex = Game.CurrentTurnIndex;
-                return await MoveResultMessageToEmbedIfNeedAsync(Game.EndTurn(player), turnIndex);
+                return await ProcessResultMessage(Game.EndTurn(player), turnIndex);
             }
             finally
             {
@@ -585,19 +596,20 @@ namespace Dos.DiscordBot
                 builder.WithCardsImage(
                     Game.CenterRow.Zip(Game.CenterRowAdditional, (c, cl) => cl.Prepend(c).ToList()).ToList(),
                     false);
-            
+
             if (displayStyle.IsText())
                 builder.AddField(fb => fb.WithName("Center row").WithValue(string.Join("\n", Game.GameTableLines())));
 
             builder.WithCurrentTimestamp();
         }
 
-        private async Task<Result> MoveResultMessageToEmbedIfNeedAsync(Result result, int currentTurnBeforeAction)
+        private async Task<Result> ProcessResultMessage(Result result, int currentTurnBeforeAction)
         {
             if (result.IsFail || !result.HasMessage || currentTurnBeforeAction != Game.CurrentTurnIndex)
                 return result;
 
-            await SendTableToChannel(false, result.Message);
+            if(!IsFinished)
+                await SendTableToChannel(false, result.Message);
             return Result.Success();
         }
     }

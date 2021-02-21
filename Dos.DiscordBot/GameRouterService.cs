@@ -17,7 +17,7 @@ namespace Dos.DiscordBot
         private static readonly TimeSpan InactiveGameTimeout = TimeSpan.FromMinutes(5);
 
         private readonly ConcurrentDictionary<ulong, DiscordDosGame> gamesByChannel =
-            new ConcurrentDictionary<ulong, DiscordDosGame>();
+            new();
 
         private readonly ILogger logger;
         private readonly IGameConfigRepository configRepository;
@@ -52,7 +52,7 @@ namespace Dos.DiscordBot
 
         private async Task<DiscordDosGame> CreateNewGameAsync(IGuild guild, ISocketMessageChannel channel, IUser player)
         {
-            var config = guild == null? new BotGameConfig() : await configRepository.GetConfigOrDefaultAsync(guild.Id);
+            var config = guild == null ? new BotGameConfig() : await configRepository.GetConfigOrDefaultAsync(guild.Id);
             var game = new DiscordDosGame(channel, player, logger, config, guild?.Name ?? "DM");
             game.Finished += () => TryDeleteGame(channel);
             return game;

@@ -1,0 +1,17 @@
+.card-group__text,
+.card-group__text_minified
+{
+    position: absolute;
+
+    transition: all ease-out .5s;
+}
+
+.card-group__text
+{
+    font-size: 20px;
+}
+
+.card-group__text_minified
+{
+    font-size: 10px;
+}

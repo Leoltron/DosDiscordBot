@@ -7,7 +7,7 @@ namespace Dos.Game.Deck
 {
     public class ShufflingDealer : DealerBase
     {
-        private readonly Random random = new Random();
+        private readonly Random random = new();
 
         public ShufflingDealer(IEnumerable<Card> cards) : base(cards)
         {

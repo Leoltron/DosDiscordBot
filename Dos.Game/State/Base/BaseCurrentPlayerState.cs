@@ -54,12 +54,19 @@ namespace Dos.Game.State.Base
             if (missingCards.Any())
                 return Result.Fail($"You don't have {string.Join(" and ", missingCards)}");
 
+            if (cardsToPlay.Length == 2 && cardsToPlay[0] == cardsToPlay[1] &&
+                CurrentPlayer.Hand.Count(c => c == cardsToPlay[0]) < 2)
+            {
+                return Result.Fail($"You don't have second {cardsToPlay[0]}");
+            }
+
             foreach (var card in cardsToPlay)
                 CurrentPlayer.Hand.Remove(card);
 
             Game.CheckCurrentPlayerForDos();
 
             additional.AddRange(cardsToPlay);
+            Game.Events.InvokePlayerMatchedCard(CurrentPlayer, target, cardsToPlay);
 
             Game.PrivateLog($"{CurrentPlayer} put {string.Join(" and ", cardsToPlay)} to {target}");
 

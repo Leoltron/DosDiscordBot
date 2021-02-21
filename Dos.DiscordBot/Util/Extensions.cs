@@ -54,7 +54,7 @@ namespace Dos.DiscordBot.Util
                 var name = string.Join("_",
                                        chunk.Select(cl =>
                                                         string.Join("-",
-                                                                    cl.Select(c => c.ToShortString())))) + ".png";
+                                                                    cl.Select(c => c.ShortName)))) + ".png";
 
                 await channel.SendFileAsync(chunk.Select(CardToImageHelper.Stack).JoinImages(10, 1173), name);
             }

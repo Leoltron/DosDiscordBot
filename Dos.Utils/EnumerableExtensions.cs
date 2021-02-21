@@ -6,7 +6,7 @@ namespace Dos.Utils
 {
     public static class EnumerableExtensions
     {
-        private static readonly Random Rand = new Random();
+        private static readonly Random Rand = new();
 
         public static IEnumerable<T> Repeat<T>(this T element, int repeatAmount)
         {
@@ -46,7 +46,7 @@ namespace Dos.Utils
 
         public static Dictionary<TKey, TValue> UnionWith<TKey, TValue>(this IDictionary<TKey, TValue> one,
                                                                        IDictionary<TKey, TValue> other) =>
-            new Dictionary<TKey, TValue>(one.Concat(other));
+            one.Concat(other).ToDictionary(p => p.Key, p => p.Value);
 
         public static IEnumerable<T> TakeWhileNotNull<T>(this IEnumerable<T?> source) where T : struct
         {

@@ -1,0 +1,91 @@
+.dos-card,
+.dos-card_minified {
+    font-family: 'Wrestlemania', sans-serif;
+
+    position: absolute;
+
+    transition: all ease-out .5s;
+    transition-duration: 500ms;
+    text-align: center;
+
+    color: black;
+    background-size: contain;
+}
+
+.dos-card {
+    font-size: 101px;
+    line-height: 120px;
+
+    width: 80px;
+    height: 129px;
+
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+    border: solid 1px gray;
+    border-radius: 20px;
+
+    -webkit-touch-callout: none;
+}
+
+.dos-card_minified {
+    font-size: 25px;
+    line-height: 31px;
+
+    width: 20px;
+    height: 32px;
+}
+
+
+.dos-card:not(.dos-card__deck):hover {
+    z-index: 9999 !important;
+
+    box-shadow: 0 5px 5px dimgrey;
+}
+
+.dos-card_back {
+    color: yellow;
+    background-image: url(../../svg/cards/Back.svg);
+}
+
+.dos-card_w {
+    background-image: url(../../svg/cards/W.svg);
+}
+
+.dos-card_g {
+    background-image: url(../../svg/cards/G.svg);
+}
+
+.dos-card_r {
+    background-image: url(../../svg/cards/R.svg);
+}
+
+.dos-card_y {
+    background-image: url(../../svg/cards/Y.svg);
+}
+
+.dos-card_b {
+    background-image: url(../../svg/cards/B.svg);
+}
+
+
+.dos-card__deck {
+    position: absolute;
+    z-index: -100;
+    left: 50px;
+
+    width: 80px;
+    height: 129px;
+
+    transition: none;
+
+    border: solid 1px gray;
+    border-radius: 15px;
+    box-shadow: gray 0 10px 0;
+}
+
+.no-animation * {
+    transition: none !important;
+}

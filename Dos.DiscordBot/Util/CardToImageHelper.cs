@@ -34,7 +34,7 @@ namespace Dos.DiscordBot.Util
         }
 
         public static MagickImage ToImage(this Card card) => card.ToImagePath().ToImage();
-        public static MagickImage ToImage(this string path) => new MagickImage(path);
+        public static MagickImage ToImage(this string path) => new(path);
 
         public static Stream JoinImages(this IEnumerable<Card> cards) => cards.Select(ToImage).JoinImages(10, 1173);
         public static Stream JoinImages(this IEnumerable<string> paths) => paths.Select(ToImage).JoinImages(10, 1173);

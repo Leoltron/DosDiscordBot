@@ -21,7 +21,7 @@ namespace Dos.DiscordBot.Helpers
 
         public async Task UpdateGameConfigAsync(ulong serverId, BotGameConfig config)
         {
-            await using var dbContext = new BotDbContext();
+            await using var dbContext = new DosDbContext();
             var guildConfig = await GetGuildConfigAsync(dbContext, serverId);
             if (guildConfig == null)
             {
@@ -37,11 +37,11 @@ namespace Dos.DiscordBot.Helpers
 
         private static async Task<GuildConfig> GetGuildConfigAsync(ulong serverId)
         {
-            await using var context = new BotDbContext();
+            await using var context = new DosDbContext();
             return await GetGuildConfigAsync(context, serverId);
         }
 
-        private static async Task<GuildConfig> GetGuildConfigAsync(BotDbContext context, ulong serverId)
+        private static async Task<GuildConfig> GetGuildConfigAsync(DosDbContext context, ulong serverId)
         {
             return await context.GuildConfig.FirstOrDefaultAsync(c => c.GuildId == serverId);
         }

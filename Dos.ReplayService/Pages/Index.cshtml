@@ -1,0 +1,38 @@
+﻿@page
+@using System.Globalization
+@model ReplayListModel
+@{
+    ViewData["Title"] = "Replay list";
+}
+
+<div class="text-center">
+    <h1 class="display-5">Most recent replays</h1>
+</div>
+<div class="container-wrapper">
+    <div class="container replay-list__container">
+        @foreach (var item in Model.Replays)
+        {
+            <div class="replay-list__item row my-2 border rounded p-2 bg-light">
+                <div>
+                    <a href="/replay/@(item.ReplayId)" class="stretched-link"></a>
+                    @($"{item.ServerName}#{item.ChannelName}")
+                </div>
+                <div class="replay-list__item__details">
+                    <div class="replay-list__item__details__date">
+                        <div class="calendar-icon"></div>
+                        @item.Date.ToString("U", CultureInfo.InvariantCulture)
+                    </div>
+                    <div class="replay-list__item__details__player-count">
+                        <div class="people-icon"></div>@item.PlayersCount
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+
+@section Styles
+{
+    <link href="~/src/css/replayList.css" rel="stylesheet" type="text/css"/>
+}

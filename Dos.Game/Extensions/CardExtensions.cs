@@ -24,9 +24,9 @@ namespace Dos.Game.Extensions
         public static readonly CardValue[] AllNumbers = LowerNumbers.Concat(HigherNumbers).ToArray();
 
 
-        public static Card Of(this CardValue value, CardColor color) => new Card(color, value);
+        public static Card Of(this CardValue value, CardColor color) => new(color, value);
 
-        public static Card Of(this int value, CardColor color) => new Card(color, (CardValue) value);
+        public static Card Of(this int value, CardColor color) => new(color, (CardValue) value);
 
         public static IEnumerable<Card> OfAllColors(this CardValue value)
         {
@@ -106,13 +106,13 @@ namespace Dos.Game.Extensions
         
         private const string BaseUrl = "https://cards-images.herokuapp.com";
 
-        public static string ToImageUrl(this Card card) => $"{BaseUrl}/card/{card.ToShortString()}";
+        public static string ToImageUrl(this Card card) => $"{BaseUrl}/card/{card.ShortName}";
 
         public static string ToImageUrl(this IEnumerable<Card> cards, bool addPlus = false) =>
-            $"{BaseUrl}/cards/{string.Join("_", cards.Select(c => c.ToShortString()))}?addPlus={addPlus}";
+            $"{BaseUrl}/cards/{string.Join("_", cards.Select(c => c.ShortName))}?addPlus={addPlus}";
 
         public static string ToImageUrl(this IEnumerable<List<Card>> cards, bool addPlus = false) =>
-            $"{BaseUrl}/cards/{string.Join("_", cards.Select(cardStack => string.Join("+", cardStack.Select(c => c.ToShortString()))))}?addPlus={addPlus}";
+            $"{BaseUrl}/cards/{string.Join("_", cards.Select(cardStack => string.Join("+", cardStack.Select(c => c.ShortName))))}?addPlus={addPlus}";
 
     }
 }

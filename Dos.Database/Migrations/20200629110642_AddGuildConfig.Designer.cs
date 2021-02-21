@@ -9,7 +9,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Dos.Database.Migrations
 {
-    [DbContext(typeof(BotDbContext))]
+    [DbContext(typeof(DosDbContext))]
     [Migration("20200629110642_AddGuildConfig")]
     partial class AddGuildConfig
     {

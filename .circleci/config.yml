@@ -1,0 +1,13 @@
+ version: 2.1
+
+ jobs:
+   build:
+     docker:
+       - image: circleci/node:10
+     steps:
+       - checkout
+       - run: npm run build-prod --prefix ./Dos.ReplayService
+       - run: docker build --rm=false -t registry.heroku.com/dos-replays/web .
+       - run: docker login -u $HEROKU_LOGIN -p $HEROKU_TOKEN registry.heroku.com
+       - run: docker push registry.heroku.com/dos-replays/web:latest
+       - run: ./scripts/release.sh dos-replays

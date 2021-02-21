@@ -1,0 +1,35 @@
+@page "{gameId:guid}"
+@model Dos.ReplayService.Pages.Replay
+
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<div class="replay-field">
+    <div class="controls">
+        <div class="controls__control controls__step-back"></div>
+        <div class="controls__control controls__step-fwd"></div>
+        <div class="controls__control controls__pause controls__control_active"></div>
+        <div class="controls__control controls__auto-fwd-1000"></div>
+        <div class="controls__control controls__auto-fwd-400"></div>
+        <div class="controls__control controls__auto-fwd-200"></div>
+    </div>
+    <div class="controls__counter"></div>
+    <div class="dos-card dos-card_back dos-card__deck"></div>
+</div>
+
+@section Styles
+{
+    <link href="~/src/css/cards.css" rel="stylesheet" type="text/css"/>
+    <link href="~/src/css/controls.css" rel="stylesheet" type="text/css"/>
+    <link href="~/src/css/groupText.css" rel="stylesheet" type="text/css"/>
+}
+
+@section Scripts
+{
+    <script src="~/dist/js/replay.js"></script>
+    <script>
+        var replayData = @Json.Serialize(Model.GameReplay);
+        initGameField('.replay-field', replayData["events"], replayData["snapshots"], replayData["playerNames"], @Model.MoveId);
+    </script>
+}

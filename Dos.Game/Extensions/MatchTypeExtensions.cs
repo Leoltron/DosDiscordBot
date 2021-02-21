@@ -5,7 +5,7 @@ namespace Dos.Game.Extensions
 {
     public static class MatchTypeExtensions
     {
-        public static MatchResult ToResult(this MatchType type, GameConfig config = null) => new MatchResult(type, type.Message(config));
+        public static MatchResult ToResult(this MatchType type, GameConfig config = null) => new(type, type.Message(config));
 
         public static string Message(this MatchType type, GameConfig config = null) =>
             type switch

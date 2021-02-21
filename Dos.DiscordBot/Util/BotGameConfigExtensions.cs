@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Dos.Database;
 using Dos.Database.Models;
 using Dos.Utils;
 
@@ -19,28 +18,30 @@ namespace Dos.DiscordBot.Util
         public static string GetDescription(string config) =>
             Descriptions.GetValueOrDefault(config, $"Sorry, I don't know configuration \"{config}\".");
 
-        private static readonly Dictionary<string, string> Descriptions =
-            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-            {
-                ["Decks"] = "Amount of decks used in game",
-                ["CalloutPenalty"] = "Penalty for being called out for not saying DOS while having two cards",
-                ["FalseCalloutPenalty"] = "Penalty for false callout",
-                ["InitialHandSize"] = "Amount of cards given to the players at the start of the game",
-                ["MinCenterRowSize"] = "Minimal amount of cards on the center row.",
-                ["DoubleColorMatchDraw"] = "Amount of cards other players draw when you make a Double Color Match.",
-                ["CenterRowPenalty"] =
-                    "Enables **Center Row Penalty*** house rule: at the end of your turn, draw as much cards as you left unmatched in the center row",
-                ["DrawEndsTurn"] =
-                    "Enables **Draw Ends Turn** house rule: if you draw a card, your turn ends immediately",
-                ["SevenSwap"] =
-                    "Enables **Seven Swap** house rule: Color Match on 7 will force you to switch your hand with somebody else",
-                ["UseImages"] = "If enabled, images will be used instead of text to show cards",
-                ["AllowGameStop"] = "Allows game owner to use `dos stop` to forcefully end the game",
-                ["CardCountRanking"] = "If enabled, card count will be used to rank players in stopped game instead of card score"
-            };
+        private static readonly Dictionary<string, string> Descriptions = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Decks"] = "Amount of decks used in game",
+            ["CalloutPenalty"] = "Penalty for being called out for not saying DOS while having two cards",
+            ["FalseCalloutPenalty"] = "Penalty for false callout",
+            ["InitialHandSize"] = "Amount of cards given to the players at the start of the game",
+            ["MinCenterRowSize"] = "Minimal amount of cards on the center row.",
+            ["DoubleColorMatchDraw"] = "Amount of cards other players draw when you make a Double Color Match.",
+            ["CenterRowPenalty"] =
+                "Enables **Center Row Penalty*** house rule: at the end of your turn, draw as much cards as you left unmatched in the center row",
+            ["DrawEndsTurn"] =
+                "Enables **Draw Ends Turn** house rule: if you draw a card, your turn ends immediately",
+            ["SevenSwap"] =
+                "Enables **Seven Swap** house rule: Color Match on 7 will force you to switch your hand with somebody else",
+            ["UseImages"] = "If enabled, images will be used instead of text to show cards",
+            ["AllowGameStop"] = "Allows game owner to use `dos stop` to forcefully end the game",
+            ["CardCountRanking"] =
+                "If enabled, card count will be used to rank players in stopped game instead of card score",
+            ["SaveReplays"] = "Allows to save games for rewatching them after",
+            ["PublishReplays"] = "Makes replays public",
+        };
 
         private static readonly Dictionary<string, Func<BotGameConfig, string, Result>> Setters =
-            new Dictionary<string, Func<BotGameConfig, string, Result>>(StringComparer.OrdinalIgnoreCase)
+            new(StringComparer.OrdinalIgnoreCase)
             {
                 ["Decks"] = (c, s) => TryParseUShort(s, 1, 100).DoIfSuccess(v => c.Decks = v.Value),
                 ["CalloutPenalty"] = (c, s) => TryParseUShort(s).DoIfSuccess(v => c.CalloutPenalty = v.Value),
@@ -61,7 +62,9 @@ namespace Dos.DiscordBot.Util
                 }),
                 ["UseImages"] = (c, s) => TryParseBool(s).DoIfSuccess(v => c.UseImages = v.Value),
                 ["AllowGameStop"] = (c, s) => TryParseBool(s).DoIfSuccess(v => c.AllowGameStop = v.Value),
-                ["CardCountRanking"] = (c, s) => TryParseBool(s).DoIfSuccess(v => c.CardCountRanking = v.Value)
+                ["CardCountRanking"] = (c, s) => TryParseBool(s).DoIfSuccess(v => c.CardCountRanking = v.Value),
+                ["SaveReplays"] = (c, s) => TryParseBool(s).DoIfSuccess(v => c.SaveReplays = v.Value),
+                ["PublishReplays"] = (c, s) => TryParseBool(s).DoIfSuccess(v => c.PublishReplays = v.Value),
             };
 
         private static Result<ushort> TryParseUShort(string s,

@@ -1,0 +1,15 @@
+[
+  {
+    "outputFileName": "front/build/js/replay.min.js",
+    "inputFiles": [
+      "front/js/cardGroup.js",
+      "front/js/cardModel.js",
+      "front/js/gameField.js"
+    ],
+    "minify": {
+      "enabled": true,
+      "renameLocals": true
+    },
+    "sourceMap": true
+  }
+]

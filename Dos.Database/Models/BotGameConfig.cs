@@ -7,6 +7,8 @@ namespace Dos.Database.Models
         public ushort Decks { get; set; } = 1;
         public bool UseImages { get; set; } = true;
         public bool AllowGameStop { get; set; } = true;
+        public bool SaveReplays { get; set; }
+        public bool PublishReplays { get; set; }
 
         public string ToDiscordTable() =>
             string.Join("\n",
@@ -25,6 +27,9 @@ namespace Dos.Database.Models
                         $"UseImages            {UseImages.ToString().ToLower()}",
                         $"AllowGameStop        {AllowGameStop.ToString().ToLower()}",
                         $"CardCountRanking     {CardCountRanking.ToString().ToLower()}",
+                        "",
+                        $"SaveReplays          {SaveReplays.ToString().ToLower()}",
+                        $"PublishReplays       {PublishReplays.ToString().ToLower()}",
                         "```");
     }
 }

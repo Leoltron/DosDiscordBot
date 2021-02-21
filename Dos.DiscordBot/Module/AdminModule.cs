@@ -19,12 +19,12 @@ namespace Dos.DiscordBot.Module
     public class AdminModule : ExtendedModule
     {
         private readonly GameRouterService gameRouterService;
-        private readonly BotDbContext botDbContext;
+        private readonly DosDbContext dosDbContext;
 
-        public AdminModule(GameRouterService gameRouterService, BotDbContext botDbContext)
+        public AdminModule(GameRouterService gameRouterService, DosDbContext dosDbContext)
         {
             this.gameRouterService = gameRouterService;
-            this.botDbContext = botDbContext;
+            this.dosDbContext = dosDbContext;
         }
 
         [NoDm]
@@ -35,17 +35,17 @@ namespace Dos.DiscordBot.Module
                 return;
 
             var guildId = Context.Guild.Id;
-            if (botDbContext.GuildConfig.Any(c => c.GuildId == guildId))
+            if (dosDbContext.GuildConfig.Any(c => c.GuildId == guildId))
             {
                 await Context.Channel.SendMessageAsync("Already found something for this server");
                 return;
             }
-            await botDbContext.GuildConfig.AddAsync(new GuildConfig
+            await dosDbContext.GuildConfig.AddAsync(new GuildConfig
             {
                 Config = new BotGameConfig(),
                 GuildId = guildId
             });
-            await botDbContext.SaveChangesAsync();
+            await dosDbContext.SaveChangesAsync();
             await Context.Channel.SendMessageAsync("Done.");
         }
 

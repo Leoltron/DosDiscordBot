@@ -3,11 +3,11 @@ using Dos.Game.Players;
 
 namespace Dos.Game.Events
 {
-    public class CenterRowAddedCardEvent : PlayerEvent
+    public class CenterRowPlayerAddedCardEvent : PlayerEvent
     {
         public Card Card { get; }
 
-        public CenterRowAddedCardEvent(DosGame game, Player player, Card card) : base(game, player)
+        public CenterRowPlayerAddedCardEvent(DosGame game, Player player, Card card) : base(game, player)
         {
             Card = card;
         }

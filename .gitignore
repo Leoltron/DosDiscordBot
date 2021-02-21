@@ -8,3 +8,5 @@ obj/
 *.pubxml
 
 *.orig
+/Dos.ReplayService/front/dist/
+/Dos.ReplayService/node_modules/

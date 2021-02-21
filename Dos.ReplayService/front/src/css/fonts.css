@@ -1,0 +1,23 @@
+@font-face
+{
+    font-family: 'Oswald';
+
+    src: local('Oswald'), url(../../fonts/Oswald-Regular.ttf) format('truetype');
+}
+
+@font-face
+{
+    font-family: 'Wrestlemania';
+
+    src: local('Wrestlemania'), url(../../fonts/Wrestlemania.ttf) format('truetype');
+}
+
+body *
+{
+    font-family: 'Oswald', sans-serif;
+}
+
+svg *
+{
+    font-family: 'Wrestlemania', serif;
+}
