@@ -6,6 +6,7 @@
        - image: circleci/node:10
      steps:
        - checkout
+       - run: npm --prefix ./Dos.ReplayService install ./Dos.ReplayService
        - run: npm run build-prod --prefix ./Dos.ReplayService
        - run: docker build --rm=false -t registry.heroku.com/dos-replays/web .
        - run: docker login -u $HEROKU_LOGIN -p $HEROKU_TOKEN registry.heroku.com
