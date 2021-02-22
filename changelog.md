@@ -45,3 +45,7 @@
   
  ### v1.5.0 (07.11.2020)
   - Added command for hybrid card displaying: both text and images
+
+ ### v1.6.0 (22.02.2021)
+  - Added replay saving feature
+  - Made AI a little less random and a little smarter

@@ -47,7 +47,7 @@ namespace Dos.DiscordBot.GameLogging
             {
                 await FinishSavingReplay();
                 await discordDosGame.SendToChannelAsync(
-                    $"Replay is available at http://localhost:5000/replay/{replayId}");
+                    $"Replay is available at https://dos-replays.herokuapp.com/replay/{replayId}");
             }
             else
             {
