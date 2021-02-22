@@ -13,7 +13,8 @@ export default class CardGroup {
     }
 
     init($parent) {
-        this.$title = $(`<div class="${this.minified ? textClassMinified : textClass}" style="top:${this.getTextY()}px;left:${this._x}px">${this.title}</div>`);
+        this.$title = $(`<div class="${this.minified ? textClassMinified : textClass}" style="top:${this.getTextY()}px;left:${this._x}px"></div>`);
+        this.$title.text(this.title);
         $parent.append(this.$title);
         this.updateCardPositions();
     }
