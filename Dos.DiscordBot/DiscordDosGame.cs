@@ -32,7 +32,7 @@ namespace Dos.DiscordBot
         public readonly List<Player> Players = new();
 
         private Card? selectedCenterRowCard;
-        private DateTime startTime;
+        private DateTime? startTime;
 
         public DiscordDosGame(ISocketMessageChannel channel, IUser owner, ILogger mainLogger, BotGameConfig config,
                               string serverName)
@@ -175,7 +175,7 @@ namespace Dos.DiscordBot
                 BindGameEvents();
                 Game.Start();
                 Game.Events.PlayerReceivedCards += OnPlayerReceivedCards;
-                startTime = DateTime.Now;
+                startTime = DateTime.UtcNow;
 /*
                 await Task.WhenAll(Players.Select(SendHandTo));
                 await SendTableToChannel(false);*/
@@ -244,8 +244,10 @@ namespace Dos.DiscordBot
 
         private string GetTimeString()
         {
-            var time = DateTime.Now - startTime;
-            return time > TimeSpan.FromDays(1) ? "**More than a day**" : $@"{time:hh\:mm\:ss\.fff}";
+            if (startTime == null)
+                return "a few moments";
+            var time = DateTime.UtcNow - startTime;
+            return time > TimeSpan.FromDays(1) ? "more than a day" : $@"{time:hh\:mm\:ss\.fff}";
         }
 
         public Task SendToChannelAsync(string message) => Info.Channel.SendMessageAsync(message);
